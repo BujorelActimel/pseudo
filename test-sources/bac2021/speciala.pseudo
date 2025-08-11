@@ -1,0 +1,13 @@
+citeste m,n # (numere naturale)
+daca m>n atunci
+    temp <- m
+    m <- n
+    n <- temp
+sf
+daca m%2=0 atunci
+    m<-m+1
+sf
+cat timp m<=n executa
+    m<-m+2
+    scrie '*'
+sf

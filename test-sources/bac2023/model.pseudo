@@ -1,0 +1,11 @@
+citeste m,n,p,q # (numere naturale nenule, p<=q)
+s<-0
+pentru x<-p,q executa
+    daca x%m=0 SAU x%n=0 atunci
+        s<-s+x
+    sf
+    daca x%m=0 SI x%n=0 atunci
+        s<-s-x
+    sf
+sf
+scrie s

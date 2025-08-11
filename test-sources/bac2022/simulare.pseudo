@@ -1,0 +1,13 @@
+citeste n,x # (numere naturale nenule)
+nr<-0
+i<-1
+cat timp i<=n executa
+    citeste y # (numar natural)
+    cat timp y!=0 SI y%2!=x%2 executa
+       y<-[y/10]
+    sf
+    daca y=x atunci nr<-nr+1
+    sf
+    i<-i+1
+sf
+scrie nr

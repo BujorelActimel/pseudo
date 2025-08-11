@@ -1,0 +1,12 @@
+citeste n # (numar natural, n>=2)
+i<-1
+cat timp i<=n executa
+    m<-i
+    cat timp m%2=0 executa
+        m<-[m/2]
+    sf
+    daca m!=i atunci
+        scrie m,' '
+    sf
+    i<-i+1
+sf

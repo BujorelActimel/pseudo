@@ -1,0 +1,12 @@
+citeste n # (numar natural)
+m<-0
+repeta
+    c<-n%10
+    n<-[n/10]
+    daca c<5 atunci m<-m-2*c
+       altfel m<-m+c
+    sf
+pana cand n=0
+daca m=0 atunci scrie 'DA'
+    altfel scrie m, 'NU'
+sf

@@ -1,9 +1,6 @@
 # TODO
 ## Compiler:
-- semicolons for multiple statements on one line
-- radical ?????????
-- swap ???? (x<->y, aparent poate fi si <-->, 2021 was wilding)
-- lowercase sau, si, not???
+- none
 ## Other:
 - linter
 - test suite

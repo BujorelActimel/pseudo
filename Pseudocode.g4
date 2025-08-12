@@ -4,6 +4,7 @@ program: stmt* EOF;
 
 stmt
     : assign
+    | swapStmt
     | readStmt
     | writeStmt
     | ifStmt
@@ -11,9 +12,12 @@ stmt
     | whileStmt
     | doWhileStmt
     | repeatStmt
+    | multiStmt
     ;
 
 assign: NAME '<-' expr ;
+swapStmt: NAME '<->' NAME ;
+multiStmt: (assign | swapStmt | readStmt | writeStmt) (';' (assign | swapStmt | readStmt | writeStmt))+ ;
 
 readStmt: 'citeste' nameList ;
 writeStmt: 'scrie' exprList ;
@@ -36,12 +40,13 @@ repeatStmt: 'repeta' stmt* 'pana' 'cand' expr ;
 expr: expr ('*'|'/'|'%') expr #mulExpr
     | '[' expr '/' expr ']'   #intDivExpr
     | expr ('+'|'-') expr     #addExpr
-    | '-' expr                #negExpr
+    | '-' atom                #negExpr
+    | '√' atom                #sqrtExpr
     | expr ('=' | '!=' | '<' | '<=' | '>' | '>=') expr  #compareExpr
     | atom                #atomExpr
-    | expr 'SAU' expr     #orExpr
-    | expr 'SI' expr      #andExpr
-    | 'NOT' expr          #notExpr
+    | expr ('SAU' | 'sau') expr     #orExpr
+    | expr ('SI' | 'si') expr      #andExpr
+    | ('NOT' | 'not') expr          #notExpr
     ;
 
 atom: NUMBER | STRING | NAME | '(' expr ')' ;

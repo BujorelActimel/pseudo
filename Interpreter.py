@@ -1,4 +1,5 @@
 import sys
+import math
 from antlr4 import *
 from PseudocodeLexer import PseudocodeLexer
 from PseudocodeParser import PseudocodeParser
@@ -40,6 +41,28 @@ class Interpreter(PseudocodeVisitor):
         value = self.visit(ctx.expr())
         self.env[name] = value
         self.debug_print(f"Assignment: {name} = {value}")
+
+    def visitSwapStmt(self, ctx):
+        """Handle swap statement: NAME '<->' NAME"""
+        name1 = ctx.NAME(0).getText()
+        name2 = ctx.NAME(1).getText()
+        
+        # Get current values (default to 0 if not found)
+        val1 = self.env.get(name1, 0)
+        val2 = self.env.get(name2, 0)
+        
+        # Swap the values
+        self.env[name1] = val2
+        self.env[name2] = val1
+        
+        self.debug_print(f"Swap: {name1} ({val1}) <-> {name2} ({val2})")
+
+    def visitMultiStmt(self, ctx):
+        """Handle multiple statements on the same line separated by semicolons"""
+        # Get all children that are not semicolons
+        for child in ctx.children:
+            if hasattr(child, 'getText') and child.getText() != ';':
+                self.visit(child)
 
     def visitReadStmt(self, ctx):
         """Handle read statement: 'citeste' nameList"""
@@ -258,9 +281,18 @@ class Interpreter(PseudocodeVisitor):
         divisor = self.visit(ctx.expr(1))
         return int(dividend // divisor)
 
+    def visitSqrtExpr(self, ctx):
+        """Handle square root: '√' atom"""
+        value = self.visit(ctx.atom())
+        if value < 0:
+            raise ValueError("Cannot take square root of negative number")
+        result = math.sqrt(value)
+        self.debug_print(f"Square root of {value} = {result}")
+        return result
+
     def visitNegExpr(self, ctx):
-        """Handle negation: '-' expr"""
-        return -self.visit(ctx.expr())
+        """Handle negation: '-' atom"""
+        return -self.visit(ctx.atom())
 
     def visitAtomExpr(self, ctx):
         """Handle atomic expressions"""

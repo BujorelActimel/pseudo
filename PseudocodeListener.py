@@ -35,6 +35,24 @@ class PseudocodeListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by PseudocodeParser#swapStmt.
+    def enterSwapStmt(self, ctx:PseudocodeParser.SwapStmtContext):
+        pass
+
+    # Exit a parse tree produced by PseudocodeParser#swapStmt.
+    def exitSwapStmt(self, ctx:PseudocodeParser.SwapStmtContext):
+        pass
+
+
+    # Enter a parse tree produced by PseudocodeParser#multiStmt.
+    def enterMultiStmt(self, ctx:PseudocodeParser.MultiStmtContext):
+        pass
+
+    # Exit a parse tree produced by PseudocodeParser#multiStmt.
+    def exitMultiStmt(self, ctx:PseudocodeParser.MultiStmtContext):
+        pass
+
+
     # Enter a parse tree produced by PseudocodeParser#readStmt.
     def enterReadStmt(self, ctx:PseudocodeParser.ReadStmtContext):
         pass
@@ -167,6 +185,15 @@ class PseudocodeListener(ParseTreeListener):
 
     # Exit a parse tree produced by PseudocodeParser#negExpr.
     def exitNegExpr(self, ctx:PseudocodeParser.NegExprContext):
+        pass
+
+
+    # Enter a parse tree produced by PseudocodeParser#sqrtExpr.
+    def enterSqrtExpr(self, ctx:PseudocodeParser.SqrtExprContext):
+        pass
+
+    # Exit a parse tree produced by PseudocodeParser#sqrtExpr.
+    def exitSqrtExpr(self, ctx:PseudocodeParser.SqrtExprContext):
         pass
 
 

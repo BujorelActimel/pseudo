@@ -24,6 +24,16 @@ class PseudocodeVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
+    # Visit a parse tree produced by PseudocodeParser#swapStmt.
+    def visitSwapStmt(self, ctx:PseudocodeParser.SwapStmtContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by PseudocodeParser#multiStmt.
+    def visitMultiStmt(self, ctx:PseudocodeParser.MultiStmtContext):
+        return self.visitChildren(ctx)
+
+
     # Visit a parse tree produced by PseudocodeParser#readStmt.
     def visitReadStmt(self, ctx:PseudocodeParser.ReadStmtContext):
         return self.visitChildren(ctx)
@@ -96,6 +106,11 @@ class PseudocodeVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by PseudocodeParser#negExpr.
     def visitNegExpr(self, ctx:PseudocodeParser.NegExprContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by PseudocodeParser#sqrtExpr.
+    def visitSqrtExpr(self, ctx:PseudocodeParser.SqrtExprContext):
         return self.visitChildren(ctx)
 
 

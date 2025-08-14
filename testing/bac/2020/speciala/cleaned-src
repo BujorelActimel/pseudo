@@ -1,0 +1,13 @@
+citeste n (număr natural nenul)
+m<-0
+pentru i<-1,n executa
+    citeste x (număr natural)
+    cat timp x%10 > [x/10]%10 executa
+        x<-[x/10]
+    sf
+    m<-m+x
+sf
+daca m>0 atunci scrie m
+    altfel scrie „niciunul”
+sf
+

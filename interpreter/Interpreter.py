@@ -1,14 +1,16 @@
 import sys
 import math
+import argparse
 from antlr4 import *
 from PseudocodeLexer import PseudocodeLexer
 from PseudocodeParser import PseudocodeParser
 from PseudocodeVisitor import PseudocodeVisitor
 
 class Interpreter(PseudocodeVisitor):
-    def __init__(self, debug=False):
+    def __init__(self, debug=False, quiet=False):
         self.env = {}
         self.debug = debug
+        self.quiet = quiet
 
     def debug_print(self, msg):
         if self.debug:
@@ -68,7 +70,13 @@ class Interpreter(PseudocodeVisitor):
         """Handle read statement: 'citeste' nameList"""
         for name_token in ctx.nameList().NAME():
             name = name_token.getText()
-            val = input(f"{name} = ")
+            
+            # Show prompt based on quiet mode
+            if self.quiet:
+                val = input()
+            else:
+                val = input(f"{name} = ")
+            
             # Try to convert to number
             try:
                 if '.' in val:
@@ -124,6 +132,9 @@ class Interpreter(PseudocodeVisitor):
         
         self.debug_print(f"For loop: {var_name} from {start_val} to {end_val} step {step_val}")
         
+        if step_val == 0:
+            raise ValueError("Step cannot be zero in for loop")
+        
         # Custom loop logic instead of Python's range
         current = start_val
         iteration_count = 0
@@ -134,8 +145,6 @@ class Interpreter(PseudocodeVisitor):
                 break
             elif step_val < 0 and current < end_val:
                 break
-            elif step_val == 0:
-                raise ValueError("Step cannot be zero in for loop")
             
             iteration_count += 1
             self.env[var_name] = current
@@ -147,11 +156,6 @@ class Interpreter(PseudocodeVisitor):
             
             # Update loop variable
             current += step_val
-            
-            # Safety check to prevent infinite loops
-            if self.debug and iteration_count > 10000:
-                print("DEBUG: Breaking potential infinite for loop")
-                break
 
     def visitWhileStmt(self, ctx):
         """Handle while loop: 'cat' 'timp' expr 'executa' stmt* 'sf'"""
@@ -161,10 +165,6 @@ class Interpreter(PseudocodeVisitor):
             self.debug_print(f"While loop iteration {iteration}")
             for stmt in ctx.stmt():
                 self.visit(stmt)
-            # Safety check to prevent infinite loops in debug mode
-            if self.debug and iteration > 1000:
-                print("DEBUG: Breaking potential infinite loop")
-                break
 
     def visitDoWhileStmt(self, ctx):
         """Handle do-while loop: 'executa' stmt* 'cat' 'timp' expr"""
@@ -175,10 +175,6 @@ class Interpreter(PseudocodeVisitor):
             for stmt in ctx.stmt():
                 self.visit(stmt)
             if not self.visit(ctx.expr()):
-                break
-            # Safety check
-            if self.debug and iteration > 1000:
-                print("DEBUG: Breaking potential infinite loop")
                 break
 
     def visitRepeatStmt(self, ctx):
@@ -193,10 +189,6 @@ class Interpreter(PseudocodeVisitor):
             # Then check condition
             if self.visit(ctx.expr()):
                 self.debug_print("Repeat loop condition met, breaking")
-                break
-            # Safety check
-            if self.debug and iteration > 1000:
-                print("DEBUG: Breaking potential infinite loop")
                 break
 
     # Expression visitors
@@ -275,11 +267,10 @@ class Interpreter(PseudocodeVisitor):
         else:
             raise ValueError(f"Unknown multiplicative operator: {op}")
 
-    def visitIntDivExpr(self, ctx):
-        """Handle integer division: '[' expr '/' expr ']'"""
-        dividend = self.visit(ctx.expr(0))
-        divisor = self.visit(ctx.expr(1))
-        return int(dividend // divisor)
+    def visitInt(self, ctx):
+        """Handle integer part: '['expr']'"""
+        result = self.visit(ctx.expr())
+        return int(result)
 
     def visitSqrtExpr(self, ctx):
         """Handle square root: '√' atom"""
@@ -322,28 +313,48 @@ class Interpreter(PseudocodeVisitor):
             raise ValueError("Unknown atom type")
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: python3 interpreter.py <pseudocode_file> [--debug]")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(
+        description='Pseudocode interpreter for educational use',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  pseudo program.pseudo
+  pseudo program.pseudo --debug
+  pseudo program.pseudo --quiet
+  pseudo program.pseudo -d -q
+        """
+    )
     
-    debug = "--debug" in sys.argv
-    filename = sys.argv[1]
+    parser.add_argument('pseudocode_file', 
+                       help='Path to the pseudocode file to execute')
+    parser.add_argument('-d', '--debug', 
+                       action='store_true', 
+                       help='Enable debug mode (shows detailed execution info)')
+    parser.add_argument('-q', '--quiet', 
+                       action='store_true', 
+                       help='Quiet mode (no input prompts, suitable for testing)')
+    
+    args = parser.parse_args()
     
     try:
-        input_stream = FileStream(filename, encoding='utf-8')
+        input_stream = FileStream(args.pseudocode_file, encoding='utf-8')
         lexer = PseudocodeLexer(input_stream)
         stream = CommonTokenStream(lexer)
         parser = PseudocodeParser(stream)
         tree = parser.program()
         
-        interpreter = Interpreter(debug=debug)
+        interpreter = Interpreter(debug=args.debug, quiet=args.quiet)
         interpreter.visit(tree)
         
+    except FileNotFoundError:
+        print(f"Error: File '{args.pseudocode_file}' not found.")
+        sys.exit(1)
     except Exception as e:
         print(f"Error: {e}")
-        if debug:
+        if args.debug:
             import traceback
             traceback.print_exc()
+        sys.exit(1)
 
 if __name__ == '__main__':
     main()

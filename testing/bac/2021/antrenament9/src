@@ -1,0 +1,10 @@
+citeşte n
+ (număr natural nenul)
+┌pentru i1,n execută
+│┌pentru ji,n execută
+││ scrie ’+’
+│└■
+│┌dacă i%2≠0 atunci
+││ scrie ’@’
+│└■
+└■

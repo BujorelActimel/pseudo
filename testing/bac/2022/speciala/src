@@ -1,0 +1,11 @@
+citeşte n (număr natural)
+┌repetă
+│ xn%100
+│┌dacă x>1 atunci
+││ p(x%2)*(x%3)*(x%5)*(x%7)
+││┌dacă p0 atunci
+│││ scrie x,’ ’
+││└■
+│└■
+│ n[n/10]
+└până când n<10

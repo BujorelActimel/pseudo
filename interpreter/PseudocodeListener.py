@@ -1,4 +1,4 @@
-# Generated from Pseudocode.g4 by ANTLR 4.13.2
+# Generated from interpreter/Pseudocode.g4 by ANTLR 4.13.2
 from antlr4 import *
 if "." in __name__:
     from .PseudocodeParser import PseudocodeParser
@@ -152,15 +152,6 @@ class PseudocodeListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by PseudocodeParser#intDivExpr.
-    def enterIntDivExpr(self, ctx:PseudocodeParser.IntDivExprContext):
-        pass
-
-    # Exit a parse tree produced by PseudocodeParser#intDivExpr.
-    def exitIntDivExpr(self, ctx:PseudocodeParser.IntDivExprContext):
-        pass
-
-
     # Enter a parse tree produced by PseudocodeParser#notExpr.
     def enterNotExpr(self, ctx:PseudocodeParser.NotExprContext):
         pass
@@ -221,6 +212,15 @@ class PseudocodeListener(ParseTreeListener):
 
     # Exit a parse tree produced by PseudocodeParser#orExpr.
     def exitOrExpr(self, ctx:PseudocodeParser.OrExprContext):
+        pass
+
+
+    # Enter a parse tree produced by PseudocodeParser#int.
+    def enterInt(self, ctx:PseudocodeParser.IntContext):
+        pass
+
+    # Exit a parse tree produced by PseudocodeParser#int.
+    def exitInt(self, ctx:PseudocodeParser.IntContext):
         pass
 
 

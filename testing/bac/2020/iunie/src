@@ -1,0 +1,13 @@
+citește a (număr natural)
+c←0
+┌repetă
+│ b←a; x←0
+│┌repetă
+││┌dacă b%10=c atunci
+│││ x←1
+││└■
+││ b←[b/10]
+│└până când b=0 sau x=1
+│ scrie x,’ ’
+│ c←c+2
+└până când c>9

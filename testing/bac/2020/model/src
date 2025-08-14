@@ -1,0 +1,14 @@
+citește m,n,x
+ (numere naturale nenule, m≤n)
+ s0; pm1; pn1
+┌repetă
+│┌dacă m%x=0 atunci
+││ ss+m; pmx
+│└■
+│┌dacă n%x=0 şi m≠n atunci
+││ ss+n; pnx
+│└■
+│ mm+pm
+│ nn-pn
+└până când m>n
+ scrie s

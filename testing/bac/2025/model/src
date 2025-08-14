@@ -1,0 +1,13 @@
+citește n,x,y
+ (numere naturale nenule, x≤n, y≤n)
+nr0
+┌pentru in,1,-1 execută
+│┌dacă i%x=0 și i%y≠0 atunci
+││ nrnr+1
+││altfel
+││┌dacă i%x≠0 și i%y=0 atunci
+│││ nrnr+1
+││└■
+│└■
+└■
+scrie nr

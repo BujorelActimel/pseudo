@@ -1,0 +1,12 @@
+citeşte m,n
+ (numere naturale nenule, m<n)
+ x1
+┌cât timp x=1 execută
+│ xm; yn; nn-1
+│┌cât timp x≠y execută
+││┌dacă x>y atunci xx-y
+│││altfel yy-x
+││└■
+│└■
+└■
+scrie n+1

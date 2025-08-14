@@ -1,0 +1,13 @@
+citeşte n, k
+ (numere naturale)
+p1
+┌cât timp n>0 execută
+│ cn%10
+│┌dacă k>0 atunci
+││ ┌dacă c%2=1 atunci
+││ │ pp*c
+││ └■
+│└■
+│ n[n/10]; kk-1
+└■
+scrie p

@@ -1,0 +1,12 @@
+citește m,n
+ (numere naturale)
+┌dacă m>n atunci
+│ n→m
+└■
+┌dacă m%2=0 atunci
+│ mm+1
+└■
+┌cât timp m≤n execută
+│ mm+2
+│ scrie ‘*’
+└■

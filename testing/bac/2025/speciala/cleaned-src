@@ -1,0 +1,13 @@
+citeste m,n
+(numere naturale nenule, m<=n)
+pentru i<-n,m,-1 executa
+    x<-i
+    c<-x%10
+    repeta
+        x<-[x/10]
+    pana cand x%10!=c
+    daca x=0 atunci
+        scrie i,' '
+    sf
+sf
+

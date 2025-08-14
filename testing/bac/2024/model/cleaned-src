@@ -1,0 +1,12 @@
+citeste n (număr natural nenul)
+m<-0; i<-n
+cat timp i>=1 executa
+    citeste x (număr natural)
+    cat timp x%10 <= [x/10]%10 executa
+        x<-[x/10]
+    sf
+    m<-m+x; i<-i-1
+sf
+daca m!=n atunci scrie m
+    altfel scrie „egal”
+sf

@@ -1,0 +1,14 @@
+citeste x (număr natural)
+p<-1; m<- -1
+cat timp p<=x executa
+    c<-[x/p]%10
+    daca c>m atunci
+        m<-c; p<-p*10
+        altfel
+        x<-[x/(p*10)]*p+x%p
+    sf
+sf
+daca m>=0 atunci scrie x
+    altfel scrie "nul"
+sf
+

@@ -1,0 +1,13 @@
+citeşte n
+ (număr natural nenul)
+ x  -1; y  -1
+┌cât timp n>9 execută
+│┌dacă x=-1 atunci xn%100
+││altfel yn%100
+│└■
+│ n[n/10]
+└■
+┌dacă x<y atunci n(n*100+x)*100+y
+│altfel n(n*100+y)*100+x
+└■
+scrie n

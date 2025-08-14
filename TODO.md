@@ -1,8 +1,8 @@
 # TODO
 ## Compiler:
-- none
+- support more languages (german and hungarian)
 ## Other:
-- test suite
+- more tests
 - rewrite interpreter in go/c
 - explore benefits of IR
 - online platform

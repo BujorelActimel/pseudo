@@ -1,0 +1,14 @@
+citește n
+ (număr natural nenul)
+ s0; d2
+┌cât timp d*d≤n execută
+│ p0
+│┌cât timp n%d=0 execută
+││ n[n/d]; p1
+│└■
+│ ss+d*p; dd+1
+└■
+┌dacă n≠1 atunci
+│ ss+n
+└■
+scrie s

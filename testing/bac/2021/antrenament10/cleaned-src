@@ -1,0 +1,11 @@
+citeste x,y (numere naturale)
+daca x<y atunci
+    x<-x-y; y<-x+y; x<-y-x
+sf
+cat timp x>=y executa
+    scrie 'A'
+    x<-x-y
+    daca x%2=0 atunci scrie 'A'
+        altfel scrie 'B'
+    sf
+sf

@@ -1,0 +1,12 @@
+citește m,n
+ (numere naturale nenule, m≤n)
+┌pentru in,m,-1 execută
+│ xi
+│ cx%10
+│┌repetă
+││ x[x/10]
+│└până când x%10≠c
+│┌dacă x=0 atunci
+││ scrie i,' '
+│└■
+└■

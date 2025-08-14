@@ -1,0 +1,10 @@
+citeste n (număr natural)
+x<-0
+pentru i<-1,n executa
+    daca i%2=0 atunci
+        x<-x+i*i
+        altfel
+        x<-x+(i+1)*(i+1)
+    sf
+sf
+scrie x

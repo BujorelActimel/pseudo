@@ -1,0 +1,14 @@
+citește x (număr natural)
+n0
+┌cât timp x≠0 execută
+│ yx; c0
+│ ┌cât timp y>0 execută
+│ │ ┌dacă y%10>c atunci
+│ │ │ cy%10
+│ │ └■
+│ │ y [y/10]
+│ └■
+│ nn*10+c
+│ citește x (număr natural)
+└■
+scrie n

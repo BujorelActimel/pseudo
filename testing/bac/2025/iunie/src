@@ -1,0 +1,13 @@
+citeşte m,n
+ (numere naturale nenule, m≤n)
+ nr0;im
+┌repetă
+│ x1
+│┌cât timp x*x<i execută
+││ xx+1
+│└■
+│┌dacă x*x=i atunci nri
+││altfel ii+1
+│└■
+└până când i>n sau nr≠0
+scrie nr

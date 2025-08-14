@@ -1,0 +1,14 @@
+citeşte n
+ (număr natural)
+x5
+┌repetă
+│ cnn; n0; p1
+│┌repetă
+││ ccn%10
+││┌dacă c=x atunci c5-c
+││└■
+││ nc*p+n; cn[cn/10]; pp*10
+│└până când cn=0
+│ xx-1
+└până când x=0
+scrie n

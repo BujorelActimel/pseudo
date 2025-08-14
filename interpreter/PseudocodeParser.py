@@ -1,4 +1,4 @@
-# Generated from Pseudocode.g4 by ANTLR 4.13.2
+# Generated from interpreter/Pseudocode.g4 by ANTLR 4.13.2
 # encoding: utf-8
 from antlr4 import *
 from io import StringIO
@@ -10,7 +10,7 @@ else:
 
 def serializedATN():
     return [
-        4,1,44,224,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,
+        4,1,44,222,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,
         6,2,7,7,7,2,8,7,8,2,9,7,9,2,10,7,10,2,11,7,11,2,12,7,12,2,13,7,13,
         2,14,7,14,2,15,7,15,2,16,7,16,2,17,7,17,1,0,5,0,38,8,0,10,0,12,0,
         41,9,0,1,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,55,8,
@@ -25,71 +25,70 @@ def serializedATN():
         1,13,1,14,1,14,5,14,159,8,14,10,14,12,14,162,9,14,1,14,1,14,1,14,
         1,14,1,15,1,15,5,15,170,8,15,10,15,12,15,173,9,15,1,15,1,15,1,15,
         1,15,1,16,1,16,1,16,1,16,1,16,1,16,1,16,1,16,1,16,1,16,1,16,1,16,
-        1,16,1,16,3,16,193,8,16,1,16,1,16,1,16,1,16,1,16,1,16,1,16,1,16,
-        1,16,1,16,1,16,1,16,1,16,1,16,1,16,5,16,210,8,16,10,16,12,16,213,
-        9,16,1,17,1,17,1,17,1,17,1,17,1,17,1,17,3,17,222,8,17,1,17,0,1,32,
-        18,0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,0,6,1,0,36,37,
-        1,0,18,20,1,0,23,24,1,0,26,31,1,0,32,33,1,0,34,35,244,0,39,1,0,0,
-        0,2,54,1,0,0,0,4,56,1,0,0,0,6,60,1,0,0,0,8,68,1,0,0,0,10,81,1,0,
-        0,0,12,84,1,0,0,0,14,87,1,0,0,0,16,95,1,0,0,0,18,103,1,0,0,0,20,
-        116,1,0,0,0,22,122,1,0,0,0,24,125,1,0,0,0,26,144,1,0,0,0,28,156,
-        1,0,0,0,30,167,1,0,0,0,32,192,1,0,0,0,34,221,1,0,0,0,36,38,3,2,1,
-        0,37,36,1,0,0,0,38,41,1,0,0,0,39,37,1,0,0,0,39,40,1,0,0,0,40,42,
-        1,0,0,0,41,39,1,0,0,0,42,43,5,0,0,1,43,1,1,0,0,0,44,55,3,4,2,0,45,
-        55,3,6,3,0,46,55,3,10,5,0,47,55,3,12,6,0,48,55,3,18,9,0,49,55,3,
-        24,12,0,50,55,3,26,13,0,51,55,3,28,14,0,52,55,3,30,15,0,53,55,3,
-        8,4,0,54,44,1,0,0,0,54,45,1,0,0,0,54,46,1,0,0,0,54,47,1,0,0,0,54,
-        48,1,0,0,0,54,49,1,0,0,0,54,50,1,0,0,0,54,51,1,0,0,0,54,52,1,0,0,
-        0,54,53,1,0,0,0,55,3,1,0,0,0,56,57,5,40,0,0,57,58,5,1,0,0,58,59,
-        3,32,16,0,59,5,1,0,0,0,60,61,5,40,0,0,61,62,5,2,0,0,62,63,5,40,0,
-        0,63,7,1,0,0,0,64,69,3,4,2,0,65,69,3,6,3,0,66,69,3,10,5,0,67,69,
-        3,12,6,0,68,64,1,0,0,0,68,65,1,0,0,0,68,66,1,0,0,0,68,67,1,0,0,0,
-        69,77,1,0,0,0,70,75,5,3,0,0,71,76,3,4,2,0,72,76,3,6,3,0,73,76,3,
-        10,5,0,74,76,3,12,6,0,75,71,1,0,0,0,75,72,1,0,0,0,75,73,1,0,0,0,
-        75,74,1,0,0,0,76,78,1,0,0,0,77,70,1,0,0,0,78,79,1,0,0,0,79,77,1,
-        0,0,0,79,80,1,0,0,0,80,9,1,0,0,0,81,82,5,4,0,0,82,83,3,14,7,0,83,
-        11,1,0,0,0,84,85,5,5,0,0,85,86,3,16,8,0,86,13,1,0,0,0,87,92,5,40,
-        0,0,88,89,5,6,0,0,89,91,5,40,0,0,90,88,1,0,0,0,91,94,1,0,0,0,92,
-        90,1,0,0,0,92,93,1,0,0,0,93,15,1,0,0,0,94,92,1,0,0,0,95,100,3,32,
-        16,0,96,97,5,6,0,0,97,99,3,32,16,0,98,96,1,0,0,0,99,102,1,0,0,0,
-        100,98,1,0,0,0,100,101,1,0,0,0,101,17,1,0,0,0,102,100,1,0,0,0,103,
-        104,5,7,0,0,104,105,3,32,16,0,105,106,5,8,0,0,106,109,3,20,10,0,
-        107,108,5,9,0,0,108,110,3,22,11,0,109,107,1,0,0,0,109,110,1,0,0,
-        0,110,111,1,0,0,0,111,112,5,10,0,0,112,19,1,0,0,0,113,115,3,2,1,
-        0,114,113,1,0,0,0,115,118,1,0,0,0,116,114,1,0,0,0,116,117,1,0,0,
-        0,117,21,1,0,0,0,118,116,1,0,0,0,119,121,3,2,1,0,120,119,1,0,0,0,
-        121,124,1,0,0,0,122,120,1,0,0,0,122,123,1,0,0,0,123,23,1,0,0,0,124,
-        122,1,0,0,0,125,126,5,11,0,0,126,127,5,40,0,0,127,128,5,1,0,0,128,
-        129,3,32,16,0,129,130,5,6,0,0,130,133,3,32,16,0,131,132,5,6,0,0,
-        132,134,3,32,16,0,133,131,1,0,0,0,133,134,1,0,0,0,134,135,1,0,0,
-        0,135,139,5,12,0,0,136,138,3,2,1,0,137,136,1,0,0,0,138,141,1,0,0,
-        0,139,137,1,0,0,0,139,140,1,0,0,0,140,142,1,0,0,0,141,139,1,0,0,
-        0,142,143,5,10,0,0,143,25,1,0,0,0,144,145,5,13,0,0,145,146,5,14,
-        0,0,146,147,3,32,16,0,147,151,5,12,0,0,148,150,3,2,1,0,149,148,1,
-        0,0,0,150,153,1,0,0,0,151,149,1,0,0,0,151,152,1,0,0,0,152,154,1,
-        0,0,0,153,151,1,0,0,0,154,155,5,10,0,0,155,27,1,0,0,0,156,160,5,
-        12,0,0,157,159,3,2,1,0,158,157,1,0,0,0,159,162,1,0,0,0,160,158,1,
-        0,0,0,160,161,1,0,0,0,161,163,1,0,0,0,162,160,1,0,0,0,163,164,5,
-        13,0,0,164,165,5,14,0,0,165,166,3,32,16,0,166,29,1,0,0,0,167,171,
-        5,15,0,0,168,170,3,2,1,0,169,168,1,0,0,0,170,173,1,0,0,0,171,169,
-        1,0,0,0,171,172,1,0,0,0,172,174,1,0,0,0,173,171,1,0,0,0,174,175,
-        5,16,0,0,175,176,5,17,0,0,176,177,3,32,16,0,177,31,1,0,0,0,178,179,
-        6,16,-1,0,179,180,5,21,0,0,180,181,3,32,16,0,181,182,5,19,0,0,182,
-        183,3,32,16,0,183,184,5,22,0,0,184,193,1,0,0,0,185,186,5,24,0,0,
-        186,193,3,34,17,0,187,188,5,25,0,0,188,193,3,34,17,0,189,193,3,34,
-        17,0,190,191,7,0,0,0,191,193,3,32,16,1,192,178,1,0,0,0,192,185,1,
-        0,0,0,192,187,1,0,0,0,192,189,1,0,0,0,192,190,1,0,0,0,193,211,1,
-        0,0,0,194,195,10,10,0,0,195,196,7,1,0,0,196,210,3,32,16,11,197,198,
-        10,8,0,0,198,199,7,2,0,0,199,210,3,32,16,9,200,201,10,5,0,0,201,
-        202,7,3,0,0,202,210,3,32,16,6,203,204,10,3,0,0,204,205,7,4,0,0,205,
-        210,3,32,16,4,206,207,10,2,0,0,207,208,7,5,0,0,208,210,3,32,16,3,
-        209,194,1,0,0,0,209,197,1,0,0,0,209,200,1,0,0,0,209,203,1,0,0,0,
-        209,206,1,0,0,0,210,213,1,0,0,0,211,209,1,0,0,0,211,212,1,0,0,0,
-        212,33,1,0,0,0,213,211,1,0,0,0,214,222,5,41,0,0,215,222,5,42,0,0,
-        216,222,5,40,0,0,217,218,5,38,0,0,218,219,3,32,16,0,219,220,5,39,
-        0,0,220,222,1,0,0,0,221,214,1,0,0,0,221,215,1,0,0,0,221,216,1,0,
-        0,0,221,217,1,0,0,0,222,35,1,0,0,0,19,39,54,68,75,79,92,100,109,
-        116,122,133,139,151,160,171,192,209,211,221
+        3,16,191,8,16,1,16,1,16,1,16,1,16,1,16,1,16,1,16,1,16,1,16,1,16,
+        1,16,1,16,1,16,1,16,1,16,5,16,208,8,16,10,16,12,16,211,9,16,1,17,
+        1,17,1,17,1,17,1,17,1,17,1,17,3,17,220,8,17,1,17,0,1,32,18,0,2,4,
+        6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,0,6,1,0,36,37,1,0,18,
+        20,1,0,23,24,1,0,26,31,1,0,32,33,1,0,34,35,242,0,39,1,0,0,0,2,54,
+        1,0,0,0,4,56,1,0,0,0,6,60,1,0,0,0,8,68,1,0,0,0,10,81,1,0,0,0,12,
+        84,1,0,0,0,14,87,1,0,0,0,16,95,1,0,0,0,18,103,1,0,0,0,20,116,1,0,
+        0,0,22,122,1,0,0,0,24,125,1,0,0,0,26,144,1,0,0,0,28,156,1,0,0,0,
+        30,167,1,0,0,0,32,190,1,0,0,0,34,219,1,0,0,0,36,38,3,2,1,0,37,36,
+        1,0,0,0,38,41,1,0,0,0,39,37,1,0,0,0,39,40,1,0,0,0,40,42,1,0,0,0,
+        41,39,1,0,0,0,42,43,5,0,0,1,43,1,1,0,0,0,44,55,3,4,2,0,45,55,3,6,
+        3,0,46,55,3,10,5,0,47,55,3,12,6,0,48,55,3,18,9,0,49,55,3,24,12,0,
+        50,55,3,26,13,0,51,55,3,28,14,0,52,55,3,30,15,0,53,55,3,8,4,0,54,
+        44,1,0,0,0,54,45,1,0,0,0,54,46,1,0,0,0,54,47,1,0,0,0,54,48,1,0,0,
+        0,54,49,1,0,0,0,54,50,1,0,0,0,54,51,1,0,0,0,54,52,1,0,0,0,54,53,
+        1,0,0,0,55,3,1,0,0,0,56,57,5,40,0,0,57,58,5,1,0,0,58,59,3,32,16,
+        0,59,5,1,0,0,0,60,61,5,40,0,0,61,62,5,2,0,0,62,63,5,40,0,0,63,7,
+        1,0,0,0,64,69,3,4,2,0,65,69,3,6,3,0,66,69,3,10,5,0,67,69,3,12,6,
+        0,68,64,1,0,0,0,68,65,1,0,0,0,68,66,1,0,0,0,68,67,1,0,0,0,69,77,
+        1,0,0,0,70,75,5,3,0,0,71,76,3,4,2,0,72,76,3,6,3,0,73,76,3,10,5,0,
+        74,76,3,12,6,0,75,71,1,0,0,0,75,72,1,0,0,0,75,73,1,0,0,0,75,74,1,
+        0,0,0,76,78,1,0,0,0,77,70,1,0,0,0,78,79,1,0,0,0,79,77,1,0,0,0,79,
+        80,1,0,0,0,80,9,1,0,0,0,81,82,5,4,0,0,82,83,3,14,7,0,83,11,1,0,0,
+        0,84,85,5,5,0,0,85,86,3,16,8,0,86,13,1,0,0,0,87,92,5,40,0,0,88,89,
+        5,6,0,0,89,91,5,40,0,0,90,88,1,0,0,0,91,94,1,0,0,0,92,90,1,0,0,0,
+        92,93,1,0,0,0,93,15,1,0,0,0,94,92,1,0,0,0,95,100,3,32,16,0,96,97,
+        5,6,0,0,97,99,3,32,16,0,98,96,1,0,0,0,99,102,1,0,0,0,100,98,1,0,
+        0,0,100,101,1,0,0,0,101,17,1,0,0,0,102,100,1,0,0,0,103,104,5,7,0,
+        0,104,105,3,32,16,0,105,106,5,8,0,0,106,109,3,20,10,0,107,108,5,
+        9,0,0,108,110,3,22,11,0,109,107,1,0,0,0,109,110,1,0,0,0,110,111,
+        1,0,0,0,111,112,5,10,0,0,112,19,1,0,0,0,113,115,3,2,1,0,114,113,
+        1,0,0,0,115,118,1,0,0,0,116,114,1,0,0,0,116,117,1,0,0,0,117,21,1,
+        0,0,0,118,116,1,0,0,0,119,121,3,2,1,0,120,119,1,0,0,0,121,124,1,
+        0,0,0,122,120,1,0,0,0,122,123,1,0,0,0,123,23,1,0,0,0,124,122,1,0,
+        0,0,125,126,5,11,0,0,126,127,5,40,0,0,127,128,5,1,0,0,128,129,3,
+        32,16,0,129,130,5,6,0,0,130,133,3,32,16,0,131,132,5,6,0,0,132,134,
+        3,32,16,0,133,131,1,0,0,0,133,134,1,0,0,0,134,135,1,0,0,0,135,139,
+        5,12,0,0,136,138,3,2,1,0,137,136,1,0,0,0,138,141,1,0,0,0,139,137,
+        1,0,0,0,139,140,1,0,0,0,140,142,1,0,0,0,141,139,1,0,0,0,142,143,
+        5,10,0,0,143,25,1,0,0,0,144,145,5,13,0,0,145,146,5,14,0,0,146,147,
+        3,32,16,0,147,151,5,12,0,0,148,150,3,2,1,0,149,148,1,0,0,0,150,153,
+        1,0,0,0,151,149,1,0,0,0,151,152,1,0,0,0,152,154,1,0,0,0,153,151,
+        1,0,0,0,154,155,5,10,0,0,155,27,1,0,0,0,156,160,5,12,0,0,157,159,
+        3,2,1,0,158,157,1,0,0,0,159,162,1,0,0,0,160,158,1,0,0,0,160,161,
+        1,0,0,0,161,163,1,0,0,0,162,160,1,0,0,0,163,164,5,13,0,0,164,165,
+        5,14,0,0,165,166,3,32,16,0,166,29,1,0,0,0,167,171,5,15,0,0,168,170,
+        3,2,1,0,169,168,1,0,0,0,170,173,1,0,0,0,171,169,1,0,0,0,171,172,
+        1,0,0,0,172,174,1,0,0,0,173,171,1,0,0,0,174,175,5,16,0,0,175,176,
+        5,17,0,0,176,177,3,32,16,0,177,31,1,0,0,0,178,179,6,16,-1,0,179,
+        180,5,21,0,0,180,181,3,32,16,0,181,182,5,22,0,0,182,191,1,0,0,0,
+        183,184,5,24,0,0,184,191,3,34,17,0,185,186,5,25,0,0,186,191,3,34,
+        17,0,187,191,3,34,17,0,188,189,7,0,0,0,189,191,3,32,16,1,190,178,
+        1,0,0,0,190,183,1,0,0,0,190,185,1,0,0,0,190,187,1,0,0,0,190,188,
+        1,0,0,0,191,209,1,0,0,0,192,193,10,10,0,0,193,194,7,1,0,0,194,208,
+        3,32,16,11,195,196,10,8,0,0,196,197,7,2,0,0,197,208,3,32,16,9,198,
+        199,10,5,0,0,199,200,7,3,0,0,200,208,3,32,16,6,201,202,10,3,0,0,
+        202,203,7,4,0,0,203,208,3,32,16,4,204,205,10,2,0,0,205,206,7,5,0,
+        0,206,208,3,32,16,3,207,192,1,0,0,0,207,195,1,0,0,0,207,198,1,0,
+        0,0,207,201,1,0,0,0,207,204,1,0,0,0,208,211,1,0,0,0,209,207,1,0,
+        0,0,209,210,1,0,0,0,210,33,1,0,0,0,211,209,1,0,0,0,212,220,5,41,
+        0,0,213,220,5,42,0,0,214,220,5,40,0,0,215,216,5,38,0,0,216,217,3,
+        32,16,0,217,218,5,39,0,0,218,220,1,0,0,0,219,212,1,0,0,0,219,213,
+        1,0,0,0,219,214,1,0,0,0,219,215,1,0,0,0,220,35,1,0,0,0,19,39,54,
+        68,75,79,92,100,109,116,122,133,139,151,160,171,190,207,209,219
     ]
 
 class PseudocodeParser ( Parser ):
@@ -1403,34 +1402,6 @@ class PseudocodeParser ( Parser ):
             super().copyFrom(ctx)
 
 
-    class IntDivExprContext(ExprContext):
-
-        def __init__(self, parser, ctx:ParserRuleContext): # actually a PseudocodeParser.ExprContext
-            super().__init__(parser)
-            self.copyFrom(ctx)
-
-        def expr(self, i:int=None):
-            if i is None:
-                return self.getTypedRuleContexts(PseudocodeParser.ExprContext)
-            else:
-                return self.getTypedRuleContext(PseudocodeParser.ExprContext,i)
-
-
-        def enterRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "enterIntDivExpr" ):
-                listener.enterIntDivExpr(self)
-
-        def exitRule(self, listener:ParseTreeListener):
-            if hasattr( listener, "exitIntDivExpr" ):
-                listener.exitIntDivExpr(self)
-
-        def accept(self, visitor:ParseTreeVisitor):
-            if hasattr( visitor, "visitIntDivExpr" ):
-                return visitor.visitIntDivExpr(self)
-            else:
-                return visitor.visitChildren(self)
-
-
     class NotExprContext(ExprContext):
 
         def __init__(self, parser, ctx:ParserRuleContext): # actually a PseudocodeParser.ExprContext
@@ -1615,6 +1586,31 @@ class PseudocodeParser ( Parser ):
                 return visitor.visitChildren(self)
 
 
+    class IntContext(ExprContext):
+
+        def __init__(self, parser, ctx:ParserRuleContext): # actually a PseudocodeParser.ExprContext
+            super().__init__(parser)
+            self.copyFrom(ctx)
+
+        def expr(self):
+            return self.getTypedRuleContext(PseudocodeParser.ExprContext,0)
+
+
+        def enterRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "enterInt" ):
+                listener.enterInt(self)
+
+        def exitRule(self, listener:ParseTreeListener):
+            if hasattr( listener, "exitInt" ):
+                listener.exitInt(self)
+
+        def accept(self, visitor:ParseTreeVisitor):
+            if hasattr( visitor, "visitInt" ):
+                return visitor.visitInt(self)
+            else:
+                return visitor.visitChildren(self)
+
+
     class CompareExprContext(ExprContext):
 
         def __init__(self, parser, ctx:ParserRuleContext): # actually a PseudocodeParser.ExprContext
@@ -1682,11 +1678,11 @@ class PseudocodeParser ( Parser ):
         self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 192
+            self.state = 190
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [21]:
-                localctx = PseudocodeParser.IntDivExprContext(self, localctx)
+                localctx = PseudocodeParser.IntContext(self, localctx)
                 self._ctx = localctx
                 _prevctx = localctx
 
@@ -1695,56 +1691,52 @@ class PseudocodeParser ( Parser ):
                 self.state = 180
                 self.expr(0)
                 self.state = 181
-                self.match(PseudocodeParser.T__18)
-                self.state = 182
-                self.expr(0)
-                self.state = 183
                 self.match(PseudocodeParser.T__21)
                 pass
             elif token in [24]:
                 localctx = PseudocodeParser.NegExprContext(self, localctx)
                 self._ctx = localctx
                 _prevctx = localctx
-                self.state = 185
+                self.state = 183
                 self.match(PseudocodeParser.T__23)
-                self.state = 186
+                self.state = 184
                 self.atom()
                 pass
             elif token in [25]:
                 localctx = PseudocodeParser.SqrtExprContext(self, localctx)
                 self._ctx = localctx
                 _prevctx = localctx
-                self.state = 187
+                self.state = 185
                 self.match(PseudocodeParser.T__24)
-                self.state = 188
+                self.state = 186
                 self.atom()
                 pass
             elif token in [38, 40, 41, 42]:
                 localctx = PseudocodeParser.AtomExprContext(self, localctx)
                 self._ctx = localctx
                 _prevctx = localctx
-                self.state = 189
+                self.state = 187
                 self.atom()
                 pass
             elif token in [36, 37]:
                 localctx = PseudocodeParser.NotExprContext(self, localctx)
                 self._ctx = localctx
                 _prevctx = localctx
-                self.state = 190
+                self.state = 188
                 _la = self._input.LA(1)
                 if not(_la==36 or _la==37):
                     self._errHandler.recoverInline(self)
                 else:
                     self._errHandler.reportMatch(self)
                     self.consume()
-                self.state = 191
+                self.state = 189
                 self.expr(1)
                 pass
             else:
                 raise NoViableAltException(self)
 
             self._ctx.stop = self._input.LT(-1)
-            self.state = 211
+            self.state = 209
             self._errHandler.sync(self)
             _alt = self._interp.adaptivePredict(self._input,17,self._ctx)
             while _alt!=2 and _alt!=ATN.INVALID_ALT_NUMBER:
@@ -1752,101 +1744,101 @@ class PseudocodeParser ( Parser ):
                     if self._parseListeners is not None:
                         self.triggerExitRuleEvent()
                     _prevctx = localctx
-                    self.state = 209
+                    self.state = 207
                     self._errHandler.sync(self)
                     la_ = self._interp.adaptivePredict(self._input,16,self._ctx)
                     if la_ == 1:
                         localctx = PseudocodeParser.MulExprContext(self, PseudocodeParser.ExprContext(self, _parentctx, _parentState))
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
-                        self.state = 194
+                        self.state = 192
                         if not self.precpred(self._ctx, 10):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 10)")
-                        self.state = 195
+                        self.state = 193
                         _la = self._input.LA(1)
                         if not((((_la) & ~0x3f) == 0 and ((1 << _la) & 1835008) != 0)):
                             self._errHandler.recoverInline(self)
                         else:
                             self._errHandler.reportMatch(self)
                             self.consume()
-                        self.state = 196
+                        self.state = 194
                         self.expr(11)
                         pass
 
                     elif la_ == 2:
                         localctx = PseudocodeParser.AddExprContext(self, PseudocodeParser.ExprContext(self, _parentctx, _parentState))
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
-                        self.state = 197
+                        self.state = 195
                         if not self.precpred(self._ctx, 8):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 8)")
-                        self.state = 198
+                        self.state = 196
                         _la = self._input.LA(1)
                         if not(_la==23 or _la==24):
                             self._errHandler.recoverInline(self)
                         else:
                             self._errHandler.reportMatch(self)
                             self.consume()
-                        self.state = 199
+                        self.state = 197
                         self.expr(9)
                         pass
 
                     elif la_ == 3:
                         localctx = PseudocodeParser.CompareExprContext(self, PseudocodeParser.ExprContext(self, _parentctx, _parentState))
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
-                        self.state = 200
+                        self.state = 198
                         if not self.precpred(self._ctx, 5):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 5)")
-                        self.state = 201
+                        self.state = 199
                         _la = self._input.LA(1)
                         if not((((_la) & ~0x3f) == 0 and ((1 << _la) & 4227858432) != 0)):
                             self._errHandler.recoverInline(self)
                         else:
                             self._errHandler.reportMatch(self)
                             self.consume()
-                        self.state = 202
+                        self.state = 200
                         self.expr(6)
                         pass
 
                     elif la_ == 4:
                         localctx = PseudocodeParser.OrExprContext(self, PseudocodeParser.ExprContext(self, _parentctx, _parentState))
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
-                        self.state = 203
+                        self.state = 201
                         if not self.precpred(self._ctx, 3):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 3)")
-                        self.state = 204
+                        self.state = 202
                         _la = self._input.LA(1)
                         if not(_la==32 or _la==33):
                             self._errHandler.recoverInline(self)
                         else:
                             self._errHandler.reportMatch(self)
                             self.consume()
-                        self.state = 205
+                        self.state = 203
                         self.expr(4)
                         pass
 
                     elif la_ == 5:
                         localctx = PseudocodeParser.AndExprContext(self, PseudocodeParser.ExprContext(self, _parentctx, _parentState))
                         self.pushNewRecursionContext(localctx, _startState, self.RULE_expr)
-                        self.state = 206
+                        self.state = 204
                         if not self.precpred(self._ctx, 2):
                             from antlr4.error.Errors import FailedPredicateException
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 2)")
-                        self.state = 207
+                        self.state = 205
                         _la = self._input.LA(1)
                         if not(_la==34 or _la==35):
                             self._errHandler.recoverInline(self)
                         else:
                             self._errHandler.reportMatch(self)
                             self.consume()
-                        self.state = 208
+                        self.state = 206
                         self.expr(3)
                         pass
 
              
-                self.state = 213
+                self.state = 211
                 self._errHandler.sync(self)
                 _alt = self._interp.adaptivePredict(self._input,17,self._ctx)
 
@@ -1904,31 +1896,31 @@ class PseudocodeParser ( Parser ):
         localctx = PseudocodeParser.AtomContext(self, self._ctx, self.state)
         self.enterRule(localctx, 34, self.RULE_atom)
         try:
-            self.state = 221
+            self.state = 219
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [41]:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 214
+                self.state = 212
                 self.match(PseudocodeParser.NUMBER)
                 pass
             elif token in [42]:
                 self.enterOuterAlt(localctx, 2)
-                self.state = 215
+                self.state = 213
                 self.match(PseudocodeParser.STRING)
                 pass
             elif token in [40]:
                 self.enterOuterAlt(localctx, 3)
-                self.state = 216
+                self.state = 214
                 self.match(PseudocodeParser.NAME)
                 pass
             elif token in [38]:
                 self.enterOuterAlt(localctx, 4)
-                self.state = 217
+                self.state = 215
                 self.match(PseudocodeParser.T__37)
-                self.state = 218
+                self.state = 216
                 self.expr(0)
-                self.state = 219
+                self.state = 217
                 self.match(PseudocodeParser.T__38)
                 pass
             else:

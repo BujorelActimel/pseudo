@@ -1,0 +1,13 @@
+citeşte x,y
+ (numere naturale distincte)
+ cx0; cy0
+┌cât timp x≥10 sau y≥10 execută
+│┌cât timp x+y≠0 execută
+││ cxcx+x%10; x[x/10]
+││ cycy+y%10; y[y/10]
+│└■
+│ xcx; cx0; ycy; cy0
+└■
+┌dacă x=y atunci scrie "DA ",x
+│altfel scrie "NU ",x," ",y
+└■

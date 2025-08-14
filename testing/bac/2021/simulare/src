@@ -1,0 +1,12 @@
+ citește x (număr natural)
+ p1; y0
+┌repetă
+│ cx%10; x[x/10]
+│┌dacă c≠0 atunci
+││┌dacă x%10<c atunci yy*10+c
+│││altfel yc*p+y
+││└■
+││ pp*10
+│└■
+└până când x=0
+ scrie y

@@ -1,0 +1,13 @@
+citește x,y
+ (numere naturale nenule)
+┌dacă x>y atunci xy
+└■
+nr1
+┌pentru iy,x,-1 execută
+│ scrie 1
+│┌dacă nr≥x atunci
+││ scrie 2
+│└■
+│ nrnr*3
+│ scrie 1
+└■

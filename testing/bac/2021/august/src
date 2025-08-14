@@ -1,0 +1,12 @@
+citește n,x,y
+ (numere naturale nenule, x≤n, y≤n)
+ ok0
+┌pentru i1,n execută
+│┌dacă (i%x=0 și i%y≠0) sau
+││ (i%x≠0 și i%y=0) atunci
+││ scrie i, ' '
+││ ok1
+│└■
+└■
+┌dacă ok=0 atunci scrie 0
+└■

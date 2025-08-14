@@ -1,0 +1,16 @@
+citește m,n
+ (numere naturale)
+┌dacă m<n atunci
+│ nn+m
+│ mn-m
+│ nn-m
+└■
+km
+┌pentru im,n,-1 execută
+│ scrie k, ' '
+│┌dacă i%2=0 atunci
+││ kk-1
+││ scrie '*'
+│└■
+│ kk-1
+└■

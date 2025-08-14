@@ -1,0 +1,13 @@
+citeste n,x,y
+(numere naturale nenule, x<=n, y<=n)
+nr<-0
+pentru i<-n,1,-1 executa
+    daca i%x=0 si i%y!=0 atunci
+        nr<-nr+1
+        altfel
+        daca i%x!=0 si i%y=0 atunci
+            nr<-nr+1
+        sf
+    sf
+sf
+scrie nr

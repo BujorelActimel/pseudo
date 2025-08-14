@@ -1,0 +1,12 @@
+citește n (număr natural nenul)
+m0; in
+┌cât timp i≥1 execută
+│ citește x (număr natural)
+│┌cât timp x%10 ≤ [x/10]%10 execută
+││ x[x/10]
+│└■
+│ mm+x; ii-1
+└■
+┌dacă m≠n atunci scrie m
+│altfel scrie „egal”
+└■

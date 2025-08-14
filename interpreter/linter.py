@@ -6,13 +6,20 @@ class PseudocodeLinter:
     def __init__(self, tab = 4*' '):
         self.char_replacements = {
             '≤': '<=',
+            '': '<=',
             '≠': '!=', 
             '≥': '>=',
+            '': '<-',
+            '': '<-',
+            '': '<->',
+            '→': '->',
             '': '<-',
             '←': '<-',
             '■': 'sf',
             '│ ': tab,
             '│': tab,
+            '’': "'",
+            '‘': "'",
         }
         
         self.box_chars = ['┌', '└']
@@ -44,6 +51,7 @@ class PseudocodeLinter:
     def _handle_keywords(self, line):
         keywords = {
             'citeşte': 'citeste',
+            'citește': 'citeste',
             'cât timp': 'cat timp', 
             'până când': 'pana cand',
             'dacă': 'daca',
@@ -51,6 +59,8 @@ class PseudocodeLinter:
             'altfel': 'altfel',
             'execută': 'executa',
             'repetă': 'repeta',
+            'și': 'si',
+            'şi': 'si',
         }
         
         for old_keyword, new_keyword in keywords.items():

@@ -1,0 +1,12 @@
+citeste n,x,y
+(numere naturale nenule, x<=n, y<=n)
+ok<-0
+pentru i<-1,n executa
+    daca (i%x=0 si i%y!=0) sau
+        (i%x!=0 si i%y=0) atunci
+        scrie i, ' '
+        ok<-1
+    sf
+sf
+daca ok=0 atunci scrie 0
+sf

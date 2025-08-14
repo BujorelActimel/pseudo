@@ -38,7 +38,7 @@ repeatStmt: 'repeta' stmt* 'pana' 'cand' expr ;
 
 // Expressions
 expr: expr ('*'|'/'|'%') expr #mulExpr
-    | '[' expr '/' expr ']'   #intDivExpr
+    | '[' expr ']'            #int
     | expr ('+'|'-') expr     #addExpr
     | '-' atom                #negExpr
     | '√' atom                #sqrtExpr

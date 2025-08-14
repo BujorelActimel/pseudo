@@ -1,0 +1,11 @@
+citeşte x,y (numere naturale)
+┌dacă x<y atunci
+│ xx-y; yx+y; xy-x
+└■
+┌cât timp x≥y execută
+│ scrie ’A’
+│ xx-y
+│┌dacă x%2=0 atunci scrie ’A’
+││altfel scrie ’B’
+│└■
+└■

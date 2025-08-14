@@ -1,0 +1,17 @@
+citeste n,k
+(numere naturale)
+p<-1
+daca k=0 atunci
+    nr<--1
+    altfel
+    nr<-0
+    repeta
+        c<-n%2; n<-[n/10]
+        daca c!=0 atunci
+            nr<-nr+(n%10)*p; p<-p*10
+            altfel
+            k<-k-1
+        sf
+    pana cand n=0 sau k=0
+sf
+scrie nr

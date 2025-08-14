@@ -1,0 +1,12 @@
+citește x,y (numere naturale, x<y)
+u0; nr0
+┌pentru kx,y execută
+│ s0; nrnr+1
+│┌pentru t1,[√k] execută
+││ ss+t*t
+│└■
+│┌dacă s≠u atunci
+││ scrie s,’*’,nr,’ ’
+││ us; nr0
+│└■
+└■

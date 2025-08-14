@@ -1,4 +1,4 @@
-# Generated from Pseudocode.g4 by ANTLR 4.13.2
+# Generated from interpreter/Pseudocode.g4 by ANTLR 4.13.2
 from antlr4 import *
 if "." in __name__:
     from .PseudocodeParser import PseudocodeParser
@@ -89,11 +89,6 @@ class PseudocodeVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by PseudocodeParser#intDivExpr.
-    def visitIntDivExpr(self, ctx:PseudocodeParser.IntDivExprContext):
-        return self.visitChildren(ctx)
-
-
     # Visit a parse tree produced by PseudocodeParser#notExpr.
     def visitNotExpr(self, ctx:PseudocodeParser.NotExprContext):
         return self.visitChildren(ctx)
@@ -126,6 +121,11 @@ class PseudocodeVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by PseudocodeParser#orExpr.
     def visitOrExpr(self, ctx:PseudocodeParser.OrExprContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by PseudocodeParser#int.
+    def visitInt(self, ctx:PseudocodeParser.IntContext):
         return self.visitChildren(ctx)
 
 

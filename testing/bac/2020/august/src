@@ -1,0 +1,11 @@
+citește n (număr natural)
+ m0
+┌repetă
+│ cn%10; n[n/10]
+│┌dacă c<5 atunci mm-2*c
+││altfel mm+c
+│└■
+└până când n=0
+┌dacă m=0 atunci scrie ‘DA’
+│altfel scrie m, ‘NU’
+└■

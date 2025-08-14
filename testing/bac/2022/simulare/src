@@ -1,0 +1,12 @@
+citește n,x (numere naturale nenule)
+nr0; i1
+┌cât timp i≤n execută
+│ citește y (număr natural)
+│┌cât timp y≠0 și y%2≠x%2 execută
+││ y[y/10]
+│└■
+│┌dacă y=x atunci nrnr+1
+│└■
+│ ii+1
+└■
+scrie nr

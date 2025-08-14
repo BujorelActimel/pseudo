@@ -1,0 +1,15 @@
+citește n (număr natural nenul)
+x0
+┌cât timp n>0 execută
+│ citește a,b (numere naturale)
+│ ca; p1
+│┌cât timp a>9 execută
+││ a[a/10]; pp*10
+│└■
+│ aa*p+b
+│┌dacă a≠c atunci
+││ xx+1
+│└■
+│ nn-1
+└■
+ scrie x

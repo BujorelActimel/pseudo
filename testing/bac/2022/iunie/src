@@ -1,0 +1,13 @@
+ citeşte n
+ (număr natural)
+ i2; k0
+┌cât timp n≥i execută
+│┌cât timp n%i=0 execută
+││ kk+1
+││ n[n/i]
+│└■
+│┌dacă i=2 atunci ii+1
+││altfel ii+2
+│└■
+└■
+ scrie k

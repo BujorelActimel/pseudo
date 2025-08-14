@@ -1,0 +1,14 @@
+citește n
+ (număr natural nenul)
+ p1
+┌pentru i1,n execută
+│ citește x
+│ (număr natural)
+│┌repetă
+││ x[x/3]
+│└până când x≤3
+│┌dacă x≠0 atunci
+││ pp*x
+│└■
+└■
+scrie p

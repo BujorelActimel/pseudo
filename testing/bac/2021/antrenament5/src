@@ -1,0 +1,13 @@
+citeşte x
+ (număr natural nenul)
+y0
+┌repetă
+│┌dacă x>9 atunci
+││┌repetă
+│││ x[x/10]
+││└până când x≤9
+│└■
+│ yy*10+x
+│ citeşte x (număr natural)
+└până când x=0
+scrie y

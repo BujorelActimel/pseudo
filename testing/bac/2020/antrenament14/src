@@ -1,0 +1,13 @@
+citește n (număr natural)
+m0
+┌repetă
+│ cn%10; n[n/10]
+│┌dacă c=9 atunci c1
+││altfel
+││┌dacă c%2=1 atunci
+│││cc+1
+││└■
+│└■
+│ mm*10+c
+└până când n=0
+scrie m

@@ -1,0 +1,12 @@
+citeste n,k
+(numere naturale nenule)
+pentru i<-1,n executa
+    pentru j<-k,1,-1 executa
+        scrie j,' '
+    sf
+    pentru j<-1,k executa
+        scrie j,' '
+    sf
+    k<-k-1
+sf
+

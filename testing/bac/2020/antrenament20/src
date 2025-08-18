@@ -1,0 +1,12 @@
+citește n
+ (număr natural nenul)
+d1; s0
+┌cât timp d*d<n execută
+│┌dacă n%d=0 și d%2≠[n/d]%2 atunci
+││ ss+d+[n/d]
+│└■
+│ dd+1
+└■
+┌dacă d*d=n atunci ss+d
+└■
+scrie s

@@ -1,0 +1,14 @@
+citește x,y
+ (numere naturale)
+┌repetă
+│ cx%10
+│ x[x/10]
+│┌dacă c≠0 atunci
+││┌dacă y%10<c atunci
+│││ yy*10+c
+│││altfel
+│││ yy*10-c
+││└■
+│└■
+└până când x=0
+scrie y

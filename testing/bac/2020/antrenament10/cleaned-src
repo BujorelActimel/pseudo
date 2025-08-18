@@ -1,0 +1,11 @@
+citeste x,y
+(numere naturale nenule)
+daca x>y atunci
+     x<-->y
+sf
+i<-x; j<-y; s<-0
+repeta
+     s<-s+(i%2)*j+(j%2)*i
+    i<-i+1; j<-j-1
+pana cand i>j
+scrie s

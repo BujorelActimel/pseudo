@@ -1,0 +1,14 @@
+citește n
+ (număr natural nenul)
+x1; m0; p1
+┌cât timp x<10 execută
+│ cnn
+│┌cât timp cn≠0 execută
+││ ccn%10; cn[cn/10]
+││┌dacă c=x atunci
+│││ mc*p+m; pp*10
+││└■
+│└■
+│ xx+2
+└■
+scrie m

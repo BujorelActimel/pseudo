@@ -1,0 +1,11 @@
+citește n (număr natural nenul)
+┌cât timp n≠0 execută
+│ cn%10; n[n/10]
+│┌dacă c%2≠0 atunci
+││ cc+1
+│└■
+│┌cât timp c>0 și c<10 execută
+││ scrie c
+││ cc*2
+│└■
+└■

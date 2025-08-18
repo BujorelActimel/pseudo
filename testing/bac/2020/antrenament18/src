@@ -1,0 +1,11 @@
+citește n,k
+ (numere naturale nenule)
+┌pentru i1,n execută
+│┌pentru jk,1,-1 execută
+││ scrie j,' '
+│└■
+│┌pentru j1,k execută
+││ scrie j,' '
+│└■
+│ kk-1
+└■

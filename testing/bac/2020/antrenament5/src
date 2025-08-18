@@ -1,0 +1,14 @@
+citește n
+ (număr natural nenul)
+x1; yn; d2
+┌cât timp x<y execută
+│┌dacă n%d=0 atunci
+││ xd
+││ y[n/d]
+│└■
+│ dd+1
+└■
+┌dacă x=y atunci
+│ scrie 'D',x
+│altfel scrie 'N'
+└■

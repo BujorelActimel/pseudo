@@ -1,0 +1,11 @@
+citeşte n (număr natural)
+┌repetă
+│ c1n%10; n[n/10]; c2n%10
+│┌dacă c1>c2 atunci
+││ c2c1; c1n%10
+│└■
+│┌cât timp c1<c2 execută
+││ scrie c1
+││ c2[c2/2]
+│└■
+└până când n≤9

@@ -1,0 +1,15 @@
+citeşte n (număr natural)
+p1; m0; k0
+┌cât timp n≠0 execută
+│ citește x (număr natural)
+│ ik
+│┌cât timp i≠0 execută
+││ x[x/10]; ii-1
+│└■
+│┌dacă x=0 atunci cn%10
+││altfel cx%10
+│└■
+│ mc*p+m; n[n/10]
+│ pp*10; kk+1
+└■
+scrie m

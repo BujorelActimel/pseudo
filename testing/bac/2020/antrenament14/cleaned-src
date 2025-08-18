@@ -1,0 +1,13 @@
+citeste n (număr natural)
+m<-0
+repeta
+    c<-n%10; n<-[n/10]
+    daca c=9 atunci c<-1
+        altfel
+        daca c%2=1 atunci
+            c<-c+1
+        sf
+    sf
+    m<-m*10+c
+pana cand n=0
+scrie m

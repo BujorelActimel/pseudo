@@ -1,0 +1,12 @@
+citeşte n (număr natural, n>9)
+c1n%10; n[n/10]; c2n%10
+┌dacă c1=c2 atunci s0
+│altfel
+│┌dacă c1>c2 atunci s1
+││altfel s-1
+│└■
+└■
+┌repetă
+│ c1n%10; n[n/10]; c2n%10
+└până când (c1-c2)*s≤0
+scrie s,' ',n

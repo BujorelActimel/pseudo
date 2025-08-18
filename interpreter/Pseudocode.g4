@@ -16,7 +16,7 @@ stmt
     ;
 
 assign: NAME '<-' expr ;
-swapStmt: NAME '<->' NAME ;
+swapStmt: NAME ('<->' | '<-->') NAME ;
 multiStmt: (assign | swapStmt | readStmt | writeStmt) (';' (assign | swapStmt | readStmt | writeStmt))+ ;
 
 readStmt: 'citeste' nameList ;

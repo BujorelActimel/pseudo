@@ -10,7 +10,7 @@ else:
 
 def serializedATN():
     return [
-        4,1,44,222,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,
+        4,1,45,222,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,
         6,2,7,7,7,2,8,7,8,2,9,7,9,2,10,7,10,2,11,7,11,2,12,7,12,2,13,7,13,
         2,14,7,14,2,15,7,15,2,16,7,16,2,17,7,17,1,0,5,0,38,8,0,10,0,12,0,
         41,9,0,1,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,55,8,
@@ -28,67 +28,68 @@ def serializedATN():
         3,16,191,8,16,1,16,1,16,1,16,1,16,1,16,1,16,1,16,1,16,1,16,1,16,
         1,16,1,16,1,16,1,16,1,16,5,16,208,8,16,10,16,12,16,211,9,16,1,17,
         1,17,1,17,1,17,1,17,1,17,1,17,3,17,220,8,17,1,17,0,1,32,18,0,2,4,
-        6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,0,6,1,0,36,37,1,0,18,
-        20,1,0,23,24,1,0,26,31,1,0,32,33,1,0,34,35,242,0,39,1,0,0,0,2,54,
-        1,0,0,0,4,56,1,0,0,0,6,60,1,0,0,0,8,68,1,0,0,0,10,81,1,0,0,0,12,
-        84,1,0,0,0,14,87,1,0,0,0,16,95,1,0,0,0,18,103,1,0,0,0,20,116,1,0,
-        0,0,22,122,1,0,0,0,24,125,1,0,0,0,26,144,1,0,0,0,28,156,1,0,0,0,
-        30,167,1,0,0,0,32,190,1,0,0,0,34,219,1,0,0,0,36,38,3,2,1,0,37,36,
-        1,0,0,0,38,41,1,0,0,0,39,37,1,0,0,0,39,40,1,0,0,0,40,42,1,0,0,0,
-        41,39,1,0,0,0,42,43,5,0,0,1,43,1,1,0,0,0,44,55,3,4,2,0,45,55,3,6,
-        3,0,46,55,3,10,5,0,47,55,3,12,6,0,48,55,3,18,9,0,49,55,3,24,12,0,
-        50,55,3,26,13,0,51,55,3,28,14,0,52,55,3,30,15,0,53,55,3,8,4,0,54,
-        44,1,0,0,0,54,45,1,0,0,0,54,46,1,0,0,0,54,47,1,0,0,0,54,48,1,0,0,
-        0,54,49,1,0,0,0,54,50,1,0,0,0,54,51,1,0,0,0,54,52,1,0,0,0,54,53,
-        1,0,0,0,55,3,1,0,0,0,56,57,5,40,0,0,57,58,5,1,0,0,58,59,3,32,16,
-        0,59,5,1,0,0,0,60,61,5,40,0,0,61,62,5,2,0,0,62,63,5,40,0,0,63,7,
-        1,0,0,0,64,69,3,4,2,0,65,69,3,6,3,0,66,69,3,10,5,0,67,69,3,12,6,
-        0,68,64,1,0,0,0,68,65,1,0,0,0,68,66,1,0,0,0,68,67,1,0,0,0,69,77,
-        1,0,0,0,70,75,5,3,0,0,71,76,3,4,2,0,72,76,3,6,3,0,73,76,3,10,5,0,
-        74,76,3,12,6,0,75,71,1,0,0,0,75,72,1,0,0,0,75,73,1,0,0,0,75,74,1,
-        0,0,0,76,78,1,0,0,0,77,70,1,0,0,0,78,79,1,0,0,0,79,77,1,0,0,0,79,
-        80,1,0,0,0,80,9,1,0,0,0,81,82,5,4,0,0,82,83,3,14,7,0,83,11,1,0,0,
-        0,84,85,5,5,0,0,85,86,3,16,8,0,86,13,1,0,0,0,87,92,5,40,0,0,88,89,
-        5,6,0,0,89,91,5,40,0,0,90,88,1,0,0,0,91,94,1,0,0,0,92,90,1,0,0,0,
-        92,93,1,0,0,0,93,15,1,0,0,0,94,92,1,0,0,0,95,100,3,32,16,0,96,97,
-        5,6,0,0,97,99,3,32,16,0,98,96,1,0,0,0,99,102,1,0,0,0,100,98,1,0,
-        0,0,100,101,1,0,0,0,101,17,1,0,0,0,102,100,1,0,0,0,103,104,5,7,0,
-        0,104,105,3,32,16,0,105,106,5,8,0,0,106,109,3,20,10,0,107,108,5,
-        9,0,0,108,110,3,22,11,0,109,107,1,0,0,0,109,110,1,0,0,0,110,111,
-        1,0,0,0,111,112,5,10,0,0,112,19,1,0,0,0,113,115,3,2,1,0,114,113,
-        1,0,0,0,115,118,1,0,0,0,116,114,1,0,0,0,116,117,1,0,0,0,117,21,1,
-        0,0,0,118,116,1,0,0,0,119,121,3,2,1,0,120,119,1,0,0,0,121,124,1,
-        0,0,0,122,120,1,0,0,0,122,123,1,0,0,0,123,23,1,0,0,0,124,122,1,0,
-        0,0,125,126,5,11,0,0,126,127,5,40,0,0,127,128,5,1,0,0,128,129,3,
-        32,16,0,129,130,5,6,0,0,130,133,3,32,16,0,131,132,5,6,0,0,132,134,
-        3,32,16,0,133,131,1,0,0,0,133,134,1,0,0,0,134,135,1,0,0,0,135,139,
-        5,12,0,0,136,138,3,2,1,0,137,136,1,0,0,0,138,141,1,0,0,0,139,137,
-        1,0,0,0,139,140,1,0,0,0,140,142,1,0,0,0,141,139,1,0,0,0,142,143,
-        5,10,0,0,143,25,1,0,0,0,144,145,5,13,0,0,145,146,5,14,0,0,146,147,
-        3,32,16,0,147,151,5,12,0,0,148,150,3,2,1,0,149,148,1,0,0,0,150,153,
-        1,0,0,0,151,149,1,0,0,0,151,152,1,0,0,0,152,154,1,0,0,0,153,151,
-        1,0,0,0,154,155,5,10,0,0,155,27,1,0,0,0,156,160,5,12,0,0,157,159,
-        3,2,1,0,158,157,1,0,0,0,159,162,1,0,0,0,160,158,1,0,0,0,160,161,
-        1,0,0,0,161,163,1,0,0,0,162,160,1,0,0,0,163,164,5,13,0,0,164,165,
-        5,14,0,0,165,166,3,32,16,0,166,29,1,0,0,0,167,171,5,15,0,0,168,170,
-        3,2,1,0,169,168,1,0,0,0,170,173,1,0,0,0,171,169,1,0,0,0,171,172,
-        1,0,0,0,172,174,1,0,0,0,173,171,1,0,0,0,174,175,5,16,0,0,175,176,
-        5,17,0,0,176,177,3,32,16,0,177,31,1,0,0,0,178,179,6,16,-1,0,179,
-        180,5,21,0,0,180,181,3,32,16,0,181,182,5,22,0,0,182,191,1,0,0,0,
-        183,184,5,24,0,0,184,191,3,34,17,0,185,186,5,25,0,0,186,191,3,34,
-        17,0,187,191,3,34,17,0,188,189,7,0,0,0,189,191,3,32,16,1,190,178,
-        1,0,0,0,190,183,1,0,0,0,190,185,1,0,0,0,190,187,1,0,0,0,190,188,
-        1,0,0,0,191,209,1,0,0,0,192,193,10,10,0,0,193,194,7,1,0,0,194,208,
-        3,32,16,11,195,196,10,8,0,0,196,197,7,2,0,0,197,208,3,32,16,9,198,
-        199,10,5,0,0,199,200,7,3,0,0,200,208,3,32,16,6,201,202,10,3,0,0,
-        202,203,7,4,0,0,203,208,3,32,16,4,204,205,10,2,0,0,205,206,7,5,0,
-        0,206,208,3,32,16,3,207,192,1,0,0,0,207,195,1,0,0,0,207,198,1,0,
-        0,0,207,201,1,0,0,0,207,204,1,0,0,0,208,211,1,0,0,0,209,207,1,0,
-        0,0,209,210,1,0,0,0,210,33,1,0,0,0,211,209,1,0,0,0,212,220,5,41,
-        0,0,213,220,5,42,0,0,214,220,5,40,0,0,215,216,5,38,0,0,216,217,3,
-        32,16,0,217,218,5,39,0,0,218,220,1,0,0,0,219,212,1,0,0,0,219,213,
-        1,0,0,0,219,214,1,0,0,0,219,215,1,0,0,0,220,35,1,0,0,0,19,39,54,
-        68,75,79,92,100,109,116,122,133,139,151,160,171,190,207,209,219
+        6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,0,7,1,0,2,3,1,0,37,38,
+        1,0,19,21,1,0,24,25,1,0,27,32,1,0,33,34,1,0,35,36,242,0,39,1,0,0,
+        0,2,54,1,0,0,0,4,56,1,0,0,0,6,60,1,0,0,0,8,68,1,0,0,0,10,81,1,0,
+        0,0,12,84,1,0,0,0,14,87,1,0,0,0,16,95,1,0,0,0,18,103,1,0,0,0,20,
+        116,1,0,0,0,22,122,1,0,0,0,24,125,1,0,0,0,26,144,1,0,0,0,28,156,
+        1,0,0,0,30,167,1,0,0,0,32,190,1,0,0,0,34,219,1,0,0,0,36,38,3,2,1,
+        0,37,36,1,0,0,0,38,41,1,0,0,0,39,37,1,0,0,0,39,40,1,0,0,0,40,42,
+        1,0,0,0,41,39,1,0,0,0,42,43,5,0,0,1,43,1,1,0,0,0,44,55,3,4,2,0,45,
+        55,3,6,3,0,46,55,3,10,5,0,47,55,3,12,6,0,48,55,3,18,9,0,49,55,3,
+        24,12,0,50,55,3,26,13,0,51,55,3,28,14,0,52,55,3,30,15,0,53,55,3,
+        8,4,0,54,44,1,0,0,0,54,45,1,0,0,0,54,46,1,0,0,0,54,47,1,0,0,0,54,
+        48,1,0,0,0,54,49,1,0,0,0,54,50,1,0,0,0,54,51,1,0,0,0,54,52,1,0,0,
+        0,54,53,1,0,0,0,55,3,1,0,0,0,56,57,5,41,0,0,57,58,5,1,0,0,58,59,
+        3,32,16,0,59,5,1,0,0,0,60,61,5,41,0,0,61,62,7,0,0,0,62,63,5,41,0,
+        0,63,7,1,0,0,0,64,69,3,4,2,0,65,69,3,6,3,0,66,69,3,10,5,0,67,69,
+        3,12,6,0,68,64,1,0,0,0,68,65,1,0,0,0,68,66,1,0,0,0,68,67,1,0,0,0,
+        69,77,1,0,0,0,70,75,5,4,0,0,71,76,3,4,2,0,72,76,3,6,3,0,73,76,3,
+        10,5,0,74,76,3,12,6,0,75,71,1,0,0,0,75,72,1,0,0,0,75,73,1,0,0,0,
+        75,74,1,0,0,0,76,78,1,0,0,0,77,70,1,0,0,0,78,79,1,0,0,0,79,77,1,
+        0,0,0,79,80,1,0,0,0,80,9,1,0,0,0,81,82,5,5,0,0,82,83,3,14,7,0,83,
+        11,1,0,0,0,84,85,5,6,0,0,85,86,3,16,8,0,86,13,1,0,0,0,87,92,5,41,
+        0,0,88,89,5,7,0,0,89,91,5,41,0,0,90,88,1,0,0,0,91,94,1,0,0,0,92,
+        90,1,0,0,0,92,93,1,0,0,0,93,15,1,0,0,0,94,92,1,0,0,0,95,100,3,32,
+        16,0,96,97,5,7,0,0,97,99,3,32,16,0,98,96,1,0,0,0,99,102,1,0,0,0,
+        100,98,1,0,0,0,100,101,1,0,0,0,101,17,1,0,0,0,102,100,1,0,0,0,103,
+        104,5,8,0,0,104,105,3,32,16,0,105,106,5,9,0,0,106,109,3,20,10,0,
+        107,108,5,10,0,0,108,110,3,22,11,0,109,107,1,0,0,0,109,110,1,0,0,
+        0,110,111,1,0,0,0,111,112,5,11,0,0,112,19,1,0,0,0,113,115,3,2,1,
+        0,114,113,1,0,0,0,115,118,1,0,0,0,116,114,1,0,0,0,116,117,1,0,0,
+        0,117,21,1,0,0,0,118,116,1,0,0,0,119,121,3,2,1,0,120,119,1,0,0,0,
+        121,124,1,0,0,0,122,120,1,0,0,0,122,123,1,0,0,0,123,23,1,0,0,0,124,
+        122,1,0,0,0,125,126,5,12,0,0,126,127,5,41,0,0,127,128,5,1,0,0,128,
+        129,3,32,16,0,129,130,5,7,0,0,130,133,3,32,16,0,131,132,5,7,0,0,
+        132,134,3,32,16,0,133,131,1,0,0,0,133,134,1,0,0,0,134,135,1,0,0,
+        0,135,139,5,13,0,0,136,138,3,2,1,0,137,136,1,0,0,0,138,141,1,0,0,
+        0,139,137,1,0,0,0,139,140,1,0,0,0,140,142,1,0,0,0,141,139,1,0,0,
+        0,142,143,5,11,0,0,143,25,1,0,0,0,144,145,5,14,0,0,145,146,5,15,
+        0,0,146,147,3,32,16,0,147,151,5,13,0,0,148,150,3,2,1,0,149,148,1,
+        0,0,0,150,153,1,0,0,0,151,149,1,0,0,0,151,152,1,0,0,0,152,154,1,
+        0,0,0,153,151,1,0,0,0,154,155,5,11,0,0,155,27,1,0,0,0,156,160,5,
+        13,0,0,157,159,3,2,1,0,158,157,1,0,0,0,159,162,1,0,0,0,160,158,1,
+        0,0,0,160,161,1,0,0,0,161,163,1,0,0,0,162,160,1,0,0,0,163,164,5,
+        14,0,0,164,165,5,15,0,0,165,166,3,32,16,0,166,29,1,0,0,0,167,171,
+        5,16,0,0,168,170,3,2,1,0,169,168,1,0,0,0,170,173,1,0,0,0,171,169,
+        1,0,0,0,171,172,1,0,0,0,172,174,1,0,0,0,173,171,1,0,0,0,174,175,
+        5,17,0,0,175,176,5,18,0,0,176,177,3,32,16,0,177,31,1,0,0,0,178,179,
+        6,16,-1,0,179,180,5,22,0,0,180,181,3,32,16,0,181,182,5,23,0,0,182,
+        191,1,0,0,0,183,184,5,25,0,0,184,191,3,34,17,0,185,186,5,26,0,0,
+        186,191,3,34,17,0,187,191,3,34,17,0,188,189,7,1,0,0,189,191,3,32,
+        16,1,190,178,1,0,0,0,190,183,1,0,0,0,190,185,1,0,0,0,190,187,1,0,
+        0,0,190,188,1,0,0,0,191,209,1,0,0,0,192,193,10,10,0,0,193,194,7,
+        2,0,0,194,208,3,32,16,11,195,196,10,8,0,0,196,197,7,3,0,0,197,208,
+        3,32,16,9,198,199,10,5,0,0,199,200,7,4,0,0,200,208,3,32,16,6,201,
+        202,10,3,0,0,202,203,7,5,0,0,203,208,3,32,16,4,204,205,10,2,0,0,
+        205,206,7,6,0,0,206,208,3,32,16,3,207,192,1,0,0,0,207,195,1,0,0,
+        0,207,198,1,0,0,0,207,201,1,0,0,0,207,204,1,0,0,0,208,211,1,0,0,
+        0,209,207,1,0,0,0,209,210,1,0,0,0,210,33,1,0,0,0,211,209,1,0,0,0,
+        212,220,5,42,0,0,213,220,5,43,0,0,214,220,5,41,0,0,215,216,5,39,
+        0,0,216,217,3,32,16,0,217,218,5,40,0,0,218,220,1,0,0,0,219,212,1,
+        0,0,0,219,213,1,0,0,0,219,214,1,0,0,0,219,215,1,0,0,0,220,35,1,0,
+        0,0,19,39,54,68,75,79,92,100,109,116,122,133,139,151,160,171,190,
+        207,209,219
     ]
 
 class PseudocodeParser ( Parser ):
@@ -101,13 +102,13 @@ class PseudocodeParser ( Parser ):
 
     sharedContextCache = PredictionContextCache()
 
-    literalNames = [ "<INVALID>", "'<-'", "'<->'", "';'", "'citeste'", "'scrie'", 
-                     "','", "'daca'", "'atunci'", "'altfel'", "'sf'", "'pentru'", 
-                     "'executa'", "'cat'", "'timp'", "'repeta'", "'pana'", 
-                     "'cand'", "'*'", "'/'", "'%'", "'['", "']'", "'+'", 
-                     "'-'", "'\\u221A'", "'='", "'!='", "'<'", "'<='", "'>'", 
-                     "'>='", "'SAU'", "'sau'", "'SI'", "'si'", "'NOT'", 
-                     "'not'", "'('", "')'" ]
+    literalNames = [ "<INVALID>", "'<-'", "'<->'", "'<-->'", "';'", "'citeste'", 
+                     "'scrie'", "','", "'daca'", "'atunci'", "'altfel'", 
+                     "'sf'", "'pentru'", "'executa'", "'cat'", "'timp'", 
+                     "'repeta'", "'pana'", "'cand'", "'*'", "'/'", "'%'", 
+                     "'['", "']'", "'+'", "'-'", "'\\u221A'", "'='", "'!='", 
+                     "'<'", "'<='", "'>'", "'>='", "'SAU'", "'sau'", "'SI'", 
+                     "'si'", "'NOT'", "'not'", "'('", "')'" ]
 
     symbolicNames = [ "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
                       "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
@@ -119,7 +120,7 @@ class PseudocodeParser ( Parser ):
                       "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
                       "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
                       "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
-                      "NAME", "NUMBER", "STRING", "WS", "COMMENT" ]
+                      "<INVALID>", "NAME", "NUMBER", "STRING", "WS", "COMMENT" ]
 
     RULE_program = 0
     RULE_stmt = 1
@@ -185,11 +186,12 @@ class PseudocodeParser ( Parser ):
     T__36=37
     T__37=38
     T__38=39
-    NAME=40
-    NUMBER=41
-    STRING=42
-    WS=43
-    COMMENT=44
+    T__39=40
+    NAME=41
+    NUMBER=42
+    STRING=43
+    WS=44
+    COMMENT=45
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
         super().__init__(input, output)
@@ -247,7 +249,7 @@ class PseudocodeParser ( Parser ):
             self.state = 39
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while (((_la) & ~0x3f) == 0 and ((1 << _la) & 1099511675056) != 0):
+            while (((_la) & ~0x3f) == 0 and ((1 << _la) & 2199023350112) != 0):
                 self.state = 36
                 self.stmt()
                 self.state = 41
@@ -502,12 +504,18 @@ class PseudocodeParser ( Parser ):
 
         localctx = PseudocodeParser.SwapStmtContext(self, self._ctx, self.state)
         self.enterRule(localctx, 6, self.RULE_swapStmt)
+        self._la = 0 # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 60
             self.match(PseudocodeParser.NAME)
             self.state = 61
-            self.match(PseudocodeParser.T__1)
+            _la = self._input.LA(1)
+            if not(_la==2 or _la==3):
+                self._errHandler.recoverInline(self)
+            else:
+                self._errHandler.reportMatch(self)
+                self.consume()
             self.state = 62
             self.match(PseudocodeParser.NAME)
         except RecognitionException as re:
@@ -610,7 +618,7 @@ class PseudocodeParser ( Parser ):
             _la = self._input.LA(1)
             while True:
                 self.state = 70
-                self.match(PseudocodeParser.T__2)
+                self.match(PseudocodeParser.T__3)
                 self.state = 75
                 self._errHandler.sync(self)
                 la_ = self._interp.adaptivePredict(self._input,3,self._ctx)
@@ -638,7 +646,7 @@ class PseudocodeParser ( Parser ):
                 self.state = 79 
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if not (_la==3):
+                if not (_la==4):
                     break
 
         except RecognitionException as re:
@@ -688,7 +696,7 @@ class PseudocodeParser ( Parser ):
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 81
-            self.match(PseudocodeParser.T__3)
+            self.match(PseudocodeParser.T__4)
             self.state = 82
             self.nameList()
         except RecognitionException as re:
@@ -738,7 +746,7 @@ class PseudocodeParser ( Parser ):
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 84
-            self.match(PseudocodeParser.T__4)
+            self.match(PseudocodeParser.T__5)
             self.state = 85
             self.exprList()
         except RecognitionException as re:
@@ -795,9 +803,9 @@ class PseudocodeParser ( Parser ):
             self.state = 92
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==6:
+            while _la==7:
                 self.state = 88
-                self.match(PseudocodeParser.T__5)
+                self.match(PseudocodeParser.T__6)
                 self.state = 89
                 self.match(PseudocodeParser.NAME)
                 self.state = 94
@@ -859,9 +867,9 @@ class PseudocodeParser ( Parser ):
             self.state = 100
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==6:
+            while _la==7:
                 self.state = 96
-                self.match(PseudocodeParser.T__5)
+                self.match(PseudocodeParser.T__6)
                 self.state = 97
                 self.expr(0)
                 self.state = 102
@@ -924,25 +932,25 @@ class PseudocodeParser ( Parser ):
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 103
-            self.match(PseudocodeParser.T__6)
+            self.match(PseudocodeParser.T__7)
             self.state = 104
             self.expr(0)
             self.state = 105
-            self.match(PseudocodeParser.T__7)
+            self.match(PseudocodeParser.T__8)
             self.state = 106
             self.thenBlock()
             self.state = 109
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==9:
+            if _la==10:
                 self.state = 107
-                self.match(PseudocodeParser.T__8)
+                self.match(PseudocodeParser.T__9)
                 self.state = 108
                 self.elseBlock()
 
 
             self.state = 111
-            self.match(PseudocodeParser.T__9)
+            self.match(PseudocodeParser.T__10)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -996,7 +1004,7 @@ class PseudocodeParser ( Parser ):
             self.state = 116
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while (((_la) & ~0x3f) == 0 and ((1 << _la) & 1099511675056) != 0):
+            while (((_la) & ~0x3f) == 0 and ((1 << _la) & 2199023350112) != 0):
                 self.state = 113
                 self.stmt()
                 self.state = 118
@@ -1056,7 +1064,7 @@ class PseudocodeParser ( Parser ):
             self.state = 122
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while (((_la) & ~0x3f) == 0 and ((1 << _la) & 1099511675056) != 0):
+            while (((_la) & ~0x3f) == 0 and ((1 << _la) & 2199023350112) != 0):
                 self.state = 119
                 self.stmt()
                 self.state = 124
@@ -1124,7 +1132,7 @@ class PseudocodeParser ( Parser ):
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 125
-            self.match(PseudocodeParser.T__10)
+            self.match(PseudocodeParser.T__11)
             self.state = 126
             self.match(PseudocodeParser.NAME)
             self.state = 127
@@ -1132,25 +1140,25 @@ class PseudocodeParser ( Parser ):
             self.state = 128
             self.expr(0)
             self.state = 129
-            self.match(PseudocodeParser.T__5)
+            self.match(PseudocodeParser.T__6)
             self.state = 130
             self.expr(0)
             self.state = 133
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==6:
+            if _la==7:
                 self.state = 131
-                self.match(PseudocodeParser.T__5)
+                self.match(PseudocodeParser.T__6)
                 self.state = 132
                 self.expr(0)
 
 
             self.state = 135
-            self.match(PseudocodeParser.T__11)
+            self.match(PseudocodeParser.T__12)
             self.state = 139
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while (((_la) & ~0x3f) == 0 and ((1 << _la) & 1099511675056) != 0):
+            while (((_la) & ~0x3f) == 0 and ((1 << _la) & 2199023350112) != 0):
                 self.state = 136
                 self.stmt()
                 self.state = 141
@@ -1158,7 +1166,7 @@ class PseudocodeParser ( Parser ):
                 _la = self._input.LA(1)
 
             self.state = 142
-            self.match(PseudocodeParser.T__9)
+            self.match(PseudocodeParser.T__10)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -1214,17 +1222,17 @@ class PseudocodeParser ( Parser ):
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 144
-            self.match(PseudocodeParser.T__12)
-            self.state = 145
             self.match(PseudocodeParser.T__13)
+            self.state = 145
+            self.match(PseudocodeParser.T__14)
             self.state = 146
             self.expr(0)
             self.state = 147
-            self.match(PseudocodeParser.T__11)
+            self.match(PseudocodeParser.T__12)
             self.state = 151
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while (((_la) & ~0x3f) == 0 and ((1 << _la) & 1099511675056) != 0):
+            while (((_la) & ~0x3f) == 0 and ((1 << _la) & 2199023350112) != 0):
                 self.state = 148
                 self.stmt()
                 self.state = 153
@@ -1232,7 +1240,7 @@ class PseudocodeParser ( Parser ):
                 _la = self._input.LA(1)
 
             self.state = 154
-            self.match(PseudocodeParser.T__9)
+            self.match(PseudocodeParser.T__10)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
@@ -1287,7 +1295,7 @@ class PseudocodeParser ( Parser ):
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 156
-            self.match(PseudocodeParser.T__11)
+            self.match(PseudocodeParser.T__12)
             self.state = 160
             self._errHandler.sync(self)
             _alt = self._interp.adaptivePredict(self._input,13,self._ctx)
@@ -1300,9 +1308,9 @@ class PseudocodeParser ( Parser ):
                 _alt = self._interp.adaptivePredict(self._input,13,self._ctx)
 
             self.state = 163
-            self.match(PseudocodeParser.T__12)
-            self.state = 164
             self.match(PseudocodeParser.T__13)
+            self.state = 164
+            self.match(PseudocodeParser.T__14)
             self.state = 165
             self.expr(0)
         except RecognitionException as re:
@@ -1360,11 +1368,11 @@ class PseudocodeParser ( Parser ):
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 167
-            self.match(PseudocodeParser.T__14)
+            self.match(PseudocodeParser.T__15)
             self.state = 171
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while (((_la) & ~0x3f) == 0 and ((1 << _la) & 1099511675056) != 0):
+            while (((_la) & ~0x3f) == 0 and ((1 << _la) & 2199023350112) != 0):
                 self.state = 168
                 self.stmt()
                 self.state = 173
@@ -1372,9 +1380,9 @@ class PseudocodeParser ( Parser ):
                 _la = self._input.LA(1)
 
             self.state = 174
-            self.match(PseudocodeParser.T__15)
-            self.state = 175
             self.match(PseudocodeParser.T__16)
+            self.state = 175
+            self.match(PseudocodeParser.T__17)
             self.state = 176
             self.expr(0)
         except RecognitionException as re:
@@ -1681,50 +1689,50 @@ class PseudocodeParser ( Parser ):
             self.state = 190
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [21]:
+            if token in [22]:
                 localctx = PseudocodeParser.IntContext(self, localctx)
                 self._ctx = localctx
                 _prevctx = localctx
 
                 self.state = 179
-                self.match(PseudocodeParser.T__20)
+                self.match(PseudocodeParser.T__21)
                 self.state = 180
                 self.expr(0)
                 self.state = 181
-                self.match(PseudocodeParser.T__21)
+                self.match(PseudocodeParser.T__22)
                 pass
-            elif token in [24]:
+            elif token in [25]:
                 localctx = PseudocodeParser.NegExprContext(self, localctx)
                 self._ctx = localctx
                 _prevctx = localctx
                 self.state = 183
-                self.match(PseudocodeParser.T__23)
+                self.match(PseudocodeParser.T__24)
                 self.state = 184
                 self.atom()
                 pass
-            elif token in [25]:
+            elif token in [26]:
                 localctx = PseudocodeParser.SqrtExprContext(self, localctx)
                 self._ctx = localctx
                 _prevctx = localctx
                 self.state = 185
-                self.match(PseudocodeParser.T__24)
+                self.match(PseudocodeParser.T__25)
                 self.state = 186
                 self.atom()
                 pass
-            elif token in [38, 40, 41, 42]:
+            elif token in [39, 41, 42, 43]:
                 localctx = PseudocodeParser.AtomExprContext(self, localctx)
                 self._ctx = localctx
                 _prevctx = localctx
                 self.state = 187
                 self.atom()
                 pass
-            elif token in [36, 37]:
+            elif token in [37, 38]:
                 localctx = PseudocodeParser.NotExprContext(self, localctx)
                 self._ctx = localctx
                 _prevctx = localctx
                 self.state = 188
                 _la = self._input.LA(1)
-                if not(_la==36 or _la==37):
+                if not(_la==37 or _la==38):
                     self._errHandler.recoverInline(self)
                 else:
                     self._errHandler.reportMatch(self)
@@ -1756,7 +1764,7 @@ class PseudocodeParser ( Parser ):
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 10)")
                         self.state = 193
                         _la = self._input.LA(1)
-                        if not((((_la) & ~0x3f) == 0 and ((1 << _la) & 1835008) != 0)):
+                        if not((((_la) & ~0x3f) == 0 and ((1 << _la) & 3670016) != 0)):
                             self._errHandler.recoverInline(self)
                         else:
                             self._errHandler.reportMatch(self)
@@ -1774,7 +1782,7 @@ class PseudocodeParser ( Parser ):
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 8)")
                         self.state = 196
                         _la = self._input.LA(1)
-                        if not(_la==23 or _la==24):
+                        if not(_la==24 or _la==25):
                             self._errHandler.recoverInline(self)
                         else:
                             self._errHandler.reportMatch(self)
@@ -1792,7 +1800,7 @@ class PseudocodeParser ( Parser ):
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 5)")
                         self.state = 199
                         _la = self._input.LA(1)
-                        if not((((_la) & ~0x3f) == 0 and ((1 << _la) & 4227858432) != 0)):
+                        if not((((_la) & ~0x3f) == 0 and ((1 << _la) & 8455716864) != 0)):
                             self._errHandler.recoverInline(self)
                         else:
                             self._errHandler.reportMatch(self)
@@ -1810,7 +1818,7 @@ class PseudocodeParser ( Parser ):
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 3)")
                         self.state = 202
                         _la = self._input.LA(1)
-                        if not(_la==32 or _la==33):
+                        if not(_la==33 or _la==34):
                             self._errHandler.recoverInline(self)
                         else:
                             self._errHandler.reportMatch(self)
@@ -1828,7 +1836,7 @@ class PseudocodeParser ( Parser ):
                             raise FailedPredicateException(self, "self.precpred(self._ctx, 2)")
                         self.state = 205
                         _la = self._input.LA(1)
-                        if not(_la==34 or _la==35):
+                        if not(_la==35 or _la==36):
                             self._errHandler.recoverInline(self)
                         else:
                             self._errHandler.reportMatch(self)
@@ -1899,29 +1907,29 @@ class PseudocodeParser ( Parser ):
             self.state = 219
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [41]:
+            if token in [42]:
                 self.enterOuterAlt(localctx, 1)
                 self.state = 212
                 self.match(PseudocodeParser.NUMBER)
                 pass
-            elif token in [42]:
+            elif token in [43]:
                 self.enterOuterAlt(localctx, 2)
                 self.state = 213
                 self.match(PseudocodeParser.STRING)
                 pass
-            elif token in [40]:
+            elif token in [41]:
                 self.enterOuterAlt(localctx, 3)
                 self.state = 214
                 self.match(PseudocodeParser.NAME)
                 pass
-            elif token in [38]:
+            elif token in [39]:
                 self.enterOuterAlt(localctx, 4)
                 self.state = 215
-                self.match(PseudocodeParser.T__37)
+                self.match(PseudocodeParser.T__38)
                 self.state = 216
                 self.expr(0)
                 self.state = 217
-                self.match(PseudocodeParser.T__38)
+                self.match(PseudocodeParser.T__39)
                 pass
             else:
                 raise NoViableAltException(self)

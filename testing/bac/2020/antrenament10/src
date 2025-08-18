@@ -1,0 +1,11 @@
+citește x,y
+ (numere naturale nenule)
+┌dacă x>y atunci
+| x→y
+└■
+ix; jy; s0
+┌repetă
+| ss+(i%2)*j+(j%2)*i
+│ ii+1; jj-1
+└până când i>j
+scrie s

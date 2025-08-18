@@ -1,0 +1,13 @@
+citește x,y
+ (numere naturale x≤y)
+ix; jy; s0
+┌cât timp i≤j execută
+│┌dacă i%2=0 atunci
+││ ss+j
+│└■
+│┌dacă j%2=0 atunci
+││ ss+i
+│└■
+│ii+1; jj-1
+└■
+scrie s

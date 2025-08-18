@@ -1,0 +1,15 @@
+citește n,k
+ (numere naturale)
+┌dacă k=0 atunci nr-1
+│altfel
+│ nr0
+│ p1
+│┌repetă
+││ cn%10; n[n/10]
+││┌dacă c%2=0 atunci
+│││ nrnr+c*p; pp*10
+│││altfel kk-1
+││└■
+│└până când n=0 sau k=0
+└■
+scrie nr

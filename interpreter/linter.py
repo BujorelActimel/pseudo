@@ -7,7 +7,8 @@ class PseudocodeLinter:
         self.char_replacements = {
             '≤': '<=',
             '': '<=',
-            '≠': '!=', 
+            '≠': '!=',
+            '': '!=',
             '≥': '>=',
             '': '<-',
             '': '<-',
@@ -18,6 +19,8 @@ class PseudocodeLinter:
             '■': 'sf',
             '│ ': tab,
             '│': tab,
+            '|': tab,
+            '| ': tab,
             '’': "'",
             '‘': "'",
         }

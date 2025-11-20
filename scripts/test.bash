@@ -179,7 +179,7 @@ print_final_report() {
 }
 
 main() {
-    local test_root_dir=${1:-"testing/bac/test"}
+    local test_root_dir=${1:-"testing/bac"}
     
     if [[ ! -d "$test_root_dir" ]]; then
         print_color $RED "Error: Test directory '$test_root_dir' does not exist."

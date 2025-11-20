@@ -1,0 +1,35 @@
+{
+  "name": "pseudocode-ro",
+  "displayName": "Romanian Pseudocode",
+  "description": "Syntax highlighting for Romanian pseudocode (.pseudo files)",
+  "version": "0.1.3",
+  "publisher": "buji",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "pseudocode",
+        "aliases": [
+          "Pseudocode",
+          "pseudocode"
+        ],
+        "extensions": [
+          ".pseudo"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "pseudocode",
+        "scopeName": "source.pseudocode",
+        "path": "./syntaxes/pseudocode.tmLanguage.json"
+      }
+    ]
+  }
+}

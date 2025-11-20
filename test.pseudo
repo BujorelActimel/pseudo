@@ -1,0 +1,10 @@
+citeşte m,n # (numere naturale, 1<m<n)
+┌repetă
+│ xm; yn; nn-1
+│┌repetă
+││┌dacă x>y atunci xx-y
+│││altfel yy-x
+││└■
+│└până când y=0
+└până când x≠1
+scrie n+1

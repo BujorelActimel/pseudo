@@ -14,27 +14,30 @@ A high-performance interpreter for Romanian educational pseudocode, written in C
 ## Building
 
 ```bash
-# Configure
-cmake -B build -DCMAKE_BUILD_TYPE=Release
+# Debug build (with sanitizers)
+make
 
-# Build
-cmake --build build -j$(nproc)
+# Release build (optimized)
+make release
 
-# Test
-cd build && ctest --output-on-failure
+# Clean
+make clean
+
+# Run tests (once implemented)
+make test
 ```
 
 ## Usage
 
 ```bash
 # Run a program
-./build/src/cli/pseudo program.pseudo
+./build/bin/pseudo program.pseudo
 
 # Debug mode
-./build/src/cli/pseudo --debug program.pseudo
+./build/bin/pseudo --debug program.pseudo
 
 # Transpile to C
-./build/src/cli/pseudo --transpile c program.pseudo
+./build/bin/pseudo --transpile c program.pseudo
 ```
 
 ## Status

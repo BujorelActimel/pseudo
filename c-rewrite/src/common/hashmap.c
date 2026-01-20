@@ -14,8 +14,8 @@ typedef enum {
 } slot_state_t;
 
 typedef struct {
-    char* key;
-    void* value;
+    string_t* key;
+    string_t* value;
     slot_state_t state;
 } hashmap_entry_t;
 
@@ -64,15 +64,13 @@ hashmap_t* hashmap_create(size_t initial_capacity) {
     return map;
 }
 
-void hashmap_destroy(hashmap_t* map, void (*value_destructor)(void* )) {
+void hashmap_destroy(hashmap_t* map) {
     if (!map) return;
 
     for (size_t i = 0; i < map->capacity; i++) {
         if (map->entries[i].state == SLOT_OCCUPIED) {
-            free(map->entries[i].key);
-            if (value_destructor) {
-                value_destructor(map->entries[i].value);
-            }
+            string_destroy(map->entries[i].key);
+            string_destroy(map->entries[i].value);
         }
     }
 
@@ -80,8 +78,8 @@ void hashmap_destroy(hashmap_t* map, void (*value_destructor)(void* )) {
     free(map);
 }
 
-static hashmap_entry_t* find_entry(hashmap_t* map, const char* key) {
-    uint64_t hash = hash_string(key);
+static hashmap_entry_t* find_entry(hashmap_t* map, const string_t* key) {
+    uint64_t hash = hash_string(string_cstr(key));
     size_t index = hash % map->capacity;
     size_t start_index = index;
 
@@ -92,7 +90,7 @@ static hashmap_entry_t* find_entry(hashmap_t* map, const char* key) {
             return NULL; // Not found
         }
 
-        if (entry->state == SLOT_OCCUPIED && strcmp(entry->key, key) == 0) {
+        if (entry->state == SLOT_OCCUPIED && string_equals_string(entry->key, key)) {
             return entry; // Found
         }
 
@@ -102,8 +100,8 @@ static hashmap_entry_t* find_entry(hashmap_t* map, const char* key) {
     return NULL; // Table is full (shouldn't happen with proper resizing)
 }
 
-static hashmap_entry_t* find_slot(hashmap_t* map, const char* key) {
-    uint64_t hash = hash_string(key);
+static hashmap_entry_t* find_slot(hashmap_t* map, const string_t* key) {
+    uint64_t hash = hash_string(string_cstr(key));
     size_t index = hash % map->capacity;
     size_t start_index = index;
     hashmap_entry_t* first_deleted = NULL;
@@ -119,7 +117,7 @@ static hashmap_entry_t* find_slot(hashmap_t* map, const char* key) {
             first_deleted = entry;
         }
 
-        if (entry->state == SLOT_OCCUPIED && strcmp(entry->key, key) == 0) {
+        if (entry->state == SLOT_OCCUPIED && string_equals_string(entry->key, key)) {
             return entry;
         }
 
@@ -129,10 +127,10 @@ static hashmap_entry_t* find_slot(hashmap_t* map, const char* key) {
     return first_deleted;
 }
 
-// should have a destroy value callback?
-void hashmap_set(hashmap_t* map, const char* key, void* value) {
+void hashmap_set(hashmap_t* map, const string_t* key, const string_t* value) {
     assert(map != NULL);
     assert(key != NULL);
+    assert(value != NULL);
 
     double load_factor = (double)(map->size + map->deleted_count) / map->capacity;
     if (load_factor > LOAD_FACTOR) {
@@ -143,19 +141,20 @@ void hashmap_set(hashmap_t* map, const char* key, void* value) {
     assert(entry != NULL);
 
     if (entry->state == SLOT_OCCUPIED) {
-        entry->value = value;
+        string_destroy(entry->value);
+        entry->value = string_create_from_string(value);
     } else {
         if (entry->state == SLOT_DELETED) {
             map->deleted_count--;
         }
-        entry->key = strdup(key);
-        entry->value = value;
+        entry->key = string_create_from_string(key);
+        entry->value = string_create_from_string(value);
         entry->state = SLOT_OCCUPIED;
         map->size++;
     }
 }
 
-void* hashmap_get(hashmap_t* map, const char* key) {
+string_t* hashmap_get(hashmap_t* map, const string_t* key) {
     assert(map != NULL);
     assert(key != NULL);
 
@@ -163,14 +162,14 @@ void* hashmap_get(hashmap_t* map, const char* key) {
     return entry ? entry->value : NULL;
 }
 
-bool hashmap_has(hashmap_t* map, const char* key) {
+bool hashmap_has(hashmap_t* map, const string_t* key) {
     assert(map != NULL);
     assert(key != NULL);
 
     return find_entry(map, key) != NULL;
 }
 
-bool hashmap_delete(hashmap_t* map, const char* key) {
+bool hashmap_delete(hashmap_t* map, const string_t* key) {
     assert(map != NULL);
     assert(key != NULL);
 
@@ -178,7 +177,8 @@ bool hashmap_delete(hashmap_t* map, const char* key) {
     if (!entry) return false;
 
     // Mark as deleted (tombstone)
-    free(entry->key);
+    string_destroy(entry->key);
+    string_destroy(entry->value);
     entry->key = NULL;
     entry->value = NULL;
     entry->state = SLOT_DELETED;
@@ -209,15 +209,13 @@ void hashmap_foreach(hashmap_t* map, hashmap_iter_fn callback, void* user_data) 
     }
 }
 
-void hashmap_clear(hashmap_t* map, void (*value_destructor)(void* )) {
+void hashmap_clear(hashmap_t* map) {
     assert(map != NULL);
 
     for (size_t i = 0; i < map->capacity; i++) {
         if (map->entries[i].state == SLOT_OCCUPIED) {
-            free(map->entries[i].key);
-            if (value_destructor) {
-                value_destructor(map->entries[i].value);
-            }
+            string_destroy(map->entries[i].key);
+            string_destroy(map->entries[i].value);
             map->entries[i].key = NULL;
             map->entries[i].value = NULL;
             map->entries[i].state = SLOT_EMPTY;
@@ -253,7 +251,8 @@ static void hashmap_resize(hashmap_t* map, size_t new_capacity) {
     for (size_t i = 0; i < old_capacity; i++) {
         if (old_entries[i].state == SLOT_OCCUPIED) {
             hashmap_set(map, old_entries[i].key, old_entries[i].value);
-            free(old_entries[i].key);
+            string_destroy(old_entries[i].key);
+            string_destroy(old_entries[i].value);
         }
     }
 

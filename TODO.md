@@ -84,14 +84,13 @@
 **Reference**: `interpreter/linter.py`
 
 **Tasks**:
-- [ ] Create `include/pseudo/linter.h` with API
-- [ ] Implement `src/linter/linter.c`:
-  - [ ] Character replacement map (≤→<=, ←→<-, etc.)
-  - [ ] Box character removal (┌,└,│)
-  - [ ] Keyword normalization (citește→citeste, dacă→daca, etc.)
-  - [ ] Line-by-line processing
-- [ ] Create `src/linter/char_map.c` with replacement tables
-- [ ] Add CMakeLists.txt for `libpseudo_linter.a`
+- [x] Create `include/pseudo/linter.h` with API
+- [x] Implement `src/linter/linter.c`:
+  - [x] Character replacement map (≤→<=, ←→<-, etc.)
+  - [x] Box character removal (┌,└,│)
+  - [x] Keyword normalization (citește→citeste, dacă→daca, etc.)
+  - [x] Line-by-line processing
+- [x] Create `src/linter/char_map.c` with replacement tables
 
 **API Functions**:
 ```c
@@ -115,12 +114,11 @@ char *linter_process_file(linter_t *linter, const char *path);
 **Priority**: Medium | **Effort**: 3h | **Milestone**: M1
 
 **Tasks**:
-- [ ] Create `test/test_linter.c`
-- [ ] Test Unicode conversions (≤, ≠, ≥, ←, →, √)
-- [ ] Test box character removal
-- [ ] Test Romanian diacritic normalization
-- [ ] Test edge cases (empty input, NULL, etc.)
-- [ ] Integrate with CTest
+- [x] Create `test/test_linter.c`
+- [x] Test Unicode conversions (≤, ≠, ≥, ←, →, √)
+- [x] Test box character removal
+- [x] Test Romanian diacritic normalization
+- [x] Test edge cases (empty input, NULL, etc.)
 
 **Acceptance Criteria**:
 - All tests pass
@@ -134,9 +132,9 @@ char *linter_process_file(linter_t *linter, const char *path);
 **Priority**: Low | **Effort**: 2h | **Milestone**: M1
 
 **Tasks**:
-- [ ] Create `src/linter/linter_cli.c`
-- [ ] Argument parsing (input file, output file, stdin mode)
-- [ ] Add to CMake build
+- [x] Create `src/linter/linter_cli.c`
+- [x] Argument parsing (input file, output file, stdin mode)
+- [x] Add to CMake build
 
 **Usage**: `pseudo-lint input.pseudo -o cleaned.pseudo`
 

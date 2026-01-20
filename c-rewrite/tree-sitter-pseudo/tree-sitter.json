@@ -1,0 +1,40 @@
+{
+  "$schema": "https://tree-sitter.github.io/tree-sitter/assets/schemas/config.schema.json",
+  "grammars": [
+    {
+      "name": "pseudo",
+      "camelcase": "Pseudo",
+      "title": "Pseudo",
+      "scope": "source.pseudo",
+      "file-types": [
+        "pseudo"
+      ],
+      "injection-regex": "^pseudo$",
+      "class-name": "TreeSitterPseudo"
+    }
+  ],
+  "metadata": {
+    "version": "0.1.0",
+    "license": "MIT",
+    "description": "Romanian BAC Pseudocode grammar for tree-sitter",
+    "authors": [
+      {
+        "name": "Bujor Mihai Alexandru",
+        "email": "bujormihaialexandru@gmail.com",
+        "url": "https://mihai-bujor.onrender.com/"
+      }
+    ],
+    "links": {
+      "repository": "https://github.com/BujorelActimel/pseudo"
+    }
+  },
+  "bindings": {
+    "c": true,
+    "go": true,
+    "node": true,
+    "python": true,
+    "rust": true,
+    "swift": true,
+    "zig": false
+  }
+}

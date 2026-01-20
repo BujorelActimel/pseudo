@@ -1,0 +1,333 @@
+================================================================================
+If statement without else
+================================================================================
+
+daca x > 0 atunci
+    scrie x
+sf
+
+--------------------------------------------------------------------------------
+
+(program
+  (stmt
+    (if
+      condition: (expr
+        (compare_expr
+          left: (expr
+            (atom
+              (identifier)))
+          right: (expr
+            (atom
+              (number)))))
+      (stmt
+        (write
+          values: (expr_list
+            (expr
+              (atom
+                (identifier)))))))))
+
+================================================================================
+If statement with else
+================================================================================
+
+daca x > 0 atunci
+    scrie "positive"
+altfel
+    scrie "non-positive"
+sf
+
+--------------------------------------------------------------------------------
+
+(program
+  (stmt
+    (if
+      condition: (expr
+        (compare_expr
+          left: (expr
+            (atom
+              (identifier)))
+          right: (expr
+            (atom
+              (number)))))
+      (stmt
+        (write
+          values: (expr_list
+            (expr
+              (atom
+                (string))))))
+      (stmt
+        (write
+          values: (expr_list
+            (expr
+              (atom
+                (string)))))))))
+
+================================================================================
+Nested if
+================================================================================
+
+daca x > 0 atunci
+    daca y > 0 atunci
+        scrie "both positive"
+    sf
+sf
+
+--------------------------------------------------------------------------------
+
+(program
+  (stmt
+    (if
+      condition: (expr
+        (compare_expr
+          left: (expr
+            (atom
+              (identifier)))
+          right: (expr
+            (atom
+              (number)))))
+      (stmt
+        (if
+          condition: (expr
+            (compare_expr
+              left: (expr
+                (atom
+                  (identifier)))
+              right: (expr
+                (atom
+                  (number)))))
+          (stmt
+            (write
+              values: (expr_list
+                (expr
+                  (atom
+                    (string)))))))))))
+
+================================================================================
+For loop basic
+================================================================================
+
+pentru i <- 1, 10 executa
+    scrie i
+sf
+
+--------------------------------------------------------------------------------
+
+(program
+  (stmt
+    (for
+      var: (identifier)
+      start: (expr
+        (atom
+          (number)))
+      end: (expr
+        (atom
+          (number)))
+      (stmt
+        (write
+          values: (expr_list
+            (expr
+              (atom
+                (identifier)))))))))
+
+================================================================================
+For loop with step
+================================================================================
+
+pentru i <- 1, 10, 2 executa
+    scrie i
+sf
+
+--------------------------------------------------------------------------------
+
+(program
+  (stmt
+    (for
+      var: (identifier)
+      start: (expr
+        (atom
+          (number)))
+      end: (expr
+        (atom
+          (number)))
+      step: (expr
+        (atom
+          (number)))
+      (stmt
+        (write
+          values: (expr_list
+            (expr
+              (atom
+                (identifier)))))))))
+
+================================================================================
+For loop with negative step
+================================================================================
+
+pentru i <- 10, 1, -1 executa
+    scrie i
+sf
+
+--------------------------------------------------------------------------------
+
+(program
+  (stmt
+    (for
+      var: (identifier)
+      start: (expr
+        (atom
+          (number)))
+      end: (expr
+        (atom
+          (number)))
+      step: (expr
+        (neg_expr
+          operand: (atom
+            (number))))
+      (stmt
+        (write
+          values: (expr_list
+            (expr
+              (atom
+                (identifier)))))))))
+
+================================================================================
+While loop
+================================================================================
+
+cat timp x > 0 executa
+    x <- x - 1
+sf
+
+--------------------------------------------------------------------------------
+
+(program
+  (stmt
+    (while
+      condition: (expr
+        (compare_expr
+          left: (expr
+            (atom
+              (identifier)))
+          right: (expr
+            (atom
+              (number)))))
+      (stmt
+        (assign
+          name: (identifier)
+          value: (expr
+            (add_expr
+              left: (expr
+                (atom
+                  (identifier)))
+              right: (expr
+                (atom
+                  (number))))))))))
+
+================================================================================
+Do-while loop
+================================================================================
+
+executa
+    x <- x - 1
+cat timp x > 0
+
+--------------------------------------------------------------------------------
+
+(program
+  (stmt
+    (do_while
+      (stmt
+        (assign
+          name: (identifier)
+          value: (expr
+            (add_expr
+              left: (expr
+                (atom
+                  (identifier)))
+              right: (expr
+                (atom
+                  (number)))))))
+      condition: (expr
+        (compare_expr
+          left: (expr
+            (atom
+              (identifier)))
+          right: (expr
+            (atom
+              (number))))))))
+
+================================================================================
+Repeat-until loop
+================================================================================
+
+repeta
+    x <- x - 1
+pana cand x = 0
+
+--------------------------------------------------------------------------------
+
+(program
+  (stmt
+    (repeat
+      (stmt
+        (assign
+          name: (identifier)
+          value: (expr
+            (add_expr
+              left: (expr
+                (atom
+                  (identifier)))
+              right: (expr
+                (atom
+                  (number)))))))
+      condition: (expr
+        (compare_expr
+          left: (expr
+            (atom
+              (identifier)))
+          right: (expr
+            (atom
+              (number))))))))
+
+================================================================================
+Nested loops
+================================================================================
+
+pentru i <- 1, n executa
+    pentru j <- 1, m executa
+        scrie i * j
+    sf
+sf
+
+--------------------------------------------------------------------------------
+
+(program
+  (stmt
+    (for
+      var: (identifier)
+      start: (expr
+        (atom
+          (number)))
+      end: (expr
+        (atom
+          (identifier)))
+      (stmt
+        (for
+          var: (identifier)
+          start: (expr
+            (atom
+              (number)))
+          end: (expr
+            (atom
+              (identifier)))
+          (stmt
+            (write
+              values: (expr_list
+                (expr
+                  (mul_expr
+                    left: (expr
+                      (atom
+                        (identifier)))
+                    right: (expr
+                      (atom
+                        (identifier)))))))))))))

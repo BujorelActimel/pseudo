@@ -1,0 +1,333 @@
+================================================================================
+Comment at end of line
+================================================================================
+
+x <- 5 # this is a comment
+
+--------------------------------------------------------------------------------
+
+(program
+  (stmt
+    (assign
+      name: (identifier)
+      value: (expr
+        (atom
+          (number)))))
+  (comment))
+
+================================================================================
+Comment on its own line
+================================================================================
+
+# this is a comment
+x <- 5
+
+--------------------------------------------------------------------------------
+
+(program
+  (comment)
+  (stmt
+    (assign
+      name: (identifier)
+      value: (expr
+        (atom
+          (number))))))
+
+================================================================================
+Multiple statements with comments
+================================================================================
+
+x <- 1 # first
+y <- 2 # second
+
+--------------------------------------------------------------------------------
+
+(program
+  (stmt
+    (assign
+      name: (identifier)
+      value: (expr
+        (atom
+          (number)))))
+  (comment)
+  (stmt
+    (assign
+      name: (identifier)
+      value: (expr
+        (atom
+          (number)))))
+  (comment))
+
+================================================================================
+Empty if body
+================================================================================
+
+daca x = 0 atunci sf
+
+--------------------------------------------------------------------------------
+
+(program
+  (stmt
+    (if
+      condition: (expr
+        (compare_expr
+          left: (expr
+            (atom
+              (identifier)))
+          right: (expr
+            (atom
+              (number))))))))
+
+================================================================================
+Empty else body
+================================================================================
+
+daca x = 0 atunci
+    scrie x
+altfel
+sf
+
+--------------------------------------------------------------------------------
+
+(program
+  (stmt
+    (if
+      condition: (expr
+        (compare_expr
+          left: (expr
+            (atom
+              (identifier)))
+          right: (expr
+            (atom
+              (number)))))
+      (stmt
+        (write
+          values: (expr_list
+            (expr
+              (atom
+                (identifier)))))))))
+
+================================================================================
+Empty for body
+================================================================================
+
+pentru i <- 1, 10 executa sf
+
+--------------------------------------------------------------------------------
+
+(program
+  (stmt
+    (for
+      var: (identifier)
+      start: (expr
+        (atom
+          (number)))
+      end: (expr
+        (atom
+          (number))))))
+
+================================================================================
+Empty while body
+================================================================================
+
+cat timp x > 0 executa sf
+
+--------------------------------------------------------------------------------
+
+(program
+  (stmt
+    (while
+      condition: (expr
+        (compare_expr
+          left: (expr
+            (atom
+              (identifier)))
+          right: (expr
+            (atom
+              (number))))))))
+
+================================================================================
+BAC example: GCD algorithm
+================================================================================
+
+citeste m,n
+repeta
+    x<-m; y<-n; n<-n-1
+    repeta
+        daca x>y atunci x<-x-y
+            altfel y<-y-x
+        sf
+    pana cand y=0
+pana cand x!=1
+scrie n+1
+
+--------------------------------------------------------------------------------
+
+(program
+  (stmt
+    (read
+      names: (name_list
+        (identifier)
+        (identifier))))
+  (stmt
+    (repeat
+      (stmt
+        (multi_stmt
+          (assign
+            name: (identifier)
+            value: (expr
+              (atom
+                (identifier))))
+          (assign
+            name: (identifier)
+            value: (expr
+              (atom
+                (identifier))))
+          (assign
+            name: (identifier)
+            value: (expr
+              (add_expr
+                left: (expr
+                  (atom
+                    (identifier)))
+                right: (expr
+                  (atom
+                    (number))))))))
+      (stmt
+        (repeat
+          (stmt
+            (if
+              condition: (expr
+                (compare_expr
+                  left: (expr
+                    (atom
+                      (identifier)))
+                  right: (expr
+                    (atom
+                      (identifier)))))
+              (stmt
+                (assign
+                  name: (identifier)
+                  value: (expr
+                    (add_expr
+                      left: (expr
+                        (atom
+                          (identifier)))
+                      right: (expr
+                        (atom
+                          (identifier)))))))
+              (stmt
+                (assign
+                  name: (identifier)
+                  value: (expr
+                    (add_expr
+                      left: (expr
+                        (atom
+                          (identifier)))
+                      right: (expr
+                        (atom
+                          (identifier)))))))))
+          condition: (expr
+            (compare_expr
+              left: (expr
+                (atom
+                  (identifier)))
+              right: (expr
+                (atom
+                  (number)))))))
+      condition: (expr
+        (compare_expr
+          left: (expr
+            (atom
+              (identifier)))
+          right: (expr
+            (atom
+              (number)))))))
+  (stmt
+    (write
+      values: (expr_list
+        (expr
+          (add_expr
+            left: (expr
+              (atom
+                (identifier)))
+            right: (expr
+              (atom
+                (number)))))))))
+
+================================================================================
+Identifier with underscore
+================================================================================
+
+my_var <- 5
+
+--------------------------------------------------------------------------------
+
+(program
+  (stmt
+    (assign
+      name: (identifier)
+      value: (expr
+        (atom
+          (number))))))
+
+================================================================================
+Identifier starting with underscore
+================================================================================
+
+_private <- 10
+
+--------------------------------------------------------------------------------
+
+(program
+  (stmt
+    (assign
+      name: (identifier)
+      value: (expr
+        (atom
+          (number))))))
+
+================================================================================
+Complex expression
+================================================================================
+
+x <- (a + b) * (c - d) / e % f
+
+--------------------------------------------------------------------------------
+
+(program
+  (stmt
+    (assign
+      name: (identifier)
+      value: (expr
+        (mul_expr
+          left: (expr
+            (mul_expr
+              left: (expr
+                (mul_expr
+                  left: (expr
+                    (paren
+                      (expr
+                        (add_expr
+                          left: (expr
+                            (atom
+                              (identifier)))
+                          right: (expr
+                            (atom
+                              (identifier)))))))
+                  right: (expr
+                    (paren
+                      (expr
+                        (add_expr
+                          left: (expr
+                            (atom
+                              (identifier)))
+                          right: (expr
+                            (atom
+                              (identifier)))))))))
+              right: (expr
+                (atom
+                  (identifier)))))
+          right: (expr
+            (atom
+              (identifier))))))))

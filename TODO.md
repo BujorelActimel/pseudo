@@ -156,19 +156,18 @@ char *linter_process_file(linter_t *linter, const char *path);
 **Reference**: `interpreter/Pseudocode.g4`
 
 **Tasks**:
-- [ ] Create new repo `tree-sitter-pseudocode-ro`
-- [ ] Setup `package.json`, `binding.gyp`
-- [ ] Write `grammar.js` converting from ANTLR:
-  - [ ] Statements: assign, swap, read, write, multi-stmt
-  - [ ] Control flow: if/then/else, for, while, do-while, repeat-until
-  - [ ] Expressions with precedence (*, /, %, +, -, comparisons, SI/SAU/NOT)
-  - [ ] Special operators: floor `[expr]`, sqrt `√`, swap `<->`, assign `<-`
-  - [ ] Literals: numbers, strings, identifiers
-  - [ ] Comments: `#`
-- [ ] Write syntax highlighting queries (`queries/highlights.scm`)
-- [ ] Create grammar tests in `test/corpus/`
-- [ ] Generate parser with `tree-sitter generate`
-- [ ] Test with `tree-sitter test`
+- [x] Create new repo `tree-sitter-pseudocode`
+- [x] Write `grammar.js` converting from ANTLR:
+  - [x] Statements: assign, swap, read, write, multi-stmt
+  - [x] Control flow: if/then/else, for, while, do-while, repeat-until
+  - [x] Expressions with precedence (*, /, %, +, -, comparisons, SI/SAU/NOT)
+  - [x] Special operators: floor `[expr]`, sqrt `√`, swap `<->`, assign `<-`
+  - [x] Literals: numbers, strings, identifiers
+  - [x] Comments: `#`
+- [x] Write syntax highlighting queries (`queries/highlights.scm`)
+- [x] Create grammar tests in `test/corpus/`
+- [x] Generate parser with `tree-sitter generate`
+- [x] Test with `tree-sitter test`
 
 **Acceptance Criteria**:
 - Grammar generates successfully

@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pseudocode Editor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-hard: #1d2021;
+      --bg: #282828;
+      --bg-soft: #32302f;
+      --bg1: #3c3836;
+      --bg2: #504945;
+      --bg3: #665c54;
+      --bg4: #7c6f64;
+      --fg: #ebdbb2;
+      --fg2: #d5c4a1;
+      --fg3: #bdae93;
+      --fg4: #a89984;
+      --gray: #928374;
+      --red: #fb4934;
+      --red-dim: #cc241d;
+      --green: #b8bb26;
+      --green-dim: #98971a;
+      --yellow: #fabd2f;
+      --yellow-dim: #d79921;
+      --blue: #83a598;
+      --blue-dim: #458588;
+      --purple: #d3869b;
+      --purple-dim: #b16286;
+      --aqua: #8ec07c;
+      --aqua-dim: #689d6a;
+      --orange: #fe8019;
+      --orange-dim: #d65d0e;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg);
+      color: var(--fg);
+    }
+
+    .app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 1rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--bg1);
+      flex-shrink: 0;
+    }
+
+    .toolbar-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .toolbar-title span:first-child {
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .toolbar-title span:last-child {
+      font-size: 0.75rem;
+      color: var(--bg3);
+    }
+
+    .toolbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.375rem 0.75rem;
+      border: none;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.15s, color 0.15s;
+    }
+
+    .btn-run {
+      background: var(--green);
+      color: var(--bg);
+    }
+
+    .btn-run:hover {
+      background: var(--green-dim);
+    }
+
+    .btn-debug {
+      background: var(--bg2);
+      color: var(--fg);
+    }
+
+    .btn-debug:hover {
+      background: var(--bg3);
+    }
+
+    .btn-stop {
+      background: var(--red);
+      color: var(--bg);
+    }
+
+    .btn-stop:hover {
+      background: var(--red-dim);
+    }
+
+    .btn-icon {
+      padding: 0.375rem 0.5rem;
+      background: transparent;
+      color: var(--fg4);
+    }
+
+    .btn-icon:hover {
+      background: var(--bg1);
+      color: var(--fg);
+    }
+
+    .debug-indicator {
+      margin-left: 0.5rem;
+      font-size: 0.75rem;
+      color: var(--yellow);
+    }
+
+    /* Main container */
+    .main {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* Editor panel */
+    .editor-panel {
+      display: flex;
+      flex-direction: column;
+      min-width: 200px;
+      background: var(--bg-hard);
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 1rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--bg1);
+      font-size: 0.75rem;
+    }
+
+    .panel-header-title {
+      color: var(--fg4);
+    }
+
+    .panel-header-status {
+      color: var(--green);
+    }
+
+    #editor-container {
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* Resize handle */
+    .resize-handle {
+      width: 4px;
+      background: var(--bg1);
+      cursor: col-resize;
+      flex-shrink: 0;
+      transition: background-color 0.15s;
+    }
+
+    .resize-handle:hover,
+    .resize-handle.dragging {
+      background: var(--blue);
+    }
+
+    /* Console panel */
+    .console-panel {
+      display: flex;
+      flex-direction: column;
+      min-width: 200px;
+      background: var(--bg-hard);
+    }
+
+    .console-output {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      cursor: text;
+    }
+
+    .console-line {
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .console-line.output { color: var(--fg); }
+    .console-line.input { color: var(--blue); }
+    .console-line.error { color: var(--red); }
+    .console-line.system { color: var(--gray); }
+    .console-line.debug { color: var(--yellow); }
+
+    .console-line.input::before {
+      content: '< ';
+      color: var(--blue);
+    }
+
+    .console-line.debug::before {
+      content: '[DEBUG] ';
+      color: var(--yellow);
+    }
+
+    .console-placeholder {
+      color: var(--bg3);
+    }
+
+    .input-line {
+      display: flex;
+      align-items: center;
+    }
+
+    .input-prompt {
+      color: var(--green);
+    }
+
+    .console-input {
+      flex: 1;
+      margin-left: 0.25rem;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-family: inherit;
+      font-size: inherit;
+      color: var(--fg);
+      caret-color: var(--fg);
+    }
+
+    .cursor-blink {
+      animation: blink 1s step-end infinite;
+      color: var(--fg);
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    /* Icons */
+    .icon {
+      width: 14px;
+      height: 14px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="toolbar">
+      <div class="toolbar-title">
+        <span>Pseudocode Editor</span>
+        <span>v1.0</span>
+      </div>
+      <div class="toolbar-actions">
+        <button id="btn-run" class="btn btn-run">
+          <svg class="icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          Run
+        </button>
+        <button id="btn-debug" class="btn btn-debug">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M9 9V6.2C9 5.0799 9 4.51984 9.21799 4.09202C9.40973 3.71569 9.71569 3.40973 10.092 3.21799C10.5198 3 11.0799 3 12.2 3H17.8C18.9201 3 19.4802 3 19.908 3.21799C20.2843 3.40973 20.5903 3.71569 20.782 4.09202C21 4.51984 21 5.0799 21 6.2V11.8C21 12.9201 21 13.4802 20.782 13.908C20.5903 14.2843 20.2843 14.5903 19.908 14.782C19.4802 15 18.9201 15 17.8 15H15M6.2 21H11.8C12.9201 21 13.4802 21 13.908 20.782C14.2843 20.5903 14.5903 20.2843 14.782 19.908C15 19.4802 15 18.9201 15 17.8V12.2C15 11.0799 15 10.5198 14.782 10.092C14.5903 9.71569 14.2843 9.40973 13.908 9.21799C13.4802 9 12.9201 9 11.8 9H6.2C5.0799 9 4.51984 9 4.09202 9.21799C3.71569 9.40973 3.40973 9.71569 3.21799 10.092C3 10.5198 3 11.0799 3 12.2V17.8C3 18.9201 3 19.4802 3.21799 19.908C3.40973 20.2843 3.71569 20.5903 4.09202 20.782C4.51984 21 5.07989 21 6.2 21Z"></path><circle cx="12" cy="12" r="1"></circle></svg>
+          Debug
+        </button>
+        <button id="btn-stop" class="btn btn-stop" style="display: none;">
+          <svg class="icon" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12"></rect></svg>
+          Stop
+        </button>
+        <span id="debug-indicator" class="debug-indicator" style="display: none;">Debug mode</span>
+        <button id="btn-clear" class="btn btn-icon" title="Clear output">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="main">
+      <div class="editor-panel" id="editor-panel">
+        <div class="panel-header">
+          <span class="panel-header-title">main.pseudo</span>
+          <span id="run-status" class="panel-header-status"></span>
+        </div>
+        <div id="editor-container"></div>
+      </div>
+
+      <div class="resize-handle" id="resize-handle"></div>
+
+      <div class="console-panel" id="console-panel">
+        <div class="panel-header">
+          <span class="panel-header-title">Console</span>
+        </div>
+        <div class="console-output" id="console-output">
+          <div class="console-placeholder">$ ready</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+  <script>
+    // State
+    let editor = null;
+    let isRunning = false;
+    let isDebugging = false;
+    let isWaitingForInput = false;
+    let inputCallback = null;
+    let stopRequested = false;
+    let editorWidth = 60; // percentage
+
+    // DOM Elements
+    const btnRun = document.getElementById('btn-run');
+    const btnDebug = document.getElementById('btn-debug');
+    const btnStop = document.getElementById('btn-stop');
+    const btnClear = document.getElementById('btn-clear');
+    const debugIndicator = document.getElementById('debug-indicator');
+    const runStatus = document.getElementById('run-status');
+    const consoleOutput = document.getElementById('console-output');
+    const editorPanel = document.getElementById('editor-panel');
+    const consolePanel = document.getElementById('console-panel');
+    const resizeHandle = document.getElementById('resize-handle');
+
+    // Default code
+    const defaultCode = `BEGIN
+  // Welcome to the Pseudocode Editor
+  // This is a simple example program
+  
+  OUTPUT "Welcome to Pseudocode!"
+  OUTPUT "What is your name?"
+  INPUT name
+  OUTPUT "Hello, " + name + "!"
+  
+  OUTPUT "Let's count to 5:"
+  FOR i <- 1 TO 5 DO
+    OUTPUT i
+  ENDFOR
+  
+  OUTPUT "Goodbye!"
+END`;
+
+    // Gruvbox Dark theme for Monaco
+    const gruvboxTheme = {
+      base: 'vs-dark',
+      inherit: true,
+      rules: [
+        { token: '', foreground: 'ebdbb2', background: '1d2021' },
+        { token: 'comment', foreground: '928374', fontStyle: 'italic' },
+        { token: 'keyword', foreground: 'fb4934' },
+        { token: 'keyword.control', foreground: 'fb4934' },
+        { token: 'keyword.operator', foreground: 'fe8019' },
+        { token: 'string', foreground: 'b8bb26' },
+        { token: 'number', foreground: 'd3869b' },
+        { token: 'operator', foreground: '8ec07c' },
+        { token: 'delimiter', foreground: 'ebdbb2' },
+        { token: 'variable', foreground: '83a598' },
+        { token: 'function', foreground: 'fabd2f' },
+        { token: 'type', foreground: 'fabd2f' },
+        { token: 'constant', foreground: 'd3869b' },
+      ],
+      colors: {
+        'editor.background': '#1d2021',
+        'editor.foreground': '#ebdbb2',
+        'editor.lineHighlightBackground': '#32302f',
+        'editor.selectionBackground': '#504945',
+        'editor.inactiveSelectionBackground': '#3c3836',
+        'editorCursor.foreground': '#ebdbb2',
+        'editorWhitespace.foreground': '#504945',
+        'editorLineNumber.foreground': '#665c54',
+        'editorLineNumber.activeForeground': '#ebdbb2',
+        'editorIndentGuide.background': '#3c3836',
+        'editorIndentGuide.activeBackground': '#504945',
+        'editor.selectionHighlightBackground': '#689d6a40',
+        'editorBracketMatch.background': '#68986640',
+        'editorBracketMatch.border': '#689866',
+        'scrollbarSlider.background': '#50494580',
+        'scrollbarSlider.hoverBackground': '#665c5480',
+        'scrollbarSlider.activeBackground': '#7c6f6480',
+      }
+    };
+
+    // Initialize Monaco Editor
+    require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
+
+    require(['vs/editor/editor.main'], function () {
+      // Register Pseudocode language
+      monaco.languages.register({ id: 'pseudocode' });
+
+      monaco.languages.setMonarchTokensProvider('pseudocode', {
+        ignoreCase: true,
+        keywords: [
+          'BEGIN', 'END', 'IF', 'THEN', 'ELSE', 'ENDIF', 'ELSEIF',
+          'FOR', 'TO', 'DO', 'ENDFOR', 'STEP', 'DOWNTO',
+          'WHILE', 'ENDWHILE', 'REPEAT', 'UNTIL',
+          'FUNCTION', 'ENDFUNCTION', 'PROCEDURE', 'ENDPROCEDURE',
+          'RETURN', 'CALL', 'AND', 'OR', 'NOT', 'MOD', 'DIV',
+          'TRUE', 'FALSE', 'NULL', 'ARRAY', 'OF', 'RECORD', 'ENDRECORD',
+          'INPUT', 'OUTPUT', 'PRINT', 'READ', 'WRITE', 'DECLARE', 'SET'
+        ],
+        operators: ['<-', '←', '+', '-', '*', '/', '=', '<>', '<', '>', '<=', '>=', ':='],
+        symbols: /[=><!~?:&|+\-*\/\^%←]+/,
+        tokenizer: {
+          root: [
+            [/\/\/.*$/, 'comment'],
+            [/[a-zA-Z_]\w*/, {
+              cases: {
+                '@keywords': 'keyword',
+                '@default': 'variable'
+              }
+            }],
+            [/"([^"\\]|\\.)*"/, 'string'],
+            [/'([^'\\]|\\.)*'/, 'string'],
+            [/\d+(\.\d+)?/, 'number'],
+            [/@symbols/, {
+              cases: {
+                '@operators': 'operator',
+                '@default': ''
+              }
+            }],
+            [/[{}()\[\]]/, 'delimiter'],
+            [/[;,.]/, 'delimiter'],
+          ]
+        }
+      });
+
+      // Define theme
+      monaco.editor.defineTheme('gruvbox-dark', gruvboxTheme);
+
+      // Create editor
+      editor = monaco.editor.create(document.getElementById('editor-container'), {
+        value: defaultCode,
+        language: 'pseudocode',
+        theme: 'gruvbox-dark',
+        fontFamily: "'JetBrains Mono', monospace",
+        fontSize: 14,
+        lineHeight: 1.6,
+        padding: { top: 16 },
+        minimap: { enabled: false },
+        scrollBeyondLastLine: false,
+        renderLineHighlight: 'line',
+        cursorBlinking: 'smooth',
+        cursorSmoothCaretAnimation: 'on',
+        smoothScrolling: true,
+        wordWrap: 'on',
+        automaticLayout: true,
+        lineNumbers: 'on',
+        glyphMargin: false,
+        folding: false,
+        lineDecorationsWidth: 8,
+        lineNumbersMinChars: 3,
+        overviewRulerBorder: false,
+        hideCursorInOverviewRuler: true,
+        overviewRulerLanes: 0,
+        scrollbar: {
+          vertical: 'auto',
+          horizontal: 'auto',
+          verticalScrollbarSize: 10,
+          horizontalScrollbarSize: 10,
+        }
+      });
+
+      // Set initial panel widths
+      updatePanelWidths();
+    });
+
+    // Resize functionality
+    let isDragging = false;
+
+    resizeHandle.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      resizeHandle.classList.add('dragging');
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      
+      const containerWidth = document.querySelector('.main').offsetWidth;
+      const newWidth = (e.clientX / containerWidth) * 100;
+      
+      // Constrain between 20% and 80%
+      editorWidth = Math.max(20, Math.min(80, newWidth));
+      updatePanelWidths();
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (isDragging) {
+        isDragging = false;
+        resizeHandle.classList.remove('dragging');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+      }
+    });
+
+    function updatePanelWidths() {
+      editorPanel.style.width = `${editorWidth}%`;
+      consolePanel.style.width = `${100 - editorWidth}%`;
+    }
+
+    // Console functions
+    function clearConsole() {
+      consoleOutput.innerHTML = '<div class="console-placeholder">$ ready</div>';
+    }
+
+    function appendToConsole(content, type = 'output') {
+      // Remove placeholder if present
+      const placeholder = consoleOutput.querySelector('.console-placeholder');
+      if (placeholder) placeholder.remove();
+
+      // Remove existing input line if any
+      const existingInput = consoleOutput.querySelector('.input-line');
+      if (existingInput) existingInput.remove();
+
+      const line = document.createElement('div');
+      line.className = `console-line ${type}`;
+      line.textContent = content;
+      consoleOutput.appendChild(line);
+      consoleOutput.scrollTop = consoleOutput.scrollHeight;
+    }
+
+    function showInputPrompt() {
+      // Remove placeholder if present
+      const placeholder = consoleOutput.querySelector('.console-placeholder');
+      if (placeholder) placeholder.remove();
+
+      const inputLine = document.createElement('div');
+      inputLine.className = 'input-line';
+      inputLine.innerHTML = `
+        <span class="input-prompt">></span>
+        <input type="text" class="console-input" autofocus>
+        <span class="cursor-blink">_</span>
+      `;
+      consoleOutput.appendChild(inputLine);
+
+      const input = inputLine.querySelector('.console-input');
+      input.focus();
+
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          const value = input.value;
+          inputLine.remove();
+          appendToConsole(value, 'input');
+          isWaitingForInput = false;
+          if (inputCallback) {
+            inputCallback(value);
+            inputCallback = null;
+          }
+        }
+      });
+
+      consoleOutput.scrollTop = consoleOutput.scrollHeight;
+    }
+
+    // Click console to focus input
+    consoleOutput.addEventListener('click', () => {
+      const input = consoleOutput.querySelector('.console-input');
+      if (input) input.focus();
+    });
+
+    // Simple pseudocode interpreter
+    async function runCode(debug = false) {
+      if (isRunning) return;
+
+      const code = editor.getValue();
+      isRunning = true;
+      isDebugging = debug;
+      stopRequested = false;
+
+      // Update UI
+      btnRun.style.display = 'none';
+      btnDebug.style.display = 'none';
+      btnStop.style.display = 'flex';
+      debugIndicator.style.display = debug ? 'inline' : 'none';
+      runStatus.textContent = debug ? 'Debugging...' : 'Running...';
+
+      clearConsole();
+      appendToConsole('Program started.', 'system');
+
+      try {
+        await interpret(code, debug);
+        if (!stopRequested) {
+          appendToConsole('Program finished.', 'system');
+        }
+      } catch (err) {
+        appendToConsole(`Error: ${err.message}`, 'error');
+      }
+
+      // Reset UI
+      isRunning = false;
+      btnRun.style.display = 'flex';
+      btnDebug.style.display = 'flex';
+      btnStop.style.display = 'none';
+      debugIndicator.style.display = 'none';
+      runStatus.textContent = '';
+    }
+
+    function stopCode() {
+      stopRequested = true;
+      isRunning = false;
+      isWaitingForInput = false;
+      inputCallback = null;
+
+      // Remove any input prompts
+      const inputLine = consoleOutput.querySelector('.input-line');
+      if (inputLine) inputLine.remove();
+
+      appendToConsole('Program stopped.', 'system');
+
+      // Reset UI
+      btnRun.style.display = 'flex';
+      btnDebug.style.display = 'flex';
+      btnStop.style.display = 'none';
+      debugIndicator.style.display = 'none';
+      runStatus.textContent = '';
+    }
+
+    // Simple interpreter
+    async function interpret(code, debug) {
+      const lines = code.split('\n');
+      const variables = {};
+
+      function evaluate(expr) {
+        expr = expr.trim();
+        
+        // String concatenation
+        if (expr.includes('+')) {
+          const parts = [];
+          let current = '';
+          let inString = false;
+          let stringChar = '';
+          
+          for (let i = 0; i < expr.length; i++) {
+            const char = expr[i];
+            if ((char === '"' || char === "'") && (i === 0 || expr[i-1] !== '\\')) {
+              if (!inString) {
+                inString = true;
+                stringChar = char;
+              } else if (char === stringChar) {
+                inString = false;
+              }
+              current += char;
+            } else if (char === '+' && !inString) {
+              parts.push(current.trim());
+              current = '';
+            } else {
+              current += char;
+            }
+          }
+          parts.push(current.trim());
+          
+          if (parts.length > 1) {
+            return parts.map(p => evaluate(p)).join('');
+          }
+        }
+
+        // String literal
+        if ((expr.startsWith('"') && expr.endsWith('"')) || 
+            (expr.startsWith("'") && expr.endsWith("'"))) {
+          return expr.slice(1, -1);
+        }
+
+        // Number
+        if (!isNaN(expr) && expr !== '') {
+          return Number(expr);
+        }
+
+        // Variable
+        if (variables.hasOwnProperty(expr)) {
+          return variables[expr];
+        }
+
+        // Simple arithmetic (very basic)
+        if (expr.includes('-') && !expr.startsWith('-')) {
+          const [a, b] = expr.split('-').map(s => evaluate(s.trim()));
+          return a - b;
+        }
+        if (expr.includes('*')) {
+          const [a, b] = expr.split('*').map(s => evaluate(s.trim()));
+          return a * b;
+        }
+        if (expr.includes('/')) {
+          const [a, b] = expr.split('/').map(s => evaluate(s.trim()));
+          return a / b;
+        }
+
+        return expr;
+      }
+
+      async function delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+      }
+
+      async function waitForInput() {
+        return new Promise((resolve) => {
+          isWaitingForInput = true;
+          inputCallback = resolve;
+          showInputPrompt();
+        });
+      }
+
+      let i = 0;
+      while (i < lines.length && !stopRequested) {
+        const line = lines[i].trim();
+        
+        // Skip empty lines and comments
+        if (!line || line.startsWith('//')) {
+          i++;
+          continue;
+        }
+
+        // Skip BEGIN/END
+        if (line.toUpperCase() === 'BEGIN' || line.toUpperCase() === 'END') {
+          i++;
+          continue;
+        }
+
+        if (debug) {
+          await delay(200);
+        }
+
+        // OUTPUT / PRINT
+        if (line.toUpperCase().startsWith('OUTPUT ') || line.toUpperCase().startsWith('PRINT ')) {
+          const expr = line.substring(line.indexOf(' ') + 1);
+          const value = evaluate(expr);
+          appendToConsole(String(value));
+          if (debug) {
+            appendToConsole(`OUTPUT: ${JSON.stringify(value)}`, 'debug');
+          }
+        }
+        // INPUT
+        else if (line.toUpperCase().startsWith('INPUT ')) {
+          const varName = line.substring(6).trim();
+          if (debug) {
+            appendToConsole(`Waiting for input for variable: ${varName}`, 'debug');
+          }
+          const value = await waitForInput();
+          if (stopRequested) break;
+          variables[varName] = isNaN(value) ? value : Number(value);
+          if (debug) {
+            appendToConsole(`${varName} = ${JSON.stringify(variables[varName])}`, 'debug');
+          }
+        }
+        // FOR loop
+        else if (line.toUpperCase().startsWith('FOR ')) {
+          const match = line.match(/FOR\s+(\w+)\s*(?:<-|←|:=)\s*(\d+)\s+TO\s+(\d+)\s*(?:DO)?/i);
+          if (match) {
+            const varName = match[1];
+            const start = parseInt(match[2]);
+            const end = parseInt(match[3]);
+            
+            if (debug) {
+              appendToConsole(`Starting FOR loop: ${varName} from ${start} to ${end}`, 'debug');
+            }
+
+            // Find ENDFOR
+            let endForIndex = i + 1;
+            let depth = 1;
+            while (endForIndex < lines.length && depth > 0) {
+              const checkLine = lines[endForIndex].trim().toUpperCase();
+              if (checkLine.startsWith('FOR ')) depth++;
+              if (checkLine === 'ENDFOR') depth--;
+              endForIndex++;
+            }
+            endForIndex--;
+
+            // Execute loop
+            const loopBody = lines.slice(i + 1, endForIndex);
+            for (let j = start; j <= end && !stopRequested; j++) {
+              variables[varName] = j;
+              if (debug) {
+                appendToConsole(`Loop iteration: ${varName} = ${j}`, 'debug');
+                await delay(150);
+              }
+              
+              // Execute body
+              for (const bodyLine of loopBody) {
+                if (stopRequested) break;
+                const trimmed = bodyLine.trim();
+                if (trimmed.toUpperCase().startsWith('OUTPUT ') || trimmed.toUpperCase().startsWith('PRINT ')) {
+                  const expr = trimmed.substring(trimmed.indexOf(' ') + 1);
+                  const value = evaluate(expr);
+                  appendToConsole(String(value));
+                  if (debug) await delay(100);
+                }
+              }
+            }
+            
+            i = endForIndex;
+          }
+        }
+        // Variable assignment
+        else if (line.includes('<-') || line.includes('←') || line.includes(':=')) {
+          const parts = line.split(/(?:<-|←|:=)/);
+          if (parts.length === 2) {
+            const varName = parts[0].trim().replace(/^(DECLARE|SET)\s+/i, '');
+            const value = evaluate(parts[1].trim());
+            variables[varName] = value;
+            if (debug) {
+              appendToConsole(`${varName} = ${JSON.stringify(value)}`, 'debug');
+            }
+          }
+        }
+
+        i++;
+      }
+    }
+
+    // Event listeners
+    btnRun.addEventListener('click', () => runCode(false));
+    btnDebug.addEventListener('click', () => runCode(true));
+    btnStop.addEventListener('click', stopCode);
+    btnClear.addEventListener('click', clearConsole);
+  </script>
+</body>
+</html>

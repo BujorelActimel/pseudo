@@ -25,7 +25,9 @@ value_t* value_create_int(int64_t val);
 value_t* value_create_float(double val);
 value_t* value_create_string(const string_t* val);
 value_t* value_create_string_from(const char* val);
+value_t* value_create_string_buf(const char* val, size_t len);
 value_t* value_copy(const value_t* val);
+value_t* value_clone(const value_t* val);  // Alias for value_copy
 void value_destroy(value_t* val);
 
 // Type inspection

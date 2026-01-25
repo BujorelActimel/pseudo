@@ -430,3 +430,24 @@ const char* value_error_string(value_error_t err) {
     }
     return "Eroare necunoscuta";
 }
+
+// Additional helper functions
+
+value_t* value_create_string_buf(const char* val, size_t len) {
+    assert(val);
+    value_t* v = malloc(sizeof(value_t));
+    if (!v) return NULL;
+    
+    v->type = VALUE_STRING;
+    v->string_val = string_create_from_buf(val, len);
+    if (!v->string_val) {
+        free(v);
+        return NULL;
+    }
+    
+    return v;
+}
+
+value_t* value_clone(const value_t* val) {
+    return value_copy(val);
+}

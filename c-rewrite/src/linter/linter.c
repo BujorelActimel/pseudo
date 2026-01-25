@@ -7,7 +7,7 @@ static hashmap_t* replacement_map = NULL;
 static hashmap_t* get_replacement_map(void) {
     if (replacement_map) return replacement_map;
 
-    replacement_map = hashmap_create(32);
+    replacement_map = hashmap_create(33);
 
     #define ADD_MAPPING(k, v) do { \
         string_t* key = string_create_from(k); \
@@ -42,6 +42,8 @@ static hashmap_t* get_replacement_map(void) {
     // Quotes
     ADD_MAPPING("’", "'");
     ADD_MAPPING("‘", "'");
+    ADD_MAPPING("”", "\"");
+    ADD_MAPPING("„", "\"");
 
     // Box drawing
     ADD_MAPPING("┌", "");

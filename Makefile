@@ -2,20 +2,26 @@ CC = gcc
 # Use c2x for broader compatibility (c23 not supported on older GCC)
 # Include bundled tree-sitter headers for portability
 CFLAGS = -std=c2x -Wall -Wextra -Iinclude -Itree-sitter-pseudo/bindings/c -Itree-sitter-pseudo/src -Itree-sitter-0.25.3/lib/include
-LDFLAGS = -lm -ltree-sitter
+LDFLAGS = -lm
 
-# Platform-specific tree-sitter paths
+# Bundled tree-sitter library source
+TS_LIB_SRC = tree-sitter-0.25.3/lib/src/lib.c
+BUNDLE_TS = 0
+
+# Platform-specific settings
 UNAME_S := $(shell uname -s 2>/dev/null || echo Windows)
 ifeq ($(UNAME_S),Darwin)
     # macOS with Homebrew
     BREW_PREFIX := $(shell brew --prefix 2>/dev/null || echo /opt/homebrew)
     CFLAGS += -I$(BREW_PREFIX)/include
-    LDFLAGS += -L$(BREW_PREFIX)/lib
+    LDFLAGS += -L$(BREW_PREFIX)/lib -ltree-sitter
 else ifdef MSYSTEM
-    # MSYS2/MinGW (MSYSTEM env var is set in MSYS2)
-    MSYS_LC := $(shell echo $(MSYSTEM) | tr '[:upper:]' '[:lower:]')
-    CFLAGS += -I/$(MSYS_LC)/include
-    LDFLAGS += -L/$(MSYS_LC)/lib
+    # MSYS2/MinGW - bundle tree-sitter (library not available)
+    BUNDLE_TS = 1
+    CFLAGS += -Itree-sitter-0.25.3/lib/src
+else
+    # Linux - use system tree-sitter
+    LDFLAGS += -ltree-sitter
 endif
 
 DEBUG_FLAGS = -g -O0 -fsanitize=address -fsanitize=undefined
@@ -52,6 +58,14 @@ SRC_OBJ = $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/src/%.o,$(SRC_FILES))
 # Grammar object file
 GRAMMAR_OBJ = $(OBJ_DIR)/grammar/parser.o
 
+# Tree-sitter library object (when bundling)
+TS_LIB_OBJ = $(OBJ_DIR)/tree-sitter/lib.o
+ifeq ($(BUNDLE_TS),1)
+    EXTRA_OBJ = $(TS_LIB_OBJ)
+else
+    EXTRA_OBJ =
+endif
+
 # Test files: all .c files under test/
 TEST_FILES = $(shell find $(TEST_DIR) -name '*.c' 2>/dev/null)
 TEST_BINS = $(patsubst $(TEST_DIR)/%.c,$(BIN_DIR)/%,$(TEST_FILES))
@@ -64,7 +78,7 @@ TARGET = $(BIN_DIR)/pseudo$(EXE_EXT)
 all: debug
 
 # Internal build target
-build: $(SRC_OBJ) $(GRAMMAR_OBJ) | $(BIN_DIR)
+build: $(SRC_OBJ) $(GRAMMAR_OBJ) $(EXTRA_OBJ) | $(BIN_DIR)
 	$(CC) $(CFLAGS) $^ -o $(TARGET) $(LDFLAGS)
 	@echo "Built: $(TARGET)"
 
@@ -77,6 +91,11 @@ $(OBJ_DIR)/src/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
 $(GRAMMAR_OBJ): $(GRAMMAR_DIR)/src/parser.c | $(OBJ_DIR)
 	@mkdir -p $(dir $@)
 	$(CC) -std=c11 -O2 -I$(GRAMMAR_DIR)/src -c $< -o $@
+
+# Compile bundled tree-sitter library (for Windows)
+$(TS_LIB_OBJ): $(TS_LIB_SRC) | $(OBJ_DIR)
+	@mkdir -p $(dir $@)
+	$(CC) -std=c11 -O2 -Itree-sitter-0.25.3/lib/src -Itree-sitter-0.25.3/lib/include -c $< -o $@
 
 # Build test binaries (exclude cli/main.o to avoid multiple main definitions)
 $(BIN_DIR)/%: $(TEST_DIR)/%.c $(filter-out $(OBJ_DIR)/src/cli/%,$(SRC_OBJ)) | $(BIN_DIR)

@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
+#include <inttypes.h>
 
 struct value {
     value_type_t type;
@@ -156,7 +157,7 @@ string_t* value_to_string(const value_t* val) {
     char buffer[64];
     switch (val->type) {
         case VALUE_INT:
-            snprintf(buffer, sizeof(buffer), "%ld", val->int_val);
+            snprintf(buffer, sizeof(buffer), "%" PRId64, val->int_val);
             return string_create_from(buffer);
         case VALUE_FLOAT: {
             if (val->float_val == floor(val->float_val) &&

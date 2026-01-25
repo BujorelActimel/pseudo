@@ -1,4 +1,4 @@
-citeste x (numar natural)
+citeste x # (numar natural)
 n<-0
 cat timp x!=0 executa
     y<-x; c<-0
@@ -9,6 +9,6 @@ cat timp x!=0 executa
         y<- [y/10]
     sf
     n<-n*10+c
-    citeste x (numar natural)
+    citeste x # (numar natural)
 sf
 scrie n

@@ -1,5 +1,5 @@
 citeste n
- (numar natural nenul)
+# (numar natural nenul)
  s<-0; d<-2
 cat timp d*d<=n executa
     p<-0

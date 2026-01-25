@@ -1,7 +1,7 @@
-citeste n (numar natural nenul)
+citeste n # (numar natural nenul)
 x<-0
 cat timp n>0 executa
-    citeste a,b (numere naturale)
+    citeste a,b # (numere naturale)
     c<-a; p<-1
     cat timp a>9 executa
         a<-[a/10]; p<-p*10

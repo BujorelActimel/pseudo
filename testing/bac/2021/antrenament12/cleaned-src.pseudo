@@ -1,5 +1,5 @@
 citeste n,k
- (numere naturale nenule)
+# (numere naturale nenule)
 t<-1
 pentru i<-1,[n/k] executa
     pentru j<-1,k executa

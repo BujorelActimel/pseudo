@@ -1,5 +1,5 @@
 citeste m,n
- (numere naturale nenule, m<=n)
+#  (numere naturale nenule, m<=n)
  nr<-0;i<-m
 repeta
     x<-1

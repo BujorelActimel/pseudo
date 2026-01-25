@@ -1,5 +1,5 @@
 citeste n
- (numar natural)
+# (numar natural)
 x<-5
 repeta
     cn<-n; n<-0; p<-1

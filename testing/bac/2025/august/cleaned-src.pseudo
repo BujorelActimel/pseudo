@@ -1,5 +1,5 @@
 citeste x,y
- (numere naturale distincte)
+#  (numere naturale distincte)
  cx<-0; cy<-0
 cat timp x>=10 sau y>=10 executa
     cat timp x+y!=0 executa

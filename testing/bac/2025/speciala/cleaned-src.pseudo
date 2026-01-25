@@ -1,5 +1,5 @@
 citeste m,n
- (numere naturale nenule, m<=n)
+#  (numere naturale nenule, m<=n)
 pentru i<-n,m,-1 executa
     x<-i
     c<-x%10

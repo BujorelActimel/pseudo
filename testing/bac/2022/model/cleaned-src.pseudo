@@ -1,4 +1,4 @@
-citeste x,y (numere naturale, x<y)
+citeste x,y # (numere naturale, x<y)
 u<-0; nr<-0
 pentru k<-x,y executa
     s<-0; nr<-nr+1

@@ -1,5 +1,5 @@
 citeste x,y
- (numere naturale, x<=y)
+# (numere naturale, x<=y)
 k<-0; i<-x
 cat timp i<=y executa
     n<-i; c<-0

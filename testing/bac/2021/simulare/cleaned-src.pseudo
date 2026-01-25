@@ -1,4 +1,4 @@
- citeste x (numar natural)
+ citeste x # (numar natural)
  p<-1; y<-0
 repeta
     c<-x%10; x<-[x/10]

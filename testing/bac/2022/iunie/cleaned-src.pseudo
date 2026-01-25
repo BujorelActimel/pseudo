@@ -1,5 +1,5 @@
  citeste n
- (numar natural)
+#  (numar natural)
  i<-2; k<-0
 cat timp n>=i executa
     cat timp n%i=0 executa

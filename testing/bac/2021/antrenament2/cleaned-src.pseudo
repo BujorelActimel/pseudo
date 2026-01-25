@@ -1,4 +1,4 @@
-citeste n (numar natural, n>9)
+citeste n # (numar natural, n>9)
 s<-1
 c1<-n%10; n<-[n/10]; c2<-n%10
 daca c1=c2 atunci s<-0

@@ -1,5 +1,5 @@
 citeste n
- (numar natural nenul)
+# (numar natural nenul)
 x<-0; m<-0; p<-1
 cat timp x<10 executa
     cn<-n

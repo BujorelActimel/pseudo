@@ -1,4 +1,4 @@
-citeste x (numar natural)
+citeste x # (numar natural)
  p<-1; m<- -1
 cat timp p<=x executa
     c<-[x/p]%10

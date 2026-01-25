@@ -1,7 +1,7 @@
-citeste n (numar natural nenul)
+citeste n # (numar natural nenul)
 m<-0; i<-n
 cat timp i>=1 executa
-    citeste x (numar natural)
+    citeste x # (numar natural)
     cat timp x%10 <= [x/10]%10 executa
         x<-[x/10]
     sf

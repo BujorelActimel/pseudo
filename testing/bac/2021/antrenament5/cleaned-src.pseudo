@@ -1,5 +1,5 @@
 citeste x
- (numar natural nenul)
+# (numar natural nenul)
 y<-0
 repeta
     daca x>9 atunci
@@ -8,6 +8,6 @@ repeta
         pana cand x<=9
     sf
     y<-y*10+x
-    citeste x (numar natural)
+    citeste x # (numar natural)
 pana cand x=0
 scrie y

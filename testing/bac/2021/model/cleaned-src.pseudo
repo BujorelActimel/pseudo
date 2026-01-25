@@ -1,5 +1,5 @@
  citeste n,k
- (numere naturale)
+# (numere naturale)
  p<-1
 daca k=0 atunci
     nr<--1

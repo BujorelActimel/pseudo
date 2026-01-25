@@ -1,5 +1,5 @@
 citeste n
-(numar natural, n>=2)
+# (numar natural, n>=2)
  i<-1
 cat timp i<=n executa
     m<-i

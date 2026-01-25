@@ -1,9 +1,9 @@
 citeste n
- (numar natural nenul)
+# (numar natural nenul)
  p<-1
 pentru i<-1,n executa
     citeste x
-    (numar natural)
+    # (numar natural)
     repeta
         x<-[x/3]
     pana cand x<=3

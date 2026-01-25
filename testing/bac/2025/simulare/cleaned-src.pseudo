@@ -1,5 +1,5 @@
 citeste m,n
- (numere naturale)
+#  (numere naturale)
 daca m<n atunci
     n<-n+m
     m<-n-m

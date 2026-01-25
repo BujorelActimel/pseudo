@@ -1,5 +1,5 @@
 citeste m,n
- (numere naturale nenule, m<n)
+# (numere naturale nenule, m<n)
  x<-1
 cat timp x=1 executa
     x<-m; y<-n; n<-n-1

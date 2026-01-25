@@ -1,4 +1,4 @@
-citeste x,y (numere naturale)
+citeste x,y # (numere naturale)
 daca x<y atunci
     x<-x-y; y<-x+y; x<-y-x
 sf

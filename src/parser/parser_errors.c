@@ -76,7 +76,7 @@ static TSPoint find_missing_sf_position(TSNode error_node, const char* source) {
 
 // Helper to find ERROR nodes (fallback)
 static void find_error_node(TSNode node, const char* source, error_info_t* info) {
-    if (ts_node_is_error(node)) {
+    if (strcmp(ts_node_type(node), "ERROR") == 0) {
         if (!info->found) {
             info->node = node;
             // Try to find a better position based on content

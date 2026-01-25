@@ -222,7 +222,7 @@ static void print_debug_tree_recursive(TSNode node, const char* source, int inde
     }
 
     const char* type = ts_node_type(node);
-    bool is_error = ts_node_is_error(node);
+    bool is_error = strcmp(type, "ERROR") == 0;
     bool is_missing = ts_node_is_missing(node);
 
     string_append(out, type);

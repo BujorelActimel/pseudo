@@ -5,19 +5,16 @@ LDFLAGS = -lm -ltree-sitter
 
 # Platform-specific tree-sitter paths
 UNAME_S := $(shell uname -s 2>/dev/null || echo Windows)
-ifneq (,$(findstring MINGW,$(UNAME_S)))
-    # MSYS2/MinGW
-    CFLAGS += -I/mingw64/include
-    LDFLAGS += -L/mingw64/lib
-else ifneq (,$(findstring MSYS,$(UNAME_S)))
-    # MSYS2
-    CFLAGS += -I/mingw64/include
-    LDFLAGS += -L/mingw64/lib
-else ifeq ($(UNAME_S),Darwin)
+ifeq ($(UNAME_S),Darwin)
     # macOS with Homebrew
     BREW_PREFIX := $(shell brew --prefix 2>/dev/null || echo /opt/homebrew)
     CFLAGS += -I$(BREW_PREFIX)/include
     LDFLAGS += -L$(BREW_PREFIX)/lib
+else ifdef MSYSTEM
+    # MSYS2/MinGW (MSYSTEM env var is set in MSYS2)
+    MSYS_LC := $(shell echo $(MSYSTEM) | tr '[:upper:]' '[:lower:]')
+    CFLAGS += -I/$(MSYS_LC)/include
+    LDFLAGS += -L/$(MSYS_LC)/lib
 endif
 
 DEBUG_FLAGS = -g -O0 -fsanitize=address -fsanitize=undefined

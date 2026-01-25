@@ -1,0 +1,247 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Version bump type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.bump.outputs.version }}
+      tag: ${{ steps.bump.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Bump version
+        id: bump
+        run: |
+          # Read current version
+          VERSION=$(cat VERSION)
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+
+          # Bump based on input
+          case "${{ inputs.bump }}" in
+            major)
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+            minor)
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            patch)
+              PATCH=$((PATCH + 1))
+              ;;
+          esac
+
+          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          echo "$NEW_VERSION" > VERSION
+
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "Bumped version: $VERSION -> $NEW_VERSION"
+
+      - name: Commit and tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add VERSION
+          git commit -m "chore: bump version to ${{ steps.bump.outputs.version }}"
+          git tag ${{ steps.bump.outputs.tag }}
+          git push
+          git push origin ${{ steps.bump.outputs.tag }}
+
+  build-linux:
+    needs: version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.version.outputs.tag }}
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libtree-sitter-dev
+
+      - name: Build release
+        run: make release
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pseudo-linux-x86_64
+          path: build/release/pseudo
+
+  build-windows:
+    needs: version
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.version.outputs.tag }}
+          submodules: recursive
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-tree-sitter
+            make
+
+      - name: Build release
+        run: make release
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pseudo-windows-x86_64
+          path: build/release/pseudo.exe
+
+  build-macos-intel:
+    needs: version
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.version.outputs.tag }}
+          submodules: recursive
+
+      - name: Install dependencies
+        run: brew install tree-sitter
+
+      - name: Build release
+        run: make release
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pseudo-macos-x86_64
+          path: build/release/pseudo
+
+  build-macos-arm:
+    needs: version
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.version.outputs.tag }}
+          submodules: recursive
+
+      - name: Install dependencies
+        run: brew install tree-sitter
+
+      - name: Build release
+        run: make release
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pseudo-macos-arm64
+          path: build/release/pseudo
+
+  build-wasm:
+    needs: version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.version.outputs.tag }}
+          submodules: recursive
+
+      - name: Setup Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: 'latest'
+
+      - name: Build WASM
+        run: make wasm
+
+      - name: Create web archive
+        run: |
+          cd web
+          zip -r ../pseudo-web.zip editor.html pseudo.js pseudo.wasm wasm-runner.js version.js
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pseudo-web
+          path: pseudo-web.zip
+
+  release:
+    needs: [version, build-linux, build-windows, build-macos-intel, build-macos-arm, build-wasm]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Prepare release files
+        run: |
+          mkdir release
+          cp artifacts/pseudo-linux-x86_64/pseudo release/pseudo-linux-x86_64
+          cp artifacts/pseudo-windows-x86_64/pseudo.exe release/pseudo-windows-x86_64.exe
+          cp artifacts/pseudo-macos-x86_64/pseudo release/pseudo-macos-x86_64
+          cp artifacts/pseudo-macos-arm64/pseudo release/pseudo-macos-arm64
+          cp artifacts/pseudo-web/pseudo-web.zip release/
+          chmod +x release/pseudo-linux-* release/pseudo-macos-*
+          ls -la release/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.version.outputs.tag }}
+          name: Pseudo++ ${{ needs.version.outputs.tag }}
+          body: |
+            ## Pseudo++ ${{ needs.version.outputs.version }}
+
+            ### Downloads
+
+            | Platform | File |
+            |----------|------|
+            | Windows x86_64 | `pseudo-windows-x86_64.exe` |
+            | Linux x86_64 | `pseudo-linux-x86_64` |
+            | macOS Intel | `pseudo-macos-x86_64` |
+            | macOS Apple Silicon | `pseudo-macos-arm64` |
+            | Web App | `pseudo-web.zip` |
+
+            ### CLI Usage
+            ```bash
+            ./pseudo program.pseudo
+            ```
+
+            ### Web App Usage
+            Extract `pseudo-web.zip` and open `editor.html` in a browser, or serve with:
+            ```bash
+            python -m http.server
+            ```
+          files: |
+            release/pseudo-windows-x86_64.exe
+            release/pseudo-linux-x86_64
+            release/pseudo-macos-x86_64
+            release/pseudo-macos-arm64
+            release/pseudo-web.zip
+          draft: false
+          prerelease: false

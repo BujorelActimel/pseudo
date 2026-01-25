@@ -3,7 +3,14 @@ CFLAGS = -std=c23 -Wall -Wextra -Wpedantic -Iinclude -Itree-sitter-pseudo/bindin
 LDFLAGS = -lm -ltree-sitter
 
 DEBUG_FLAGS = -g -O0 -fsanitize=address -fsanitize=undefined
-RELEASE_FLAGS = -O3 -march=native
+RELEASE_FLAGS = -O3
+
+# Detect Windows
+ifeq ($(OS),Windows_NT)
+    EXE_EXT = .exe
+else
+    EXE_EXT =
+endif
 
 SRC_DIR = src
 TEST_DIR = test
@@ -34,7 +41,7 @@ TEST_FILES = $(shell find $(TEST_DIR) -name '*.c' 2>/dev/null)
 TEST_BINS = $(patsubst $(TEST_DIR)/%.c,$(BIN_DIR)/%,$(TEST_FILES))
 
 # Main target
-TARGET = $(BIN_DIR)/pseudo
+TARGET = $(BIN_DIR)/pseudo$(EXE_EXT)
 
 .PHONY: all clean debug release test build grammar-generate grammar-test wasm
 
@@ -114,7 +121,8 @@ WASM_SRC = $(filter-out $(SRC_DIR)/cli/main.c $(SRC_DIR)/wasm/bridge.c,$(SRC_FIL
 
 wasm:
 	$(EMCC) $(WASM_FLAGS) -std=c11 -D_POSIX_C_SOURCE=200809L $(WASM_INCLUDES) $(WASM_SRC) -o web/pseudo.js
-	@echo "Built: web/pseudo.js and web/pseudo.wasm"
+	@echo "const VERSION = '$$(cat VERSION)';" > web/version.js
+	@echo "Built: web/pseudo.js, web/pseudo.wasm, web/version.js"
 
 # Help
 help:

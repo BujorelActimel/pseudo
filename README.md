@@ -1,4 +1,4 @@
-# Romanian Pseudocode Interpreter (C Rewrite)
+# Romanian Pseudocode Interpreter
 
 A high-performance interpreter for Romanian educational pseudocode, written in C with tree-sitter.
 

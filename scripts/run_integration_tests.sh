@@ -12,7 +12,7 @@ set -uo pipefail
 
 # Configuration
 PSEUDO_BIN="./build/debug/pseudo"
-TEST_DIR="../testing/bac"
+TEST_DIR="./int-test/bac"
 PASSED=0
 FAILED=0
 SKIPPED=0

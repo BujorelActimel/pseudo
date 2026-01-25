@@ -1,0 +1,15 @@
+citeste n # (numar natural)
+p<-1; m<-0; k<-0
+cat timp n!=0 executa
+    citeste x # (numar natural)
+    i<-k
+    cat timp i!=0 executa
+        x<-[x/10]; i<-i-1
+    sf
+    daca x=0 atunci c<-n%10
+        altfel c<-x%10
+    sf
+    m<-c*p+m; n<-[n/10]
+    p<-p*10; k<-k+1
+sf
+scrie m

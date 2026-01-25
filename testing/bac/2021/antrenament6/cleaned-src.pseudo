@@ -1,0 +1,14 @@
+citeste x,y
+ (numere naturale, x<=y)
+k<-0; i<-x
+cat timp i<=y executa
+    n<-i; c<-0
+    cat timp n>0 si c=0 executa
+        daca n%2=1 atunci c<-1
+        sf
+        n<-[n/10]
+    sf
+    k<-k+c
+    i<-i+1
+sf
+scrie k

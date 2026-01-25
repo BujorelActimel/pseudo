@@ -1,0 +1,14 @@
+citeste n
+ (numar natural nenul)
+ p<-1
+pentru i<-1,n executa
+    citeste x
+    (numar natural)
+    repeta
+        x<-[x/3]
+    pana cand x<=3
+    daca x!=0 atunci
+        p<-p*x
+    sf
+sf
+scrie p

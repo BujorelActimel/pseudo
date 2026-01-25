@@ -1,0 +1,14 @@
+citeste m,n,x
+# (numere naturale nenule, m<=n)
+ s<-0; pm<-1; pn<-1
+repeta
+    daca m%x=0 atunci
+        s<-s+m; pm<-x
+    sf
+    daca n%x=0 si m!=n atunci
+        s<-s+n; pn<-x
+    sf
+    m<-m+pm
+    n<-n-pn
+pana cand m>n
+ scrie s

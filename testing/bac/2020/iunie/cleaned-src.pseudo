@@ -1,0 +1,13 @@
+citeste a # (numar natural)
+c<-0
+repeta
+    b<-a; x<-0
+    repeta
+        daca b%10=c atunci
+            x<-1
+        sf
+        b<-[b/10]
+    pana cand b=0 sau x=1
+    scrie x,' '
+    c<-c+2
+pana cand c>9

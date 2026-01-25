@@ -1,0 +1,14 @@
+citeste n
+# (numar natural nenul)
+x<-1; m<-0; p<-1
+cat timp x<10 executa
+    cn<-n
+    cat timp cn!=0 executa
+        c<-cn%10; cn<-[cn/10]
+        daca c=x atunci
+            m<-c*p+m; p<-p*10
+        sf
+    sf
+    x<-x+2
+sf
+scrie m

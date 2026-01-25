@@ -1,0 +1,13 @@
+ citeste n
+ (numar natural)
+ i<-2; k<-0
+cat timp n>=i executa
+    cat timp n%i=0 executa
+        k<-k+1
+        n<-[n/i]
+    sf
+    daca i=2 atunci i<-i+1
+        altfel i<-i+2
+    sf
+sf
+ scrie k

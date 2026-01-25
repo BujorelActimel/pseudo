@@ -1,0 +1,13 @@
+citeste x,y
+# (numere naturale x<=y)
+i<-x; j<-y; s<-0
+cat timp i<=j executa
+    daca i%2=0 atunci
+        s<-s+j
+    sf
+    daca j%2=0 atunci
+        s<-s+i
+    sf
+    i<-i+1; j<-j-1
+sf
+scrie s

@@ -1,0 +1,11 @@
+citeste n
+ (numar natural nenul)
+pentru i<-1,n executa
+    pentru j<-1,n executa
+        daca j<=i atunci
+            scrie 2
+            altfel
+            scrie 3
+        sf
+    sf
+sf

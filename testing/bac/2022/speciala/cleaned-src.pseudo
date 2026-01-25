@@ -1,0 +1,11 @@
+citeste n (numar natural)
+repeta
+    x<-n%100
+    daca x>1 atunci
+        p<-(x%2)*(x%3)*(x%5)*(x%7)
+        daca p!=0 atunci
+            scrie x,' '
+        sf
+    sf
+    n<-[n/10]
+pana cand n<10

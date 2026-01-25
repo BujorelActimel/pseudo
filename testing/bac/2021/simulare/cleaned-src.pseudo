@@ -1,0 +1,12 @@
+ citeste x (numar natural)
+ p<-1; y<-0
+repeta
+    c<-x%10; x<-[x/10]
+    daca c!=0 atunci
+        daca x%10<c atunci y<-y*10+c
+            altfel y<-c*p+y
+        sf
+        p<-p*10
+    sf
+pana cand x=0
+ scrie y

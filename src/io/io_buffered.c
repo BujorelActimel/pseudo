@@ -16,12 +16,19 @@ typedef struct {
 } buffered_ctx_t;
 
 static void buffered_write(io_t* io, const char* text) {
+    if (!io || !text) return;
     buffered_ctx_t* ctx = (buffered_ctx_t*)io->ctx;
-    
+
     string_node_t* node = malloc(sizeof(string_node_t));
+    if (!node) return;
+
     node->str = strdup(text);
+    if (!node->str) {
+        free(node);
+        return;
+    }
     node->next = NULL;
-    
+
     if (ctx->output_tail) {
         ctx->output_tail->next = node;
     } else {
@@ -30,31 +37,35 @@ static void buffered_write(io_t* io, const char* text) {
     ctx->output_tail = node;
 }
 
+// Maximum input length (inputs longer than this will be truncated)
+#define MAX_INPUT_LENGTH 65536
+
 static const char* buffered_read(io_t* io) {
+    if (!io) return NULL;
     buffered_ctx_t* ctx = (buffered_ctx_t*)io->ctx;
-    
+
     if (!ctx->input_head) {
         ctx->waiting_for_input = true;
         return NULL;  // No input available
     }
-    
+
     // Dequeue input
     string_node_t* node = ctx->input_head;
     ctx->input_head = node->next;
     if (!ctx->input_head) {
         ctx->input_tail = NULL;
     }
-    
+
     ctx->waiting_for_input = false;
-    
-    // Use static buffer (not ideal but matches Python interpreter behavior)
-    static char input_buffer[4096];
+
+    // Use static buffer to avoid requiring caller to free
+    static char input_buffer[MAX_INPUT_LENGTH];
     strncpy(input_buffer, node->str, sizeof(input_buffer) - 1);
     input_buffer[sizeof(input_buffer) - 1] = '\0';
-    
+
     free(node->str);
     free(node);
-    
+
     return input_buffer;
 }
 
@@ -104,12 +115,19 @@ io_t* io_buffered_create(void) {
 }
 
 void io_buffered_push_input(io_t* io, const char* value) {
+    if (!io || !value) return;
     buffered_ctx_t* ctx = (buffered_ctx_t*)io->ctx;
-    
+
     string_node_t* node = malloc(sizeof(string_node_t));
+    if (!node) return;
+
     node->str = strdup(value);
+    if (!node->str) {
+        free(node);
+        return;
+    }
     node->next = NULL;
-    
+
     if (ctx->input_tail) {
         ctx->input_tail->next = node;
     } else {
@@ -119,8 +137,9 @@ void io_buffered_push_input(io_t* io, const char* value) {
 }
 
 char* io_buffered_pop_output(io_t* io) {
+    if (!io) return NULL;
     buffered_ctx_t* ctx = (buffered_ctx_t*)io->ctx;
-    
+
     if (!ctx->output_head) return NULL;
     
     string_node_t* node = ctx->output_head;
@@ -135,16 +154,19 @@ char* io_buffered_pop_output(io_t* io) {
 }
 
 bool io_buffered_has_output(io_t* io) {
+    if (!io) return false;
     buffered_ctx_t* ctx = (buffered_ctx_t*)io->ctx;
     return ctx->output_head != NULL;
 }
 
 bool io_buffered_needs_input(io_t* io) {
+    if (!io) return false;
     buffered_ctx_t* ctx = (buffered_ctx_t*)io->ctx;
     return ctx->waiting_for_input;
 }
 
 void io_buffered_clear(io_t* io) {
+    if (!io) return;
     buffered_ctx_t* ctx = (buffered_ctx_t*)io->ctx;
     
     // Clear output

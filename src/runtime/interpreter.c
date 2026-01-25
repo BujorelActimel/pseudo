@@ -15,12 +15,18 @@ struct runtime {
     parser_t* parser;
     io_t* io;
     environment_t* env;
-    
+
     exec_state_t state;
     string_t* error_msg;
-    
+
     TSNode program_root;
     uint32_t next_stmt_index;
+
+    // For multi-variable read statements (citeste a,b,c)
+    uint32_t read_var_index;
+
+    // For stopping execution from JS
+    bool stop_requested;
 };
 
 // Forward declarations
@@ -87,9 +93,11 @@ bool runtime_load(runtime_t* rt, const char* source) {
     
     rt->program_root = parser_root(rt->parser);
     rt->next_stmt_index = 0;
+    rt->read_var_index = 0;
+    rt->stop_requested = false;
     rt->state = EXEC_CONTINUE;
     env_clear(rt->env);
-    
+
     return true;
 }
 
@@ -323,24 +331,32 @@ static void exec_swap(runtime_t* rt, TSNode swap_node) {
 
 static void exec_read(runtime_t* rt, TSNode read_node) {
     TSNode name_list = parser_child_by_field(read_node, "names");
-    
+
     uint32_t count = ts_node_child_count(name_list);
+    uint32_t var_index = 0;
+
     for (uint32_t i = 0; i < count; i++) {
         TSNode child = ts_node_child(name_list, i);
         if (!parser_node_is_type(child, NODE_IDENTIFIER)) continue;
-        
+
+        // Skip variables we've already read (when resuming after input)
+        if (var_index < rt->read_var_index) {
+            var_index++;
+            continue;
+        }
+
         string_t* name = parser_get_identifier(rt->parser, child);
-        
+
         const char* input = rt->io->ops.read(rt->io);
         if (!input) {
             rt->state = EXEC_NEEDS_INPUT;
             string_destroy(name);
             return;
         }
-        
+
         value_t* val;
         char* endptr;
-        
+
         long long int_val = strtoll(input, &endptr, 10);
         if (*endptr == '\0') {
             val = value_create_int(int_val);
@@ -352,10 +368,17 @@ static void exec_read(runtime_t* rt, TSNode read_node) {
                 val = value_create_string_from(input);
             }
         }
-        
+
         env_set(rt->env, name, val);
         string_destroy(name);
+
+        // Successfully read this variable, move to next
+        rt->read_var_index++;
+        var_index++;
     }
+
+    // All variables read, reset for next read statement
+    rt->read_var_index = 0;
 }
 
 static void exec_write(runtime_t* rt, TSNode write_node) {
@@ -408,7 +431,7 @@ static void exec_if(runtime_t* rt, TSNode if_node) {
         if (parser_node_is_type(child, NODE_STMT)) {
             if ((!in_else && is_true) || (in_else && !is_true)) {
                 exec_stmt(rt, child);
-                if (rt->state == EXEC_ERROR) return;
+                if (rt->state != EXEC_CONTINUE) return;
             }
         }
     }
@@ -419,64 +442,79 @@ static void exec_for(runtime_t* rt, TSNode for_node) {
     TSNode start_node = parser_child_by_field(for_node, "start");
     TSNode end_node = parser_child_by_field(for_node, "end");
     TSNode step_node = parser_child_by_field(for_node, "step");
-    
+
     string_t* var_name = parser_get_identifier(rt->parser, var_node);
-    
+
     value_t* start_val = eval_expr(rt, start_node);
     value_t* end_val = eval_expr(rt, end_node);
-    
+
     int64_t start = value_to_int(start_val);
     int64_t end = value_to_int(end_val);
     int64_t step = 1;
-    
+
     if (!ts_node_is_null(step_node)) {
         value_t* step_val = eval_expr(rt, step_node);
         step = value_to_int(step_val);
         value_destroy(step_val);
     }
-    
+
     value_destroy(start_val);
     value_destroy(end_val);
-    
+
     int64_t current = start;
     while ((step > 0 && current <= end) || (step < 0 && current >= end)) {
+        // Check for stop request
+        if (rt->stop_requested) {
+            rt->state = EXEC_ERROR;
+            rt->error_msg = string_create_from("Program stopped");
+            string_destroy(var_name);
+            return;
+        }
+
         env_set(rt->env, var_name, value_create_int(current));
-        
+
         uint32_t count = ts_node_child_count(for_node);
         for (uint32_t i = 0; i < count; i++) {
             TSNode child = ts_node_child(for_node, i);
             if (parser_node_is_type(child, NODE_STMT)) {
                 exec_stmt(rt, child);
-                if (rt->state == EXEC_ERROR) {
+                if (rt->state != EXEC_CONTINUE) {
                     string_destroy(var_name);
                     return;
                 }
             }
         }
-        
+
         current += step;
     }
-    
+
     string_destroy(var_name);
 }
 
 static void exec_while(runtime_t* rt, TSNode while_node) {
     TSNode cond = parser_child_by_field(while_node, "condition");
-    
+
     while (true) {
+        // Check for stop request
+        if (rt->stop_requested) {
+            rt->state = EXEC_ERROR;
+            rt->error_msg = string_create_from("Program stopped");
+            return;
+        }
+
         value_t* cond_val = eval_expr(rt, cond);
-        if (!cond_val || rt->state == EXEC_ERROR) return;
+        if (!cond_val || rt->state != EXEC_CONTINUE) return;
         bool is_true = value_to_bool(cond_val);
         value_destroy(cond_val);
-        
+
         if (!is_true) break;
-        
+
         uint32_t count = ts_node_child_count(while_node);
         for (uint32_t i = 0; i < count; i++) {
             TSNode child = ts_node_child(while_node, i);
             if (parser_node_is_type(child, NODE_STMT)) {
                 exec_stmt(rt, child);
-                if (rt->state == EXEC_ERROR) return;
+                if (rt->state != EXEC_CONTINUE) return;
             }
         }
     }
@@ -484,44 +522,58 @@ static void exec_while(runtime_t* rt, TSNode while_node) {
 
 static void exec_do_while(runtime_t* rt, TSNode do_while_node) {
     TSNode cond = parser_child_by_field(do_while_node, "condition");
-    
+
     do {
+        // Check for stop request
+        if (rt->stop_requested) {
+            rt->state = EXEC_ERROR;
+            rt->error_msg = string_create_from("Program stopped");
+            return;
+        }
+
         uint32_t count = ts_node_child_count(do_while_node);
         for (uint32_t i = 0; i < count; i++) {
             TSNode child = ts_node_child(do_while_node, i);
             if (parser_node_is_type(child, NODE_STMT)) {
                 exec_stmt(rt, child);
-                if (rt->state == EXEC_ERROR) return;
+                if (rt->state != EXEC_CONTINUE) return;
             }
         }
-        
+
         value_t* cond_val = eval_expr(rt, cond);
-        if (!cond_val || rt->state == EXEC_ERROR) return;
+        if (!cond_val || rt->state != EXEC_CONTINUE) return;
         bool is_true = value_to_bool(cond_val);
         value_destroy(cond_val);
-        
+
         if (!is_true) break;
     } while (true);
 }
 
 static void exec_repeat(runtime_t* rt, TSNode repeat_node) {
     TSNode cond = parser_child_by_field(repeat_node, "condition");
-    
+
     do {
+        // Check for stop request
+        if (rt->stop_requested) {
+            rt->state = EXEC_ERROR;
+            rt->error_msg = string_create_from("Program stopped");
+            return;
+        }
+
         uint32_t count = ts_node_child_count(repeat_node);
         for (uint32_t i = 0; i < count; i++) {
             TSNode child = ts_node_child(repeat_node, i);
             if (parser_node_is_type(child, NODE_STMT)) {
                 exec_stmt(rt, child);
-                if (rt->state == EXEC_ERROR) return;
+                if (rt->state != EXEC_CONTINUE) return;
             }
         }
-        
+
         value_t* cond_val = eval_expr(rt, cond);
-        if (!cond_val || rt->state == EXEC_ERROR) return;
+        if (!cond_val || rt->state != EXEC_CONTINUE) return;
         bool is_true = value_to_bool(cond_val);
         value_destroy(cond_val);
-        
+
         if (is_true) break;
     } while (true);
 }
@@ -540,8 +592,8 @@ static void exec_multi_stmt(runtime_t* rt, TSNode multi_stmt_node) {
         else if (strcmp(type, NODE_SWAP) == 0) exec_swap(rt, child);
         else if (strcmp(type, NODE_READ) == 0) exec_read(rt, child);
         else if (strcmp(type, NODE_WRITE) == 0) exec_write(rt, child);
-        
-        if (rt->state == EXEC_ERROR) return;
+
+        if (rt->state != EXEC_CONTINUE) return;
     }
 }
 
@@ -567,33 +619,37 @@ static void exec_stmt(runtime_t* rt, TSNode stmt_node) {
 
 exec_state_t runtime_step(runtime_t* rt) {
     assert(rt);
-    
+
     if (rt->state != EXEC_CONTINUE) {
         return rt->state;
     }
-    
+
     uint32_t child_count = ts_node_child_count(rt->program_root);
-    
+
     // Skip non-statement nodes (comments, whitespace)
     while (rt->next_stmt_index < child_count) {
         TSNode child = ts_node_child(rt->program_root, rt->next_stmt_index);
-        
+
         // Only process actual statement nodes
         if (parser_node_is_type(child, NODE_STMT)) {
-            rt->next_stmt_index++;
             exec_stmt(rt, child);
-            
-            if (rt->state == EXEC_CONTINUE && rt->next_stmt_index >= child_count) {
-                rt->state = EXEC_DONE;
+
+            // Only advance to next statement if this one completed
+            // (don't advance if waiting for input - we need to retry this statement)
+            if (rt->state == EXEC_CONTINUE) {
+                rt->next_stmt_index++;
+                if (rt->next_stmt_index >= child_count) {
+                    rt->state = EXEC_DONE;
+                }
             }
-            
+
             return rt->state;
         }
-        
+
         // Skip this non-statement node
         rt->next_stmt_index++;
     }
-    
+
     // No more statements
     rt->state = EXEC_DONE;
     return EXEC_DONE;
@@ -604,6 +660,18 @@ exec_state_t runtime_run(runtime_t* rt) {
         runtime_step(rt);
     }
     return rt->state;
+}
+
+void runtime_resume(runtime_t* rt) {
+    if (rt && rt->state == EXEC_NEEDS_INPUT) {
+        rt->state = EXEC_CONTINUE;
+    }
+}
+
+void runtime_request_stop(runtime_t* rt) {
+    if (rt) {
+        rt->stop_requested = true;
+    }
 }
 
 const char* runtime_get_error(runtime_t* rt) {

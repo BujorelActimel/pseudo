@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pseudocode Editor</title>
+  <title>Pseudo++</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -423,8 +423,8 @@
   <div class="app">
     <div class="toolbar">
       <div class="toolbar-title">
-        <span>Pseudocode Editor</span>
-        <span>v1.0</span>
+        <span>Pseudo++</span>
+        <span id="version-label"></span>
       </div>
       <div class="toolbar-actions">
         <button id="btn-run" class="btn btn-run" title="Run">
@@ -476,10 +476,17 @@
     </div>
   </div>
 
+  <script src="pseudo.js"></script>
+  <script src="wasm-runner.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
   <script>
+    // Version
+    const VERSION = 'beta-0.1';
+    document.getElementById('version-label').textContent = VERSION;
+
     // State
     let editor = null;
+    let pseudoInterpreter = null;
     let isRunning = false;
     let isDebugging = false;
     let isWaitingForInput = false;
@@ -508,23 +515,114 @@
     const tabsScrollLeft = document.getElementById('tabs-scroll-left');
     const tabsScrollRight = document.getElementById('tabs-scroll-right');
 
-    // Default code
-    const defaultCode = `BEGIN
-  // Welcome to the Pseudocode Editor
-  // This is a simple example program
-  
-  OUTPUT "Welcome to Pseudocode!"
-  OUTPUT "What is your name?"
-  INPUT name
-  OUTPUT "Hello, " + name + "!"
-  
-  OUTPUT "Let's count to 5:"
-  FOR i <- 1 TO 5 DO
-    OUTPUT i
-  ENDFOR
-  
-  OUTPUT "Goodbye!"
-END`;
+    // Default code (Romanian pseudocode syntax)
+    const defaultCode = `# ===== PSEUDOCOD - Prezentare completa a limbajului =====
+
+# --- 1. VARIABILE SI ATRIBUIRE ---
+x <- 10
+y <- 3.14
+nume <- "Ana"
+scrie "x = ", x, ", y = ", y, ", nume = ", nume
+
+# --- 2. OPERATII ARITMETICE ---
+suma <- x + 5
+diferenta <- x - 3
+produs <- x * 2
+_cat <- x / 4
+rest <- x % 3
+scrie "Operatii: ", suma, ", ", diferenta, ", ", produs, ", ", _cat, ", ", rest
+
+# --- 3. FUNCTII MATEMATICE ---
+# Radical (sqrt)
+rad <- √16
+scrie "Radical din 16 = ", rad
+
+# Parte intreaga (floor) cu paranteze patrate
+pi <- 3.14159
+intreg <- [pi]
+scrie "Partea intreaga din ", pi, " = ", intreg
+
+# --- 4. CITIRE DE LA TASTATURA ---
+scrie "Introdu un numar:"
+citeste n
+
+# --- 5. STRUCTURA DACA-ATUNCI-ALTFEL ---
+daca n > 0 atunci
+    scrie "Numarul ", n, " este pozitiv"
+altfel
+    daca n < 0 atunci
+        scrie "Numarul ", n, " este negativ"
+    altfel
+        scrie "Numarul este zero"
+    sf
+sf
+
+# --- 6. OPERATORI LOGICI (si, sau, not) ---
+daca n >= 1 si n <= 100 atunci
+    scrie "Numarul este intre 1 si 100"
+sf
+
+# --- 7. BUCLA PENTRU (for) ---
+scrie "Numerele de la 1 la 5:"
+pentru i <- 1, 5 executa
+    scrie i
+sf
+
+# Bucla PENTRU cu pas
+scrie "Numere pare de la 2 la 10:"
+pentru i <- 2, 10, 2 executa
+    scrie i
+sf
+
+# --- 8. BUCLA CAT TIMP (while) ---
+scrie "Countdown:"
+contor <- 5
+cat timp contor > 0 executa
+    scrie contor
+    contor <- contor - 1
+sf
+scrie "Decolare!"
+
+# --- 9. BUCLA REPETA-PANA CAND (do-while) ---
+scrie "Ghiceste numarul (intre 1-10):"
+secret <- 7
+repeta
+    citeste ghicit
+    daca ghicit < secret atunci
+        scrie "Prea mic!"
+    altfel
+        daca ghicit > secret atunci
+            scrie "Prea mare!"
+        sf
+    sf
+pana cand ghicit = secret
+scrie "Felicitari! Ai ghicit!"
+
+# --- 10. INTERSCHIMBARE (swap) ---
+a <- 5
+b <- 9
+scrie "Inainte de swap: a=", a, ", b=", b
+a <-> b
+scrie "Dupa swap: a=", a, ", b=", b
+
+# --- 11. CITIRE MULTIPLA ---
+scrie "Introdu doua numere:"
+citeste p, q
+scrie "Suma: ", (p + q)
+scrie "Produsul: ", (p * q)
+
+# --- 12. OPERATORI DE COMPARATIE ---
+daca p = q atunci
+    scrie "Numerele sunt egale"
+sf
+daca p != q atunci
+    scrie "Numerele sunt diferite"
+sf
+daca p <= q atunci
+    scrie p, " <= ", q
+sf
+
+scrie "=== Program incheiat ==="`;
 
     // Gruvbox Dark theme for Monaco
     const gruvboxTheme = {
@@ -534,12 +632,16 @@ END`;
         { token: '', foreground: 'ebdbb2', background: '1d2021' },
         { token: 'comment', foreground: '928374', fontStyle: 'italic' },
         { token: 'keyword', foreground: 'fb4934' },
-        { token: 'keyword.control', foreground: 'fb4934' },
-        { token: 'keyword.operator', foreground: 'fe8019' },
+        { token: 'keyword.control', foreground: 'fb4934' },          // daca, pentru, cat, repeta
+        { token: 'keyword.flow', foreground: 'fb4934' },             // atunci, altfel, executa, timp, pana, cand, sf
+        { token: 'keyword.function', foreground: 'fabd2f' },         // citeste, scrie
+        { token: 'keyword.operator', foreground: 'fe8019' },         // SAU, SI, NOT
         { token: 'string', foreground: 'b8bb26' },
         { token: 'number', foreground: 'd3869b' },
         { token: 'operator', foreground: '8ec07c' },
         { token: 'delimiter', foreground: 'ebdbb2' },
+        { token: 'delimiter.bracket', foreground: 'fe8019' },        // [ ] for floor
+        { token: 'delimiter.parenthesis', foreground: 'ebdbb2' },
         { token: 'variable', foreground: '83a598' },
         { token: 'function', foreground: 'fabd2f' },
         { token: 'type', foreground: 'fabd2f' },
@@ -570,44 +672,87 @@ END`;
     require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
 
     require(['vs/editor/editor.main'], function () {
-      // Register Pseudocode language
+      // Register Pseudocode language (Romanian syntax)
       monaco.languages.register({ id: 'pseudocode' });
 
       monaco.languages.setMonarchTokensProvider('pseudocode', {
-        ignoreCase: true,
-        keywords: [
-          'BEGIN', 'END', 'IF', 'THEN', 'ELSE', 'ENDIF', 'ELSEIF',
-          'FOR', 'TO', 'DO', 'ENDFOR', 'STEP', 'DOWNTO',
-          'WHILE', 'ENDWHILE', 'REPEAT', 'UNTIL',
-          'FUNCTION', 'ENDFUNCTION', 'PROCEDURE', 'ENDPROCEDURE',
-          'RETURN', 'CALL', 'AND', 'OR', 'NOT', 'MOD', 'DIV',
-          'TRUE', 'FALSE', 'NULL', 'ARRAY', 'OF', 'RECORD', 'ENDRECORD',
-          'INPUT', 'OUTPUT', 'PRINT', 'READ', 'WRITE', 'DECLARE', 'SET'
-        ],
-        operators: ['<-', '←', '+', '-', '*', '/', '=', '<>', '<', '>', '<=', '>=', ':='],
-        symbols: /[=><!~?:&|+\-*\/\^%←]+/,
+        ignoreCase: false,
+        // Control keywords (daca, pentru, cat, repeta)
+        controlKeywords: ['daca', 'pentru', 'cat', 'repeta'],
+        // Flow keywords (atunci, altfel, executa, timp, pana, cand, sf)
+        flowKeywords: ['atunci', 'altfel', 'executa', 'timp', 'pana', 'cand', 'sf'],
+        // Built-in functions
+        builtinFunctions: ['citeste', 'scrie'],
+        // Logical operators
+        logicalOperators: ['SAU', 'sau', 'SI', 'si', 'NOT', 'not'],
         tokenizer: {
           root: [
+            // Comments (# style)
+            [/#.*$/, 'comment'],
+            // Comments (// style)
             [/\/\/.*$/, 'comment'],
-            [/[a-zA-Z_]\w*/, {
+
+            // Strings
+            [/"([^"\\]|\\.)*"/, 'string'],
+            [/'([^'\\]|\\.)*'/, 'string'],
+
+            // Numbers
+            [/\b\d+(\.\d+)?\b/, 'number'],
+
+            // Assignment operators (use \x2D to avoid --> being parsed as HTML comment)
+            [/<->|<-\x2D>/, 'operator'],
+            [/<-/, 'operator'],
+
+            // Comparison operators
+            [/==|!=|<=|>=|<|>|=/, 'operator'],
+
+            // Arithmetic operators
+            [/[+\-*/%√]/, 'operator'],
+
+            // Floor brackets
+            [/\[|\]/, 'delimiter.bracket'],
+
+            // Parentheses
+            [/[()]/, 'delimiter.parenthesis'],
+
+            // Delimiters
+            [/[;,]/, 'delimiter'],
+
+            // Identifiers and keywords
+            [/[a-zA-Z_][a-zA-Z0-9_]*/, {
               cases: {
-                '@keywords': 'keyword',
+                '@controlKeywords': 'keyword.control',
+                '@flowKeywords': 'keyword.flow',
+                '@builtinFunctions': 'keyword.function',
+                '@logicalOperators': 'keyword.operator',
                 '@default': 'variable'
               }
             }],
-            [/"([^"\\]|\\.)*"/, 'string'],
-            [/'([^'\\]|\\.)*'/, 'string'],
-            [/\d+(\.\d+)?/, 'number'],
-            [/@symbols/, {
-              cases: {
-                '@operators': 'operator',
-                '@default': ''
-              }
-            }],
-            [/[{}()\[\]]/, 'delimiter'],
-            [/[;,.]/, 'delimiter'],
           ]
         }
+      });
+
+      // Language configuration (enables Ctrl+/ for comments, bracket matching, etc.)
+      monaco.languages.setLanguageConfiguration('pseudocode', {
+        comments: {
+          lineComment: '#',
+        },
+        brackets: [
+          ['[', ']'],
+          ['(', ')'],
+        ],
+        autoClosingPairs: [
+          { open: '[', close: ']' },
+          { open: '(', close: ')' },
+          { open: '"', close: '"' },
+          { open: "'", close: "'" },
+        ],
+        surroundingPairs: [
+          { open: '[', close: ']' },
+          { open: '(', close: ')' },
+          { open: '"', close: '"' },
+          { open: "'", close: "'" },
+        ],
       });
 
       // Define theme
@@ -651,6 +796,12 @@ END`;
 
       // Initialize with default file
       createFile('main.pseudo', defaultCode);
+
+      // Initialize WASM interpreter
+      pseudoInterpreter = new PseudoInterpreter();
+      pseudoInterpreter.init().catch(err => {
+        appendToConsole(`Failed to initialize: ${err.message}`, 'error');
+      });
     });
 
     // File management functions
@@ -1002,6 +1153,11 @@ END`;
       isWaitingForInput = false;
       inputCallback = null;
 
+      // Stop the WASM interpreter
+      if (pseudoInterpreter) {
+        pseudoInterpreter.stop();
+      }
+
       // Remove any input prompts
       const inputLine = consoleOutput.querySelector('.input-line');
       if (inputLine) inputLine.remove();
@@ -1016,88 +1172,15 @@ END`;
       runStatus.textContent = '';
     }
 
-    // Simple interpreter
+    // WASM-based interpreter
     async function interpret(code, debug) {
-      const lines = code.split('\n');
-      const variables = {};
-
-      function evaluate(expr) {
-        expr = expr.trim();
-        
-        // String concatenation
-        if (expr.includes('+')) {
-          const parts = [];
-          let current = '';
-          let inString = false;
-          let stringChar = '';
-          
-          for (let i = 0; i < expr.length; i++) {
-            const char = expr[i];
-            if ((char === '"' || char === "'") && (i === 0 || expr[i-1] !== '\\')) {
-              if (!inString) {
-                inString = true;
-                stringChar = char;
-              } else if (char === stringChar) {
-                inString = false;
-              }
-              current += char;
-            } else if (char === '+' && !inString) {
-              parts.push(current.trim());
-              current = '';
-            } else {
-              current += char;
-            }
-          }
-          parts.push(current.trim());
-          
-          if (parts.length > 1) {
-            return parts.map(p => evaluate(p)).join('');
-          }
-        }
-
-        // String literal
-        if ((expr.startsWith('"') && expr.endsWith('"')) || 
-            (expr.startsWith("'") && expr.endsWith("'"))) {
-          return expr.slice(1, -1);
-        }
-
-        // Number
-        if (!isNaN(expr) && expr !== '') {
-          return Number(expr);
-        }
-
-        // Variable
-        if (variables.hasOwnProperty(expr)) {
-          return variables[expr];
-        }
-
-        // Simple arithmetic (very basic)
-        if (expr.includes('-') && !expr.startsWith('-')) {
-          const [a, b] = expr.split('-').map(s => evaluate(s.trim()));
-          return a - b;
-        }
-        if (expr.includes('*')) {
-          const [a, b] = expr.split('*').map(s => evaluate(s.trim()));
-          return a * b;
-        }
-        if (expr.includes('/')) {
-          const [a, b] = expr.split('/').map(s => evaluate(s.trim()));
-          return a / b;
-        }
-
-        return expr;
+      if (!pseudoInterpreter || !pseudoInterpreter.initialized) {
+        appendToConsole('WASM interpreter not ready. Please wait...', 'error');
+        return;
       }
 
-      async function delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-      }
-
-      // Yield to allow browser to render
-      async function yieldToRender() {
-        return new Promise(resolve => requestAnimationFrame(resolve));
-      }
-
-      async function waitForInput() {
+      // Helper to wait for user input
+      function waitForInput() {
         return new Promise((resolve) => {
           isWaitingForInput = true;
           inputCallback = resolve;
@@ -1105,116 +1188,27 @@ END`;
         });
       }
 
-      let i = 0;
-      while (i < lines.length && !stopRequested) {
-        const line = lines[i].trim();
-        
-        // Skip empty lines and comments
-        if (!line || line.startsWith('//')) {
-          i++;
-          continue;
-        }
-
-        // Skip BEGIN/END
-        if (line.toUpperCase() === 'BEGIN' || line.toUpperCase() === 'END') {
-          i++;
-          continue;
-        }
-
-        if (debug) {
-          await delay(200);
-        }
-
-        // OUTPUT / PRINT
-        if (line.toUpperCase().startsWith('OUTPUT ') || line.toUpperCase().startsWith('PRINT ')) {
-          const expr = line.substring(line.indexOf(' ') + 1);
-          const value = evaluate(expr);
-          appendToConsole(String(value));
+      await pseudoInterpreter.run(code, {
+        onOutput: (text) => {
+          appendToConsole(text);
+        },
+        onError: (err) => {
+          appendToConsole(`Error: ${err}`, 'error');
+        },
+        onNeedsInput: async () => {
           if (debug) {
-            appendToConsole(`OUTPUT: ${JSON.stringify(value)}`, 'debug');
-          }
-        }
-        // INPUT
-        else if (line.toUpperCase().startsWith('INPUT ')) {
-          const varName = line.substring(6).trim();
-          if (debug) {
-            appendToConsole(`Waiting for input for variable: ${varName}`, 'debug');
+            appendToConsole('Waiting for input...', 'debug');
           }
           const value = await waitForInput();
-          if (stopRequested) break;
-          variables[varName] = isNaN(value) ? value : Number(value);
+          return value;
+        },
+        onStep: (line) => {
           if (debug) {
-            appendToConsole(`${varName} = ${JSON.stringify(variables[varName])}`, 'debug');
+            appendToConsole(`Line ${line + 1}`, 'debug');
           }
-        }
-        // FOR loop
-        else if (line.toUpperCase().startsWith('FOR ')) {
-          const match = line.match(/FOR\s+(\w+)\s*(?:<-|←|:=)\s*(\d+)\s+TO\s+(\d+)\s*(?:DO)?/i);
-          if (match) {
-            const varName = match[1];
-            const start = parseInt(match[2]);
-            const end = parseInt(match[3]);
-            
-            if (debug) {
-              appendToConsole(`Starting FOR loop: ${varName} from ${start} to ${end}`, 'debug');
-            }
-
-            // Find ENDFOR
-            let endForIndex = i + 1;
-            let depth = 1;
-            while (endForIndex < lines.length && depth > 0) {
-              const checkLine = lines[endForIndex].trim().toUpperCase();
-              if (checkLine.startsWith('FOR ')) depth++;
-              if (checkLine === 'ENDFOR') depth--;
-              endForIndex++;
-            }
-            endForIndex--;
-
-            // Execute loop
-            const loopBody = lines.slice(i + 1, endForIndex);
-            for (let j = start; j <= end && !stopRequested; j++) {
-              variables[varName] = j;
-              if (debug) {
-                appendToConsole(`Loop iteration: ${varName} = ${j}`, 'debug');
-                await delay(150);
-              }
-
-              // Execute body
-              for (const bodyLine of loopBody) {
-                if (stopRequested) break;
-                const trimmed = bodyLine.trim();
-                if (trimmed.toUpperCase().startsWith('OUTPUT ') || trimmed.toUpperCase().startsWith('PRINT ')) {
-                  const expr = trimmed.substring(trimmed.indexOf(' ') + 1);
-                  const value = evaluate(expr);
-                  appendToConsole(String(value));
-                  if (debug) await delay(100);
-                }
-              }
-
-              // Yield every 50 iterations to allow rendering
-              if (!debug && (j - start) % 50 === 0) {
-                await yieldToRender();
-              }
-            }
-            
-            i = endForIndex;
-          }
-        }
-        // Variable assignment
-        else if (line.includes('<-') || line.includes('←') || line.includes(':=')) {
-          const parts = line.split(/(?:<-|←|:=)/);
-          if (parts.length === 2) {
-            const varName = parts[0].trim().replace(/^(DECLARE|SET)\s+/i, '');
-            const value = evaluate(parts[1].trim());
-            variables[varName] = value;
-            if (debug) {
-              appendToConsole(`${varName} = ${JSON.stringify(value)}`, 'debug');
-            }
-          }
-        }
-
-        i++;
-      }
+        },
+        debug: debug
+      });
     }
 
     // Event listeners

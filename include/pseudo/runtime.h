@@ -24,6 +24,8 @@ bool runtime_load(runtime_t* rt, const char* source);
 // Execution
 exec_state_t runtime_step(runtime_t* rt);  // Execute one statement
 exec_state_t runtime_run(runtime_t* rt);   // Run until done/input/error (CLI)
+void runtime_resume(runtime_t* rt);        // Resume after input provided (WASM mode)
+void runtime_request_stop(runtime_t* rt);  // Request stop (checked in loops)
 
 // Error reporting
 const char* runtime_get_error(runtime_t* rt);

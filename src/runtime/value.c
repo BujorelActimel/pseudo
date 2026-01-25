@@ -1,6 +1,5 @@
 #include "pseudo/value.h"
 #include "pseudo/string.h"
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -19,7 +18,7 @@ struct value {
 
 value_t* value_create_int(int64_t val) {
     value_t* v = malloc(sizeof(value_t));
-    assert(v);
+    if (!v) return NULL;
     v->type = VALUE_INT;
     v->int_val = val;
     return v;
@@ -27,32 +26,40 @@ value_t* value_create_int(int64_t val) {
 
 value_t* value_create_float(double val) {
     value_t* v = malloc(sizeof(value_t));
-    assert(v);
+    if (!v) return NULL;
     v->type = VALUE_FLOAT;
     v->float_val = val;
     return v;
 }
 
 value_t* value_create_string(const string_t* val) {
-    assert(val);
+    if (!val) return NULL;
     value_t* v = malloc(sizeof(value_t));
-    assert(v);
+    if (!v) return NULL;
     v->type = VALUE_STRING;
     v->string_val = string_create_from_string(val);
+    if (!v->string_val) {
+        free(v);
+        return NULL;
+    }
     return v;
 }
 
 value_t* value_create_string_from(const char* val) {
-    assert(val);
+    if (!val) return NULL;
     value_t* v = malloc(sizeof(value_t));
-    assert(v);
+    if (!v) return NULL;
     v->type = VALUE_STRING;
     v->string_val = string_create_from(val);
+    if (!v->string_val) {
+        free(v);
+        return NULL;
+    }
     return v;
 }
 
 value_t* value_copy(const value_t* val) {
-    assert(val);
+    if (!val) return NULL;
     switch (val->type) {
         case VALUE_INT:
             return value_create_int(val->int_val);
@@ -61,7 +68,7 @@ value_t* value_copy(const value_t* val) {
         case VALUE_STRING:
             return value_create_string(val->string_val);
     }
-    __builtin_unreachable();
+    return NULL;
 }
 
 void value_destroy(value_t* val) {
@@ -75,82 +82,77 @@ void value_destroy(value_t* val) {
 // Type inspection
 
 value_type_t value_type(const value_t* val) {
-    assert(val);
+    if (!val) return VALUE_INT; // Safe default
     return val->type;
 }
 
 bool value_is_int(const value_t* val) {
-    assert(val);
+    if (!val) return false;
     return val->type == VALUE_INT;
 }
 
 bool value_is_float(const value_t* val) {
-    assert(val);
+    if (!val) return false;
     return val->type == VALUE_FLOAT;
 }
 
 bool value_is_string(const value_t* val) {
-    assert(val);
+    if (!val) return false;
     return val->type == VALUE_STRING;
 }
 
 bool value_is_numeric(const value_t* val) {
-    assert(val);
+    if (!val) return false;
     return val->type == VALUE_INT || val->type == VALUE_FLOAT;
 }
 
 // Value access
 
 int64_t value_as_int(const value_t* val) {
-    assert(val);
-    assert(val->type == VALUE_INT);
+    if (!val || val->type != VALUE_INT) return 0;
     return val->int_val;
 }
 
 double value_as_float(const value_t* val) {
-    assert(val);
-    assert(val->type == VALUE_FLOAT);
+    if (!val || val->type != VALUE_FLOAT) return 0.0;
     return val->float_val;
 }
 
 const string_t* value_as_string(const value_t* val) {
-    assert(val);
-    assert(val->type == VALUE_STRING);
+    if (!val || val->type != VALUE_STRING) return NULL;
     return val->string_val;
 }
 
 // Type conversions
 
 int64_t value_to_int(const value_t* val) {
-    assert(val);
-    assert(value_is_numeric(val));
+    if (!val || !value_is_numeric(val)) return 0;
     switch (val->type) {
         case VALUE_INT:
             return val->int_val;
         case VALUE_FLOAT:
             return (int64_t)val->float_val;
         case VALUE_STRING:
-            __builtin_unreachable();
+            return 0;
     }
-    __builtin_unreachable();
+    return 0;
 }
 
 double value_to_float(const value_t* val) {
-    assert(val);
-    assert(value_is_numeric(val));
+    if (!val || !value_is_numeric(val)) return 0.0;
     switch (val->type) {
         case VALUE_INT:
             return (double)val->int_val;
         case VALUE_FLOAT:
             return val->float_val;
         case VALUE_STRING:
-            __builtin_unreachable();
+            return 0.0;
     }
-    __builtin_unreachable();
+    return 0.0;
 }
 
 string_t* value_to_string(const value_t* val) {
-    assert(val);
+    if (!val) return NULL;
     char buffer[64];
     switch (val->type) {
         case VALUE_INT:
@@ -168,11 +170,11 @@ string_t* value_to_string(const value_t* val) {
         case VALUE_STRING:
             return string_create_from_string(val->string_val);
     }
-    __builtin_unreachable();
+    return NULL;
 }
 
 bool value_to_bool(const value_t* val) {
-    assert(val);
+    if (!val) return false;
     switch (val->type) {
         case VALUE_INT:
             return val->int_val != 0;
@@ -181,7 +183,7 @@ bool value_to_bool(const value_t* val) {
         case VALUE_STRING:
             return string_length(val->string_val) > 0;
     }
-    __builtin_unreachable();
+    return false;
 }
 
 // Helper macros
@@ -195,7 +197,10 @@ static bool needs_float_math(const value_t* a, const value_t* b) {
 // Arithmetic operations
 
 value_t* value_add(const value_t* a, const value_t* b, value_error_t* err) {
-    assert(a && b);
+    if (!a || !b) {
+        SET_ERR(err, VALUE_ERR_TYPE);
+        return NULL;
+    }
 
     // String concatenation: both must be strings
     if (a->type == VALUE_STRING && b->type == VALUE_STRING) {
@@ -221,8 +226,7 @@ value_t* value_add(const value_t* a, const value_t* b, value_error_t* err) {
 }
 
 value_t* value_sub(const value_t* a, const value_t* b, value_error_t* err) {
-    assert(a && b);
-    if (!value_is_numeric(a) || !value_is_numeric(b)) {
+    if (!a || !b || !value_is_numeric(a) || !value_is_numeric(b)) {
         SET_ERR(err, VALUE_ERR_TYPE);
         return NULL;
     }
@@ -234,8 +238,7 @@ value_t* value_sub(const value_t* a, const value_t* b, value_error_t* err) {
 }
 
 value_t* value_mul(const value_t* a, const value_t* b, value_error_t* err) {
-    assert(a && b);
-    if (!value_is_numeric(a) || !value_is_numeric(b)) {
+    if (!a || !b || !value_is_numeric(a) || !value_is_numeric(b)) {
         SET_ERR(err, VALUE_ERR_TYPE);
         return NULL;
     }
@@ -247,8 +250,7 @@ value_t* value_mul(const value_t* a, const value_t* b, value_error_t* err) {
 }
 
 value_t* value_div(const value_t* a, const value_t* b, value_error_t* err) {
-    assert(a && b);
-    if (!value_is_numeric(a) || !value_is_numeric(b)) {
+    if (!a || !b || !value_is_numeric(a) || !value_is_numeric(b)) {
         SET_ERR(err, VALUE_ERR_TYPE);
         return NULL;
     }
@@ -263,8 +265,7 @@ value_t* value_div(const value_t* a, const value_t* b, value_error_t* err) {
 }
 
 value_t* value_mod(const value_t* a, const value_t* b, value_error_t* err) {
-    assert(a && b);
-    if (!value_is_numeric(a) || !value_is_numeric(b)) {
+    if (!a || !b || !value_is_numeric(a) || !value_is_numeric(b)) {
         SET_ERR(err, VALUE_ERR_TYPE);
         return NULL;
     }
@@ -278,8 +279,7 @@ value_t* value_mod(const value_t* a, const value_t* b, value_error_t* err) {
 }
 
 value_t* value_neg(const value_t* val, value_error_t* err) {
-    assert(val);
-    if (!value_is_numeric(val)) {
+    if (!val || !value_is_numeric(val)) {
         SET_ERR(err, VALUE_ERR_TYPE);
         return NULL;
     }
@@ -291,8 +291,7 @@ value_t* value_neg(const value_t* val, value_error_t* err) {
 }
 
 value_t* value_sqrt(const value_t* val, value_error_t* err) {
-    assert(val);
-    if (!value_is_numeric(val)) {
+    if (!val || !value_is_numeric(val)) {
         SET_ERR(err, VALUE_ERR_TYPE);
         return NULL;
     }
@@ -310,8 +309,7 @@ value_t* value_sqrt(const value_t* val, value_error_t* err) {
 }
 
 value_t* value_floor(const value_t* val, value_error_t* err) {
-    assert(val);
-    if (!value_is_numeric(val)) {
+    if (!val || !value_is_numeric(val)) {
         SET_ERR(err, VALUE_ERR_TYPE);
         return NULL;
     }
@@ -339,8 +337,7 @@ static int compare_values(const value_t* a, const value_t* b) {
 }
 
 value_t* value_eq(const value_t* a, const value_t* b, value_error_t* err) {
-    assert(a && b);
-    if (!types_comparable(a, b)) {
+    if (!a || !b || !types_comparable(a, b)) {
         SET_ERR(err, VALUE_ERR_TYPE);
         return NULL;
     }
@@ -349,8 +346,7 @@ value_t* value_eq(const value_t* a, const value_t* b, value_error_t* err) {
 }
 
 value_t* value_ne(const value_t* a, const value_t* b, value_error_t* err) {
-    assert(a && b);
-    if (!types_comparable(a, b)) {
+    if (!a || !b || !types_comparable(a, b)) {
         SET_ERR(err, VALUE_ERR_TYPE);
         return NULL;
     }
@@ -359,8 +355,7 @@ value_t* value_ne(const value_t* a, const value_t* b, value_error_t* err) {
 }
 
 value_t* value_lt(const value_t* a, const value_t* b, value_error_t* err) {
-    assert(a && b);
-    if (!types_comparable(a, b)) {
+    if (!a || !b || !types_comparable(a, b)) {
         SET_ERR(err, VALUE_ERR_TYPE);
         return NULL;
     }
@@ -369,8 +364,7 @@ value_t* value_lt(const value_t* a, const value_t* b, value_error_t* err) {
 }
 
 value_t* value_le(const value_t* a, const value_t* b, value_error_t* err) {
-    assert(a && b);
-    if (!types_comparable(a, b)) {
+    if (!a || !b || !types_comparable(a, b)) {
         SET_ERR(err, VALUE_ERR_TYPE);
         return NULL;
     }
@@ -379,8 +373,7 @@ value_t* value_le(const value_t* a, const value_t* b, value_error_t* err) {
 }
 
 value_t* value_gt(const value_t* a, const value_t* b, value_error_t* err) {
-    assert(a && b);
-    if (!types_comparable(a, b)) {
+    if (!a || !b || !types_comparable(a, b)) {
         SET_ERR(err, VALUE_ERR_TYPE);
         return NULL;
     }
@@ -389,8 +382,7 @@ value_t* value_gt(const value_t* a, const value_t* b, value_error_t* err) {
 }
 
 value_t* value_ge(const value_t* a, const value_t* b, value_error_t* err) {
-    assert(a && b);
-    if (!types_comparable(a, b)) {
+    if (!a || !b || !types_comparable(a, b)) {
         SET_ERR(err, VALUE_ERR_TYPE);
         return NULL;
     }
@@ -401,17 +393,17 @@ value_t* value_ge(const value_t* a, const value_t* b, value_error_t* err) {
 // Logical operations (always succeed, use truthiness)
 
 value_t* value_and(const value_t* a, const value_t* b) {
-    assert(a && b);
+    if (!a || !b) return value_create_int(0);
     return value_create_int(value_to_bool(a) && value_to_bool(b) ? 1 : 0);
 }
 
 value_t* value_or(const value_t* a, const value_t* b) {
-    assert(a && b);
+    if (!a || !b) return value_create_int(0);
     return value_create_int(value_to_bool(a) || value_to_bool(b) ? 1 : 0);
 }
 
 value_t* value_not(const value_t* val) {
-    assert(val);
+    if (!val) return value_create_int(1);
     return value_create_int(value_to_bool(val) ? 0 : 1);
 }
 
@@ -434,7 +426,7 @@ const char* value_error_string(value_error_t err) {
 // Additional helper functions
 
 value_t* value_create_string_buf(const char* val, size_t len) {
-    assert(val);
+    if (!val) return NULL;
     value_t* v = malloc(sizeof(value_t));
     if (!v) return NULL;
     

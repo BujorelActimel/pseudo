@@ -24,7 +24,18 @@ parser_t* parser_create(void) {
         return NULL;
     }
 
-    ts_parser_set_language(parser->ts_parser, tree_sitter_pseudo());
+    const TSLanguage* lang = tree_sitter_pseudo();
+    if (!lang) {
+        ts_parser_delete(parser->ts_parser);
+        free(parser);
+        return NULL;
+    }
+
+    if (!ts_parser_set_language(parser->ts_parser, lang)) {
+        ts_parser_delete(parser->ts_parser);
+        free(parser);
+        return NULL;
+    }
 
     parser->tree = NULL;
     parser->source = NULL;

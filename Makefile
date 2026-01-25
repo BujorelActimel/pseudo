@@ -22,8 +22,8 @@ else
     OBJ_DIR = $(BUILD_DIR)/obj/debug
 endif
 
-# Source files: all .c files under src/
-SRC_FILES = $(shell find $(SRC_DIR) -name '*.c')
+# Source files: all .c files under src/ (excluding wasm/ which is Emscripten-only)
+SRC_FILES = $(shell find $(SRC_DIR) -name '*.c' ! -path '$(SRC_DIR)/wasm/*')
 SRC_OBJ = $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/src/%.o,$(SRC_FILES))
 
 # Grammar object file
@@ -36,7 +36,7 @@ TEST_BINS = $(patsubst $(TEST_DIR)/%.c,$(BIN_DIR)/%,$(TEST_FILES))
 # Main target
 TARGET = $(BIN_DIR)/pseudo
 
-.PHONY: all clean debug release test build grammar-generate grammar-test
+.PHONY: all clean debug release test build grammar-generate grammar-test wasm
 
 all: debug
 
@@ -92,6 +92,30 @@ grammar-generate:
 grammar-test:
 	cd $(GRAMMAR_DIR) && bunx tree-sitter test
 
+# Emscripten / WASM configuration
+EMCC = emcc
+WASM_FLAGS = -O2 -s WASM=1 -s MODULARIZE=1 -s EXPORT_NAME="PseudoModule"
+WASM_FLAGS += -s EXPORTED_RUNTIME_METHODS='["ccall","cwrap","UTF8ToString","stringToUTF8","lengthBytesUTF8"]'
+WASM_FLAGS += -s EXPORTED_FUNCTIONS='["_malloc","_free"]'
+WASM_FLAGS += -s ALLOW_MEMORY_GROWTH=1 -s NO_EXIT_RUNTIME=1 --no-entry
+
+WASM_INCLUDES = -Iinclude -Itree-sitter-pseudo/bindings/c -Itree-sitter-pseudo/src \
+                -Itree-sitter-0.25.3/lib/include \
+                -Itree-sitter-0.25.3/lib/src
+
+# Tree-sitter library source (bundled, not linked)
+TS_LIB = tree-sitter-0.25.3/lib/src/lib.c
+
+# WASM source files: all src except cli/main.c, plus bridge.c and grammar
+WASM_SRC = $(filter-out $(SRC_DIR)/cli/main.c $(SRC_DIR)/wasm/bridge.c,$(SRC_FILES)) \
+           $(SRC_DIR)/wasm/bridge.c \
+           $(GRAMMAR_DIR)/src/parser.c \
+           $(TS_LIB)
+
+wasm:
+	$(EMCC) $(WASM_FLAGS) -std=c11 -D_POSIX_C_SOURCE=200809L $(WASM_INCLUDES) $(WASM_SRC) -o web/pseudo.js
+	@echo "Built: web/pseudo.js and web/pseudo.wasm"
+
 # Help
 help:
 	@echo "Usage:"
@@ -100,6 +124,7 @@ help:
 	@echo "  make release  - Build release version"
 	@echo "  make test     - Build and run tests"
 	@echo "  make clean    - Remove build artifacts"
+	@echo "  make wasm     - Build WebAssembly version"
 	@echo ""
 	@echo "Grammar targets:"
 	@echo "  make grammar-generate - Generate tree-sitter parser"
@@ -107,3 +132,4 @@ help:
 	@echo ""
 	@echo "Debug builds:   build/debug/pseudo"
 	@echo "Release builds: build/release/pseudo"
+	@echo "WASM output:    web/pseudo.js, web/pseudo.wasm"

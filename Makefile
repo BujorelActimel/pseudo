@@ -1,6 +1,7 @@
 CC = gcc
 # Use c2x for broader compatibility (c23 not supported on older GCC)
-CFLAGS = -std=c2x -Wall -Wextra -Iinclude -Itree-sitter-pseudo/bindings/c -Itree-sitter-pseudo/src
+# Include bundled tree-sitter headers for portability
+CFLAGS = -std=c2x -Wall -Wextra -Iinclude -Itree-sitter-pseudo/bindings/c -Itree-sitter-pseudo/src -Itree-sitter-0.25.3/lib/include
 LDFLAGS = -lm -ltree-sitter
 
 # Platform-specific tree-sitter paths

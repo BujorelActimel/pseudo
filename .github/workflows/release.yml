@@ -182,13 +182,32 @@ jobs:
       - name: Create web archive
         run: |
           cd web
-          zip -r ../pseudo-web.zip editor.html pseudo.js pseudo.wasm wasm-runner.js version.js
+          zip -r ../pseudo-web.zip index.html pseudo.js pseudo.wasm wasm-runner.js version.js docs.html docs-language.md docs-editor.md
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: pseudo-web
           path: pseudo-web.zip
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/
+
+  deploy-pages:
+    needs: [version, build-wasm]
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
 
   release:
     needs: [version, build-linux, build-windows, build-macos-intel, build-macos-arm, build-wasm]
@@ -220,6 +239,9 @@ jobs:
           body: |
             ## Pseudo++ ${{ needs.version.outputs.version }}
 
+            ### Web Editor (Live)
+            **[Deschide Editorul Online](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/)**
+
             ### Downloads
 
             | Platform | File |
@@ -228,17 +250,11 @@ jobs:
             | Linux x86_64 | `pseudo-linux-x86_64` |
             | macOS Intel | `pseudo-macos-x86_64` |
             | macOS Apple Silicon | `pseudo-macos-arm64` |
-            | Web App | `pseudo-web.zip` |
+            | Web App (offline) | `pseudo-web.zip` |
 
             ### CLI Usage
             ```bash
             ./pseudo program.pseudo
-            ```
-
-            ### Web App Usage
-            Extract `pseudo-web.zip` and open `editor.html` in a browser, or serve with:
-            ```bash
-            python -m http.server
             ```
           files: |
             release/pseudo-windows-x86_64.exe

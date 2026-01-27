@@ -64,7 +64,7 @@ make wasm
 python -m http.server --directory web
 
 # Open in browser
-# http://localhost:8000/editor.html
+# http://localhost:8000
 ```
 
 ## Language Features

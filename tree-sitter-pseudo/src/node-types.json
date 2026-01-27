@@ -640,6 +640,10 @@
           {
             "type": "atom",
             "named": true
+          },
+          {
+            "type": "paren",
+            "named": true
           }
         ]
       }

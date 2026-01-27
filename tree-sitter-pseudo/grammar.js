@@ -214,7 +214,7 @@ module.exports = grammar({
 
     sqrt_expr: $ => prec(PREC.UNARY, seq(
       '\u221A', // √ symbol
-      field('operand', $.atom),
+      field('operand', choice($.atom, $.paren)),
     )),
 
     // Floor: [expr]

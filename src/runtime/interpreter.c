@@ -270,7 +270,7 @@ static value_t* eval_expr(runtime_t* rt, TSNode expr_node) {
     
     if (strcmp(type, NODE_SQRT_EXPR) == 0) {
         TSNode operand = parser_child_by_field(expr_node, "operand");
-        value_t* val = eval_atom(rt, operand);
+        value_t* val = eval_expr(rt, operand);
         value_error_t err = VALUE_OK;
         value_t* result = value_sqrt(val, &err);
         value_destroy(val);

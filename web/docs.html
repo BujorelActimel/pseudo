@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documentație Pseudo++</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-hard: #1d2021;
+      --bg: #282828;
+      --bg-soft: #32302f;
+      --bg1: #3c3836;
+      --bg2: #504945;
+      --bg3: #665c54;
+      --bg4: #7c6f64;
+      --fg: #ebdbb2;
+      --fg2: #d5c4a1;
+      --fg3: #bdae93;
+      --fg4: #a89984;
+      --gray: #928374;
+      --red: #fb4934;
+      --green: #b8bb26;
+      --green-dim: #98971a;
+      --yellow: #fabd2f;
+      --blue: #83a598;
+      --purple: #d3869b;
+      --aqua: #8ec07c;
+      --orange: #fe8019;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.6;
+      min-height: 100vh;
+      font-variant-ligatures: none;
+    }
+
+    /* Landing Page */
+    .landing {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .landing-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .landing-title {
+      font-size: 2.5rem;
+      font-weight: 600;
+      color: var(--fg);
+      margin-bottom: 0.5rem;
+    }
+
+    .landing-subtitle {
+      font-size: 1rem;
+      color: var(--fg4);
+    }
+
+    .cards {
+      display: flex;
+      gap: 2rem;
+      max-width: 800px;
+    }
+
+    .card {
+      flex: 1;
+      background: var(--bg-hard);
+      border: 1px solid var(--bg1);
+      border-radius: 12px;
+      padding: 2rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .card:hover {
+      border-color: var(--bg3);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 1.5rem;
+      color: var(--aqua);
+    }
+
+    .card:nth-child(2) .card-icon {
+      color: var(--yellow);
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--fg);
+      margin-bottom: 0.5rem;
+    }
+
+    .card-description {
+      font-size: 0.875rem;
+      color: var(--fg4);
+      line-height: 1.5;
+    }
+
+    .back-home {
+      margin-top: 3rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--fg4);
+      text-decoration: none;
+      font-size: 0.875rem;
+      transition: color 0.15s;
+    }
+
+    .back-home:hover {
+      color: var(--fg);
+    }
+
+    /* Documentation View */
+    .docs-view {
+      display: none;
+      min-height: 100vh;
+    }
+
+    .docs-view.active {
+      display: flex;
+    }
+
+    .landing.hidden {
+      display: none;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 260px;
+      height: 100vh;
+      background: var(--bg-hard);
+      border-right: 1px solid var(--bg1);
+      padding: 1rem 0;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--bg2) var(--bg-hard);
+    }
+
+    .sidebar-header {
+      padding: 0.5rem 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--bg1);
+      margin-bottom: 1rem;
+    }
+
+    .sidebar-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--fg);
+    }
+
+    .sidebar-subtitle {
+      font-size: 0.75rem;
+      color: var(--fg4);
+      margin-top: 0.25rem;
+    }
+
+    .back-link {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1.25rem;
+      color: var(--blue);
+      text-decoration: none;
+      font-size: 0.875rem;
+      margin-bottom: 1rem;
+      transition: color 0.15s;
+      cursor: pointer;
+    }
+
+    .back-link:hover {
+      color: var(--aqua);
+    }
+
+    #toc {
+      padding: 0 0.5rem;
+    }
+
+    .toc-item {
+      display: block;
+      padding: 0.375rem 0.75rem;
+      color: var(--fg3);
+      text-decoration: none;
+      font-size: 0.8125rem;
+      border-radius: 4px;
+      transition: color 0.15s, background-color 0.15s;
+    }
+
+    .toc-item:hover {
+      color: var(--fg);
+      background: var(--bg-soft);
+    }
+
+    .toc-item.active {
+      color: var(--aqua);
+      background: var(--bg-soft);
+    }
+
+    .toc-item.toc-h3 {
+      padding-left: 1.5rem;
+      font-size: 0.75rem;
+      color: var(--fg4);
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-left: 260px;
+      flex: 1;
+      padding: 2rem 3rem;
+      max-width: 900px;
+    }
+
+    /* Markdown Styles */
+    .markdown h1 {
+      font-size: 2rem;
+      font-weight: 600;
+      color: var(--fg);
+      margin-bottom: 0.5rem;
+    }
+
+    .markdown h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--aqua);
+      margin-top: 3rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--bg1);
+    }
+
+    .markdown h2:first-of-type {
+      margin-top: 1.5rem;
+    }
+
+    .markdown h3 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--blue);
+      margin-top: 2rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .markdown p {
+      margin-bottom: 1rem;
+      color: var(--fg2);
+    }
+
+    .markdown code {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg-hard);
+      padding: 0.125rem 0.375rem;
+      border-radius: 3px;
+      font-size: 0.875em;
+      color: var(--orange);
+    }
+
+    .markdown pre {
+      background: var(--bg-hard);
+      border: 1px solid var(--bg1);
+      border-radius: 6px;
+      padding: 1rem;
+      overflow-x: auto;
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+      position: relative;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      padding: 0.25rem 0.5rem;
+      background: var(--bg2);
+      border: none;
+      border-radius: 4px;
+      color: var(--fg4);
+      font-family: inherit;
+      font-size: 0.75rem;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.15s, background-color 0.15s, color 0.15s;
+    }
+
+    .markdown pre:hover .copy-btn {
+      opacity: 1;
+    }
+
+    .copy-btn:hover {
+      background: var(--bg3);
+      color: var(--fg);
+    }
+
+    .copy-btn.copied {
+      background: var(--green-dim);
+      color: var(--fg);
+    }
+
+    .markdown pre code {
+      background: none;
+      padding: 0;
+      color: var(--fg);
+      font-size: 0.875rem;
+    }
+
+    /* Syntax highlighting */
+    .hl-keyword { color: var(--red); }
+    .hl-function { color: var(--yellow); }
+    .hl-string { color: var(--green); }
+    .hl-number { color: var(--purple); }
+    .hl-operator { color: var(--aqua); }
+    .hl-comment { color: var(--gray); font-style: italic; }
+    .hl-variable { color: var(--blue); }
+    .hl-logic { color: var(--orange); }
+
+    .markdown table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1.5rem;
+    }
+
+    .markdown th, .markdown td {
+      text-align: left;
+      padding: 0.75rem;
+      border: 1px solid var(--bg1);
+    }
+
+    .markdown th {
+      background: var(--bg-hard);
+      color: var(--fg);
+      font-weight: 600;
+    }
+
+    .markdown td {
+      color: var(--fg2);
+    }
+
+    .markdown td code {
+      white-space: nowrap;
+    }
+
+    .markdown ul, .markdown ol {
+      margin-bottom: 1rem;
+      padding-left: 1.5rem;
+    }
+
+    .markdown li {
+      margin-bottom: 0.5rem;
+      color: var(--fg2);
+    }
+
+    .markdown blockquote {
+      background: var(--bg-soft);
+      border-left: 3px solid var(--aqua);
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      border-radius: 0 6px 6px 0;
+    }
+
+    .markdown blockquote p {
+      margin-bottom: 0;
+    }
+
+    .markdown blockquote strong {
+      color: var(--aqua);
+    }
+
+    .markdown blockquote.note {
+      border-left-color: var(--yellow);
+    }
+
+    .markdown blockquote.note strong {
+      color: var(--yellow);
+    }
+
+    .markdown hr {
+      border: none;
+      border-top: 1px solid var(--bg1);
+      margin: 2rem 0;
+    }
+
+    .markdown a {
+      color: var(--blue);
+      text-decoration: none;
+    }
+
+    .markdown a:hover {
+      color: var(--aqua);
+      text-decoration: underline;
+    }
+
+    .markdown strong {
+      color: var(--orange);
+      font-weight: 600;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .cards {
+        flex-direction: column;
+        max-width: 400px;
+      }
+
+      .sidebar {
+        width: 220px;
+      }
+
+      .main-content {
+        margin-left: 220px;
+        padding: 1.5rem 2rem;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .landing {
+        padding: 1.5rem;
+      }
+
+      .landing-title {
+        font-size: 1.75rem;
+      }
+
+      .cards {
+        width: 100%;
+      }
+
+      .card {
+        padding: 1.5rem;
+      }
+
+      .sidebar {
+        position: static;
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--bg1);
+      }
+
+      .main-content {
+        margin-left: 0;
+        padding: 1.5rem;
+      }
+
+      .docs-view.active {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Landing Page -->
+  <div class="landing" id="landing">
+    <div class="landing-header">
+      <h1 class="landing-title">Pseudo++</h1>
+      <p class="landing-subtitle">Documentație</p>
+    </div>
+
+    <div class="cards">
+      <a class="card" onclick="loadDocs('editor')">
+        <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="3" y="3" width="18" height="18" rx="2"/>
+          <path d="M3 9h18"/>
+          <path d="M9 21V9"/>
+          <path d="M13 13h4"/>
+          <path d="M13 17h4"/>
+        </svg>
+        <h2 class="card-title">Editor</h2>
+        <p class="card-description">Interfața, tab-uri, execuție, consola și scurtături de tastatură.</p>
+      </a>
+
+      <a class="card" onclick="loadDocs('language')">
+        <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M14 3v4a1 1 0 0 0 1 1h4"/>
+          <path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/>
+          <path d="M9 13h6"/>
+          <path d="M9 17h3"/>
+        </svg>
+        <h2 class="card-title">Limbaj</h2>
+        <p class="card-description">Sintaxă, variabile, operatori, structuri de control și funcții.</p>
+      </a>
+    </div>
+
+    <a href="editor.html" class="back-home">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+      Înapoi la Editor
+    </a>
+  </div>
+
+  <!-- Documentation View -->
+  <div class="docs-view" id="docs-view">
+    <nav class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-title">Pseudo++</div>
+        <div class="sidebar-subtitle" id="docs-subtitle">Documentație</div>
+      </div>
+
+      <a class="back-link" onclick="showLanding()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        Înapoi
+      </a>
+
+      <div id="toc"></div>
+    </nav>
+
+    <main class="main-content">
+      <div id="content" class="markdown"></div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+    // Pseudocode syntax highlighter - tokenizer approach
+    function highlightPseudocode(code) {
+      const keywords = ['daca', 'pentru', 'cat timp', 'repeta', 'atunci', 'altfel', 'executa', 'pana cand', 'sf'];
+      const functions = ['citeste', 'scrie'];
+      const logic = ['si', 'sau', 'not', 'SI', 'SAU', 'NOT', 'adevarat', 'fals'];
+
+      let result = '';
+      let i = 0;
+
+      while (i < code.length) {
+        // Comments
+        if (code[i] === '#') {
+          let end = code.indexOf('\n', i);
+          if (end === -1) end = code.length;
+          result += `<span class="hl-comment">${escapeHtml(code.slice(i, end))}</span>`;
+          i = end;
+          continue;
+        }
+
+        // Strings
+        if (code[i] === '"' || code[i] === "'") {
+          const quote = code[i];
+          let j = i + 1;
+          while (j < code.length && code[j] !== quote) {
+            if (code[j] === '\\') j++;
+            j++;
+          }
+          j++;
+          result += `<span class="hl-string">${escapeHtml(code.slice(i, j))}</span>`;
+          i = j;
+          continue;
+        }
+
+        // Multi-word keywords (cat timp, pana cand)
+        let foundMulti = false;
+        for (const kw of ['cat timp', 'pana cand']) {
+          if (code.slice(i, i + kw.length) === kw) {
+            const before = i === 0 || /\s/.test(code[i-1]);
+            const after = i + kw.length >= code.length || /\s/.test(code[i + kw.length]);
+            if (before && after) {
+              result += `<span class="hl-keyword">${kw}</span>`;
+              i += kw.length;
+              foundMulti = true;
+              break;
+            }
+          }
+        }
+        if (foundMulti) continue;
+
+        // Operators (multi-char first)
+        const ops = ['<->', '<-', '<=', '>=', '!=', '<>'];
+        let foundOp = false;
+        for (const op of ops) {
+          if (code.slice(i, i + op.length) === op) {
+            result += `<span class="hl-operator">${escapeHtml(op)}</span>`;
+            i += op.length;
+            foundOp = true;
+            break;
+          }
+        }
+        if (foundOp) continue;
+
+        // Single char operators
+        if ('√[]<>=+-*/%'.includes(code[i])) {
+          result += `<span class="hl-operator">${escapeHtml(code[i])}</span>`;
+          i++;
+          continue;
+        }
+
+        // Words (identifiers, keywords, etc)
+        if (/[a-zA-Z_]/.test(code[i])) {
+          let j = i;
+          while (j < code.length && /[a-zA-Z0-9_]/.test(code[j])) j++;
+          const word = code.slice(i, j);
+
+          if (keywords.includes(word)) {
+            result += `<span class="hl-keyword">${word}</span>`;
+          } else if (functions.includes(word)) {
+            result += `<span class="hl-function">${word}</span>`;
+          } else if (logic.includes(word)) {
+            result += `<span class="hl-logic">${word}</span>`;
+          } else {
+            result += escapeHtml(word);
+          }
+          i = j;
+          continue;
+        }
+
+        // Numbers
+        if (/[0-9]/.test(code[i])) {
+          let j = i;
+          while (j < code.length && /[0-9.]/.test(code[j])) j++;
+          result += `<span class="hl-number">${code.slice(i, j)}</span>`;
+          i = j;
+          continue;
+        }
+
+        // Everything else
+        result += escapeHtml(code[i]);
+        i++;
+      }
+
+      return result;
+    }
+
+    function escapeHtml(text) {
+      return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function showLanding() {
+      document.getElementById('landing').classList.remove('hidden');
+      document.getElementById('docs-view').classList.remove('active');
+      history.pushState({}, '', 'docs.html');
+    }
+
+    function addCopyButtons() {
+      document.querySelectorAll('.markdown pre').forEach(pre => {
+        // Skip if already has button
+        if (pre.querySelector('.copy-btn')) return;
+
+        pre.style.position = 'relative';
+
+        const btn = document.createElement('button');
+        btn.className = 'copy-btn';
+        btn.textContent = 'Copy';
+        btn.onclick = async () => {
+          const code = pre.querySelector('code');
+          await navigator.clipboard.writeText(code.textContent);
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.textContent = 'Copy';
+            btn.classList.remove('copied');
+          }, 2000);
+        };
+        pre.appendChild(btn);
+      });
+    }
+
+    function loadDocs(type) {
+      const file = type === 'editor' ? 'docs-editor.md' : 'docs-language.md';
+      const subtitle = type === 'editor' ? 'Editor' : 'Limbaj';
+
+      document.getElementById('landing').classList.add('hidden');
+      document.getElementById('docs-view').classList.add('active');
+      document.getElementById('docs-subtitle').textContent = subtitle;
+
+      fetch(file)
+        .then(r => r.text())
+        .then(md => {
+          document.getElementById('content').innerHTML = marked.parse(md);
+
+          // Syntax highlighting
+          document.querySelectorAll('pre code').forEach(block => {
+            if (block.className.includes('pseudo') || block.className.includes('language-pseudo')) {
+              block.innerHTML = highlightPseudocode(block.textContent);
+            }
+          });
+
+          // Add copy buttons
+          addCopyButtons();
+
+          // Style Note blockquotes
+          document.querySelectorAll('.markdown blockquote').forEach(q => {
+            if (q.textContent.includes('Note:')) q.classList.add('note');
+          });
+
+          // Build TOC
+          const headings = document.querySelectorAll('.markdown h2, .markdown h3');
+          const toc = document.getElementById('toc');
+          toc.innerHTML = '';
+
+          headings.forEach(h => {
+            const id = h.textContent.toLowerCase()
+              .replace(/[^\w\săîâșț-]/g, '')
+              .replace(/\s+/g, '-');
+            h.id = id;
+
+            const link = document.createElement('a');
+            link.href = 'javascript:void(0)';
+            link.className = 'toc-item toc-' + h.tagName.toLowerCase();
+            link.textContent = h.textContent;
+            link.onclick = (e) => {
+              e.preventDefault();
+              h.scrollIntoView({ behavior: 'smooth' });
+            };
+            toc.appendChild(link);
+          });
+
+          // Active TOC highlight
+          const tocLinks = document.querySelectorAll('.toc-item');
+
+          function updateActiveToc() {
+            const scrollPos = window.scrollY + 120;
+            let activeIdx = 0;
+
+            headings.forEach((h, i) => {
+              if (h.offsetTop <= scrollPos) activeIdx = i;
+            });
+
+            tocLinks.forEach((link, i) => {
+              link.classList.toggle('active', i === activeIdx);
+            });
+          }
+
+          window.addEventListener('scroll', updateActiveToc);
+          updateActiveToc();
+          window.scrollTo(0, 0);
+        })
+        .catch(err => {
+          document.getElementById('content').innerHTML =
+            `<p style="color: var(--red)">Eroare: ${err.message}</p>`;
+        });
+
+      history.pushState({type}, '', `docs.html?${type}`);
+    }
+
+    // Handle browser back/forward
+    window.addEventListener('popstate', (e) => {
+      if (e.state && e.state.type) {
+        loadDocs(e.state.type);
+      } else {
+        // Check URL params before showing landing (anchor clicks don't have state)
+        const params = window.location.search.slice(1);
+        if (params === 'editor' || params === 'language') {
+          // Stay on current docs, just scrolled to anchor
+          return;
+        }
+        showLanding();
+      }
+    });
+
+    // Check URL on load
+    const params = window.location.search.slice(1);
+    if (params === 'editor' || params === 'language') {
+      loadDocs(params);
+    }
+  </script>
+</body>
+</html>

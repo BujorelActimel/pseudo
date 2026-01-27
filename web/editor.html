@@ -437,6 +437,9 @@
           <svg class="icon icon-lg" viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6" y="6" width="12" height="12" rx="1"></rect></svg>
         </button>
         <span id="debug-indicator" class="debug-indicator" style="display: none;">Debug mode</span>
+        <a href="docs.html" target="_blank" class="btn btn-icon" title="Documentație">
+          <svg class="icon icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+        </a>
       </div>
     </div>
 
@@ -499,6 +502,49 @@
     let activeFileId = null;
     let fileCounter = 0;
 
+    // LocalStorage persistence
+    const STORAGE_KEY = 'pseudo_editor_state';
+
+    function saveState() {
+      // Save current editor content to active file first
+      if (activeFileId && editor) {
+        const currentFile = files.find(f => f.id === activeFileId);
+        if (currentFile) {
+          currentFile.content = editor.getValue();
+        }
+      }
+      const state = {
+        files: files,
+        activeFileId: activeFileId,
+        editorWidth: editorWidth,
+        fileCounter: fileCounter
+      };
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        console.warn('Failed to save state:', e);
+      }
+    }
+
+    function loadState() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          console.warn('Failed to parse saved state:', e);
+        }
+      }
+      return null;
+    }
+
+    // Debounced save for content changes
+    let saveTimeout = null;
+    function debouncedSave() {
+      if (saveTimeout) clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(saveState, 1000);
+    }
+
     // DOM Elements
     const btnRun = document.getElementById('btn-run');
     const btnDebug = document.getElementById('btn-debug');
@@ -516,113 +562,36 @@
     const tabsScrollRight = document.getElementById('tabs-scroll-right');
 
     // Default code (Romanian pseudocode syntax)
-    const defaultCode = `# ===== PSEUDOCOD - Prezentare completa a limbajului =====
+    const defaultCode = `# Implementarea problemei FizzBuzz in pseudocod
 
-# --- 1. VARIABILE SI ATRIBUIRE ---
-x <- 10
-y <- 3.14
-nume <- "Ana"
-scrie "x = ", x, ", y = ", y, ", nume = ", nume
+# Se primeste ca input un numar, n, si afiseaza toate numerele de la 1 la n astfel:
+#   - daca numarul este divizibil cu 3 se afiseaza 'Fizz'
+#   - daca numarul este divizibil cu 5 se afiseaza 'Buzz'
+#   - daca numarul este divizibil si cu 3 si cu 5 se afiseaza 'FizzBuzz'
+#   - in restul cazurilor se afiseaza numarul
 
-# --- 2. OPERATII ARITMETICE ---
-suma <- x + 5
-diferenta <- x - 3
-produs <- x * 2
-_cat <- x / 4
-rest <- x % 3
-scrie "Operatii: ", suma, ", ", diferenta, ", ", produs, ", ", _cat, ", ", rest
-
-# --- 3. FUNCTII MATEMATICE ---
-# Radical (sqrt)
-rad <- √16
-scrie "Radical din 16 = ", rad
-
-# Parte intreaga (floor) cu paranteze patrate
-pi <- 3.14159
-intreg <- [pi]
-scrie "Partea intreaga din ", pi, " = ", intreg
-
-# --- 4. CITIRE DE LA TASTATURA ---
-scrie "Introdu un numar:"
+scrie "Introduceti valoarea lui n: "
 citeste n
 
-# --- 5. STRUCTURA DACA-ATUNCI-ALTFEL ---
-daca n > 0 atunci
-    scrie "Numarul ", n, " este pozitiv"
+daca n < 1 atunci
+    scrie "Numarul trebuie sa fie mai mare sau egal cu 1"
 altfel
-    daca n < 0 atunci
-        scrie "Numarul ", n, " este negativ"
-    altfel
-        scrie "Numarul este zero"
-    sf
-sf
-
-# --- 6. OPERATORI LOGICI (si, sau, not) ---
-daca n >= 1 si n <= 100 atunci
-    scrie "Numarul este intre 1 si 100"
-sf
-
-# --- 7. BUCLA PENTRU (for) ---
-scrie "Numerele de la 1 la 5:"
-pentru i <- 1, 5 executa
-    scrie i
-sf
-
-# Bucla PENTRU cu pas
-scrie "Numere pare de la 2 la 10:"
-pentru i <- 2, 10, 2 executa
-    scrie i
-sf
-
-# --- 8. BUCLA CAT TIMP (while) ---
-scrie "Countdown:"
-contor <- 5
-cat timp contor > 0 executa
-    scrie contor
-    contor <- contor - 1
-sf
-scrie "Decolare!"
-
-# --- 9. BUCLA REPETA-PANA CAND (do-while) ---
-scrie "Ghiceste numarul (intre 1-10):"
-secret <- 7
-repeta
-    citeste ghicit
-    daca ghicit < secret atunci
-        scrie "Prea mic!"
-    altfel
-        daca ghicit > secret atunci
-            scrie "Prea mare!"
+    pentru numar <- 1, n executa
+        daca numar % 3 = 0 SI numar % 5 = 0 atunci
+            scrie "FizzBuzz"
+        altfel
+            daca numar % 3 = 0 atunci
+                scrie "Fizz"
+            altfel
+                daca numar % 5 = 0 atunci
+                    scrie "Buzz"
+                altfel
+                    scrie numar
+                sf
+            sf
         sf
     sf
-pana cand ghicit = secret
-scrie "Felicitari! Ai ghicit!"
-
-# --- 10. INTERSCHIMBARE (swap) ---
-a <- 5
-b <- 9
-scrie "Inainte de swap: a=", a, ", b=", b
-a <-> b
-scrie "Dupa swap: a=", a, ", b=", b
-
-# --- 11. CITIRE MULTIPLA ---
-scrie "Introdu doua numere:"
-citeste p, q
-scrie "Suma: ", (p + q)
-scrie "Produsul: ", (p * q)
-
-# --- 12. OPERATORI DE COMPARATIE ---
-daca p = q atunci
-    scrie "Numerele sunt egale"
-sf
-daca p != q atunci
-    scrie "Numerele sunt diferite"
-sf
-daca p <= q atunci
-    scrie p, " <= ", q
-sf
-
-scrie "=== Program incheiat ==="`;
+sf`;
 
     // Gruvbox Dark theme for Monaco
     const gruvboxTheme = {
@@ -791,11 +760,42 @@ scrie "=== Program incheiat ==="`;
         }
       });
 
+      // Load saved state or initialize with default
+      const savedState = loadState();
+      if (savedState && savedState.files && savedState.files.length > 0) {
+        // Restore saved state
+        files = savedState.files;
+        activeFileId = savedState.activeFileId;
+        fileCounter = savedState.fileCounter || files.length;
+        if (savedState.editorWidth) {
+          editorWidth = savedState.editorWidth;
+        }
+
+        // Render tabs and switch to active file
+        renderTabs();
+        const activeFile = files.find(f => f.id === activeFileId);
+        if (activeFile) {
+          editor.setValue(activeFile.content);
+        } else if (files.length > 0) {
+          activeFileId = files[0].id;
+          editor.setValue(files[0].content);
+          renderTabs();
+        }
+      } else {
+        // Initialize with default file
+        createFile('fizzBuzz.pseudo', defaultCode);
+      }
+
       // Set initial panel widths
       updatePanelWidths();
 
-      // Initialize with default file
-      createFile('main.pseudo', defaultCode);
+      // Listen for content changes to auto-save
+      editor.onDidChangeModelContent(() => {
+        debouncedSave();
+      });
+
+      // Save state before page unload
+      window.addEventListener('beforeunload', saveState);
 
       // Initialize WASM interpreter
       pseudoInterpreter = new PseudoInterpreter();
@@ -815,10 +815,11 @@ scrie "=== Program incheiat ==="`;
 
       const file = { id, name, content };
       files.push(file);
-      
+
       renderTabs();
       switchToFile(id);
-      
+      saveState();
+
       return file;
     }
 
@@ -842,6 +843,7 @@ scrie "=== Program incheiat ==="`;
       }
 
       renderTabs();
+      saveState();
     }
 
     function switchToFile(id) {
@@ -865,6 +867,7 @@ scrie "=== Program incheiat ==="`;
       }
 
       renderTabs();
+      saveState();
     }
 
     function renameFile(id, newName) {
@@ -872,6 +875,7 @@ scrie "=== Program incheiat ==="`;
       if (file) {
         file.name = newName.endsWith('.pseudo') ? newName : newName + '.pseudo';
         renderTabs();
+        saveState();
       }
     }
 
@@ -1011,6 +1015,7 @@ scrie "=== Program incheiat ==="`;
         resizeHandle.classList.remove('dragging');
         document.body.style.cursor = '';
         document.body.style.userSelect = '';
+        saveState();
       }
     });
 

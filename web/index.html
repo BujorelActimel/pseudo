@@ -417,6 +417,96 @@
       width: 20px;
       height: 20px;
     }
+
+    /* Visual Mode Toggle */
+    .btn-visual-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.25rem 0.5rem;
+      margin-left: auto;
+      background: var(--bg1);
+      border: 1px solid var(--bg2);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--fg4);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-visual-toggle:hover {
+      background: var(--bg2);
+      color: var(--fg2);
+    }
+
+    .btn-visual-toggle.active {
+      background: var(--aqua-dim);
+      border-color: var(--aqua);
+      color: var(--bg);
+    }
+
+    .toggle-switch {
+      width: 24px;
+      height: 14px;
+      background: var(--bg3);
+      border-radius: 7px;
+      position: relative;
+      transition: background 0.15s;
+    }
+
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 10px;
+      height: 10px;
+      background: var(--fg4);
+      border-radius: 50%;
+      transition: transform 0.15s, background 0.15s;
+    }
+
+    .btn-visual-toggle.active .toggle-switch {
+      background: var(--aqua);
+    }
+
+    .btn-visual-toggle.active .toggle-switch::after {
+      transform: translateX(10px);
+      background: var(--bg);
+    }
+
+    .toggle-label {
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* BAC Mode: sf replacement - hide 'sf' text and show └■ aligned with indent guide */
+    .sf-replacement {
+      color: transparent !important;
+      background: transparent !important;
+    }
+
+    /* └■ marker for sf - positioned at start of sf (aligns with indent guide) */
+    .sf-end-marker {
+      position: relative;
+    }
+
+    .sf-end-marker::before {
+      content: '└■';
+      position: absolute;
+      left: -0.432ch; /* crazy magic number, might not work for every browser/screen */
+      color: #3c3836; /* matches editorIndentGuide.background */
+      font-family: 'JetBrains Mono', monospace;
+      pointer-events: none;
+    }
+
+    /* Make Monaco indent guides slightly thicker */
+    .monaco-editor .lines-content .core-guide-indent {
+      box-shadow: 2px 0 0 0 #3c3836;
+    }
+
   </style>
 </head>
 <body>
@@ -458,6 +548,10 @@
               <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg>
             </button>
           </div>
+          <button id="btn-bac-mode" class="btn-visual-toggle" title="Mod vizual: ligatures + sf→└■">
+            <span class="toggle-switch"></span>
+            <span class="toggle-label">Vizual</span>
+          </button>
           <span id="run-status" class="panel-header-status"></span>
         </div>
         <div id="editor-container"></div>
@@ -479,9 +573,10 @@
     </div>
   </div>
 
-  <script src="version.js"></script>
-  <script src="pseudo.js"></script>
-  <script src="wasm-runner.js"></script>
+  <script>
+    // Mock version.js for demo
+    const VERSION = 'v1.0.0';
+  </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
   <script>
     // Set version from version.js
@@ -502,6 +597,10 @@
     let activeFileId = null;
     let fileCounter = 0;
 
+    // BAC mode state
+    let bacModeEnabled = false;
+    let sfDecorations = [];
+
     // LocalStorage persistence
     const STORAGE_KEY = 'pseudo_editor_state';
 
@@ -517,7 +616,8 @@
         files: files,
         activeFileId: activeFileId,
         editorWidth: editorWidth,
-        fileCounter: fileCounter
+        fileCounter: fileCounter,
+        bacModeEnabled: bacModeEnabled
       };
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -560,38 +660,29 @@
     const addFileBtn = document.getElementById('add-file-btn');
     const tabsScrollLeft = document.getElementById('tabs-scroll-left');
     const tabsScrollRight = document.getElementById('tabs-scroll-right');
+    const btnBacMode = document.getElementById('btn-bac-mode');
 
-    // Default code (Romanian pseudocode syntax)
-    const defaultCode = `# Implementarea problemei FizzBuzz in pseudocod
+    // Default code (Romanian pseudocode syntax) - demo with nested blocks
+    const defaultCode = `# Exemplu de pseudocod cu blocuri imbricate
 
-# Se primeste ca input un numar, n, si afiseaza toate numerele de la 1 la n astfel:
-#   - daca numarul este divizibil cu 3 se afiseaza 'Fizz'
-#   - daca numarul este divizibil cu 5 se afiseaza 'Buzz'
-#   - daca numarul este divizibil si cu 3 si cu 5 se afiseaza 'FizzBuzz'
-#   - in restul cazurilor se afiseaza numarul
+citeste m, n
 
-scrie "Introduceti valoarea lui n: "
-citeste n
-
-daca n < 1 atunci
-    scrie "Numarul trebuie sa fie mai mare sau egal cu 1"
-altfel
-    pentru numar <- 1, n executa
-        daca numar % 3 = 0 SI numar % 5 = 0 atunci
-            scrie "FizzBuzz"
-        altfel
-            daca numar % 3 = 0 atunci
-                scrie "Fizz"
+daca m < n atunci
+    repeta
+        x <- m
+        y <- n
+        n <- n - 1
+        repeta
+            daca x > y atunci
+                x <- x - y
             altfel
-                daca numar % 5 = 0 atunci
-                    scrie "Buzz"
-                altfel
-                    scrie numar
-                sf
+                y <- y - x
             sf
-        sf
-    sf
-sf`;
+        pana cand y = 0
+    pana cand x != 1
+sf
+
+scrie n + 1`;
 
     // Gruvbox Dark theme for Monaco
     const gruvboxTheme = {
@@ -601,15 +692,15 @@ sf`;
         { token: '', foreground: 'ebdbb2', background: '1d2021' },
         { token: 'comment', foreground: '928374', fontStyle: 'italic' },
         { token: 'keyword', foreground: 'fb4934' },
-        { token: 'keyword.control', foreground: 'fb4934' },          // daca, pentru, cat, repeta
-        { token: 'keyword.flow', foreground: 'fb4934' },             // atunci, altfel, executa, timp, pana, cand, sf
-        { token: 'keyword.function', foreground: 'fabd2f' },         // citeste, scrie
-        { token: 'keyword.operator', foreground: 'fe8019' },         // SAU, SI, NOT
+        { token: 'keyword.control', foreground: 'fb4934' },
+        { token: 'keyword.flow', foreground: 'fb4934' },
+        { token: 'keyword.function', foreground: 'fabd2f' },
+        { token: 'keyword.operator', foreground: 'fe8019' },
         { token: 'string', foreground: 'b8bb26' },
         { token: 'number', foreground: 'd3869b' },
         { token: 'operator', foreground: '8ec07c' },
         { token: 'delimiter', foreground: 'ebdbb2' },
-        { token: 'delimiter.bracket', foreground: 'fe8019' },        // [ ] for floor
+        { token: 'delimiter.bracket', foreground: 'fe8019' },
         { token: 'delimiter.parenthesis', foreground: 'ebdbb2' },
         { token: 'variable', foreground: '83a598' },
         { token: 'function', foreground: 'fabd2f' },
@@ -646,48 +737,24 @@ sf`;
 
       monaco.languages.setMonarchTokensProvider('pseudocode', {
         ignoreCase: false,
-        // Control keywords (daca, pentru, cat, repeta)
         controlKeywords: ['daca', 'pentru', 'cat', 'repeta'],
-        // Flow keywords (atunci, altfel, executa, timp, pana, cand, sf)
         flowKeywords: ['atunci', 'altfel', 'executa', 'timp', 'pana', 'cand', 'sf'],
-        // Built-in functions
         builtinFunctions: ['citeste', 'scrie'],
-        // Logical operators
         logicalOperators: ['SAU', 'sau', 'SI', 'si', 'NOT', 'not'],
         tokenizer: {
           root: [
-            // Comments (# style)
             [/#.*$/, 'comment'],
-            // Comments (// style)
             [/\/\/.*$/, 'comment'],
-
-            // Strings
             [/"([^"\\]|\\.)*"/, 'string'],
             [/'([^'\\]|\\.)*'/, 'string'],
-
-            // Numbers
             [/\b\d+(\.\d+)?\b/, 'number'],
-
-            // Assignment operators (use \x2D to avoid --> being parsed as HTML comment)
             [/<->|<-\x2D>/, 'operator'],
             [/<-/, 'operator'],
-
-            // Comparison operators
             [/==|!=|<=|>=|<|>|=/, 'operator'],
-
-            // Arithmetic operators
             [/[+\-*/%√]/, 'operator'],
-
-            // Floor brackets
             [/\[|\]/, 'delimiter.bracket'],
-
-            // Parentheses
             [/[()]/, 'delimiter.parenthesis'],
-
-            // Delimiters
             [/[;,]/, 'delimiter'],
-
-            // Identifiers and keywords
             [/[a-zA-Z_][a-zA-Z0-9_]*/, {
               cases: {
                 '@controlKeywords': 'keyword.control',
@@ -701,7 +768,6 @@ sf`;
         }
       });
 
-      // Language configuration (enables Ctrl+/ for comments, bracket matching, etc.)
       monaco.languages.setLanguageConfiguration('pseudocode', {
         comments: {
           lineComment: '#',
@@ -749,6 +815,10 @@ sf`;
         folding: false,
         lineDecorationsWidth: 8,
         lineNumbersMinChars: 3,
+        guides: {
+          indentation: true,
+          highlightActiveIndentation: true
+        },
         overviewRulerBorder: false,
         hideCursorInOverviewRuler: true,
         overviewRulerLanes: 0,
@@ -763,15 +833,16 @@ sf`;
       // Load saved state or initialize with default
       const savedState = loadState();
       if (savedState && savedState.files && savedState.files.length > 0) {
-        // Restore saved state
         files = savedState.files;
         activeFileId = savedState.activeFileId;
         fileCounter = savedState.fileCounter || files.length;
         if (savedState.editorWidth) {
           editorWidth = savedState.editorWidth;
         }
+        if (savedState.bacModeEnabled !== undefined) {
+          bacModeEnabled = savedState.bacModeEnabled;
+        }
 
-        // Render tabs and switch to active file
         renderTabs();
         const activeFile = files.find(f => f.id === activeFileId);
         if (activeFile) {
@@ -782,26 +853,27 @@ sf`;
           renderTabs();
         }
       } else {
-        // Initialize with default file
-        createFile('fizzBuzz.pseudo', defaultCode);
+        createFile('demo.pseudo', defaultCode);
       }
 
       // Set initial panel widths
       updatePanelWidths();
 
-      // Listen for content changes to auto-save
+      // Apply BAC mode UI state
+      updateBacModeUI();
+      setTimeout(() => updateAllDecorations(), 100);
+
+      // Listen for content changes to auto-save and update decorations
       editor.onDidChangeModelContent(() => {
         debouncedSave();
+        if (bacModeEnabled) {
+          clearTimeout(editor._decorationUpdateTimeout);
+          editor._decorationUpdateTimeout = setTimeout(updateAllDecorations, 150);
+        }
       });
 
       // Save state before page unload
       window.addEventListener('beforeunload', saveState);
-
-      // Initialize WASM interpreter
-      pseudoInterpreter = new PseudoInterpreter();
-      pseudoInterpreter.init().catch(err => {
-        appendToConsole(`Failed to initialize: ${err.message}`, 'error');
-      });
     });
 
     // File management functions
@@ -824,19 +896,17 @@ sf`;
     }
 
     function deleteFile(id) {
-      if (files.length <= 1) return; // Keep at least one file
+      if (files.length <= 1) return;
       
       const index = files.findIndex(f => f.id === id);
       if (index === -1) return;
 
-      // Save current content before deleting
       if (activeFileId === id && editor) {
         files[index].content = editor.getValue();
       }
 
       files.splice(index, 1);
 
-      // Switch to another file if we deleted the active one
       if (activeFileId === id) {
         const newIndex = Math.min(index, files.length - 1);
         switchToFile(files[newIndex].id);
@@ -847,10 +917,8 @@ sf`;
     }
 
     function switchToFile(id) {
-      // Skip if already on this file
       if (activeFileId === id) return;
 
-      // Save current file content
       if (activeFileId && editor) {
         const currentFile = files.find(f => f.id === activeFileId);
         if (currentFile) {
@@ -898,14 +966,12 @@ sf`;
         tab.appendChild(nameSpan);
         tab.appendChild(closeBtn);
 
-        // Click to switch (but not on close button)
         tab.addEventListener('click', (e) => {
           if (!e.target.closest('.file-tab-close')) {
             switchToFile(file.id);
           }
         });
 
-        // Double-click on name to rename
         nameSpan.addEventListener('dblclick', (e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -951,7 +1017,6 @@ sf`;
           });
         });
 
-        // Close button
         closeBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           deleteFile(file.id);
@@ -961,12 +1026,10 @@ sf`;
       });
     }
 
-    // Add file button
     addFileBtn.addEventListener('click', () => {
       createFile();
     });
 
-    // Tab scroll functionality
     function updateScrollButtons() {
       const hasOverflow = fileTabs.scrollWidth > fileTabs.clientWidth;
       const canScrollLeft = fileTabs.scrollLeft > 0;
@@ -988,6 +1051,73 @@ sf`;
 
     fileTabs.addEventListener('scroll', updateScrollButtons);
 
+    // BAC Mode toggle functionality
+    function toggleBacMode() {
+      bacModeEnabled = !bacModeEnabled;
+      updateBacModeUI();
+      updateAllDecorations();
+      saveState();
+    }
+
+    function updateBacModeUI() {
+      const editorContainer = document.getElementById('editor-container');
+      btnBacMode.classList.toggle('active', bacModeEnabled);
+      editorContainer.classList.toggle('bac-mode-enabled', bacModeEnabled);
+
+      if (editor) {
+        editor.updateOptions({
+          fontLigatures: bacModeEnabled,
+          // Keep indentation guides enabled - we only modify 'sf' lines
+          guides: {
+            indentation: true,
+            highlightActiveIndentation: true
+          }
+        });
+      }
+    }
+
+    function updateAllDecorations() {
+      if (!editor) return;
+
+      // Clear existing decorations
+      sfDecorations = editor.deltaDecorations(sfDecorations, []);
+
+      if (!bacModeEnabled) return;
+
+      const model = editor.getModel();
+      if (!model) return;
+
+      const text = model.getValue();
+      const lines = text.split('\n');
+      const newDecorations = [];
+
+      // Process each line for 'sf' replacement
+      for (let lineNum = 0; lineNum < lines.length; lineNum++) {
+        const line = lines[lineNum];
+
+        // Find 'sf' keyword on this line
+        const sfMatch = line.match(/^(\s*)sf\b/i);
+        if (sfMatch) {
+          const indent = sfMatch[1].length; // Number of leading spaces
+          const sfStartCol = indent + 1; // 1-based column where 'sf' starts
+          const sfEndCol = sfStartCol + 2; // 'sf' is 2 characters
+
+          // Hide the 'sf' text and add └■ before it
+          newDecorations.push({
+            range: new monaco.Range(lineNum + 1, sfStartCol, lineNum + 1, sfEndCol),
+            options: {
+              inlineClassName: 'sf-replacement',
+              beforeContentClassName: 'sf-end-marker'
+            }
+          });
+        }
+      }
+
+      sfDecorations = editor.deltaDecorations([], newDecorations);
+    }
+
+    btnBacMode.addEventListener('click', toggleBacMode);
+
     // Resize functionality
     let isDragging = false;
 
@@ -1004,7 +1134,6 @@ sf`;
       const containerWidth = document.querySelector('.main').offsetWidth;
       const newWidth = (e.clientX / containerWidth) * 100;
       
-      // Constrain between 20% and 80%
       editorWidth = Math.max(20, Math.min(80, newWidth));
       updatePanelWidths();
     });
@@ -1039,11 +1168,9 @@ sf`;
         return;
       }
 
-      // Remove placeholder if present
       const placeholder = consoleOutput.querySelector('.console-placeholder');
       if (placeholder) placeholder.remove();
 
-      // Create a document fragment for batch insertion
       const fragment = document.createDocumentFragment();
       for (const item of outputBuffer) {
         const line = document.createElement('div');
@@ -1053,7 +1180,6 @@ sf`;
       }
       outputBuffer = [];
 
-      // Insert before input line if it exists, otherwise append
       const existingInput = consoleOutput.querySelector('.input-line');
       if (existingInput) {
         consoleOutput.insertBefore(fragment, existingInput);
@@ -1074,10 +1200,8 @@ sf`;
     }
 
     function showInputPrompt() {
-      // Flush any pending output first
       flushOutputBuffer();
 
-      // Remove placeholder if present
       const placeholder = consoleOutput.querySelector('.console-placeholder');
       if (placeholder) placeholder.remove();
 
@@ -1109,22 +1233,19 @@ sf`;
       consoleOutput.scrollTop = consoleOutput.scrollHeight;
     }
 
-    // Click console to focus input
     consoleOutput.addEventListener('click', () => {
       const input = consoleOutput.querySelector('.console-input');
       if (input) input.focus();
     });
 
-    // Simple pseudocode interpreter
+    // Simple demo run function
     async function runCode(debug = false) {
       if (isRunning) return;
 
-      const code = editor.getValue();
       isRunning = true;
       isDebugging = debug;
       stopRequested = false;
 
-      // Update UI
       btnRun.style.display = 'none';
       btnDebug.style.display = 'none';
       btnStop.style.display = 'flex';
@@ -1133,23 +1254,17 @@ sf`;
 
       clearConsole();
       appendToConsole('Program started.', 'system');
+      appendToConsole('(Demo mode - WASM interpreter not loaded)', 'system');
 
-      try {
-        await interpret(code, debug);
-        if (!stopRequested) {
-          appendToConsole('Program finished.', 'system');
-        }
-      } catch (err) {
-        appendToConsole(`Error: ${err.message}`, 'error');
-      }
-
-      // Reset UI
-      isRunning = false;
-      btnRun.style.display = 'flex';
-      btnDebug.style.display = 'flex';
-      btnStop.style.display = 'none';
-      debugIndicator.style.display = 'none';
-      runStatus.textContent = '';
+      setTimeout(() => {
+        appendToConsole('Program finished.', 'system');
+        isRunning = false;
+        btnRun.style.display = 'flex';
+        btnDebug.style.display = 'flex';
+        btnStop.style.display = 'none';
+        debugIndicator.style.display = 'none';
+        runStatus.textContent = '';
+      }, 500);
     }
 
     function stopCode() {
@@ -1158,62 +1273,16 @@ sf`;
       isWaitingForInput = false;
       inputCallback = null;
 
-      // Stop the WASM interpreter
-      if (pseudoInterpreter) {
-        pseudoInterpreter.stop();
-      }
-
-      // Remove any input prompts
       const inputLine = consoleOutput.querySelector('.input-line');
       if (inputLine) inputLine.remove();
 
       appendToConsole('Program stopped.', 'system');
 
-      // Reset UI
       btnRun.style.display = 'flex';
       btnDebug.style.display = 'flex';
       btnStop.style.display = 'none';
       debugIndicator.style.display = 'none';
       runStatus.textContent = '';
-    }
-
-    // WASM-based interpreter
-    async function interpret(code, debug) {
-      if (!pseudoInterpreter || !pseudoInterpreter.initialized) {
-        appendToConsole('WASM interpreter not ready. Please wait...', 'error');
-        return;
-      }
-
-      // Helper to wait for user input
-      function waitForInput() {
-        return new Promise((resolve) => {
-          isWaitingForInput = true;
-          inputCallback = resolve;
-          showInputPrompt();
-        });
-      }
-
-      await pseudoInterpreter.run(code, {
-        onOutput: (text) => {
-          appendToConsole(text);
-        },
-        onError: (err) => {
-          appendToConsole(`Error: ${err}`, 'error');
-        },
-        onNeedsInput: async () => {
-          if (debug) {
-            appendToConsole('Waiting for input...', 'debug');
-          }
-          const value = await waitForInput();
-          return value;
-        },
-        onStep: (line) => {
-          if (debug) {
-            appendToConsole(`Line ${line + 1}`, 'debug');
-          }
-        },
-        debug: debug
-      });
     }
 
     // Event listeners

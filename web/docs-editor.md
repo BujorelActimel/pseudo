@@ -93,6 +93,31 @@ Când programul ajunge la o comandă `citeste`:
 
 Butonul `×` din header-ul consolei șterge tot conținutul afișat.
 
+## Modul Vizual
+
+Toggle-ul **Vizual** din bara de tab-uri schimbă afișarea codului pentru a arăta la fel ca în subiectele de BAC.
+
+### Ce face?
+
+Când este activat:
+
+- **Ligaturi** — `<-` devine `←`, `<=` devine `≤`, etc.
+- **Marcaj `sf`** — `sf` este înlocuit cu `└■`, aliniat cu ghidajele de indentare
+
+### Exemplu
+
+```pseudo
+daca x > 0 atunci
+    pentru i <- 1, 10 executa
+        scrie i
+    sf
+sf
+```
+
+Cu modul vizual, `<-` apare ca `←` și fiecare `sf` apare ca `└■`.
+
+> **Note:** Afectează doar afișarea. Codul salvat rămâne neschimbat.
+
 ## Scurtături de Tastatură
 
 ### Editare

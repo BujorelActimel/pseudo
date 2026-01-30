@@ -507,6 +507,181 @@
       box-shadow: 2px 0 0 0 #3c3836;
     }
 
+    /* Debug toolbar controls (inline) */
+    .debug-toolbar-controls {
+      display: none;
+      align-items: center;
+      gap: 0.25rem;
+      margin-left: 0.5rem;
+      padding-left: 0.5rem;
+      border-left: 1px solid var(--bg2);
+    }
+
+    .debug-toolbar-controls.visible {
+      display: flex;
+    }
+
+    .debug-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      background: transparent;
+      border: none;
+      border-radius: 4px;
+      color: var(--fg4);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .debug-btn:hover:not(:disabled) {
+      background: var(--bg1);
+      color: var(--fg);
+    }
+
+    .debug-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .debug-btn.step-into:hover:not(:disabled) { color: var(--blue); }
+    .debug-btn.debug-continue:hover:not(:disabled) { color: var(--green); }
+    .debug-btn.debug-stop:hover:not(:disabled) { color: var(--red); }
+
+    /* Variables panel (below console) */
+    .variables-panel {
+      display: none;
+      background: var(--bg-hard);
+      border-top: 1px solid var(--bg1);
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    .variables-panel.visible {
+      display: block;
+    }
+
+    .condition-display {
+      display: none;
+      padding: 0.4rem 0.5rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--bg1);
+      font-size: 0.75rem;
+      font-family: monospace;
+    }
+
+    .condition-display.visible {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .condition-label {
+      color: var(--fg4);
+      text-transform: uppercase;
+      font-size: 0.65rem;
+      letter-spacing: 0.5px;
+    }
+
+    .condition-text {
+      color: var(--aqua);
+      flex: 1;
+    }
+
+    .condition-result {
+      padding: 0.15rem 0.4rem;
+      border-radius: 3px;
+      font-size: 0.7rem;
+      font-weight: 500;
+    }
+
+    .condition-result.true {
+      background: rgba(142, 192, 124, 0.2);
+      color: var(--green);
+    }
+
+    .condition-result.false {
+      background: rgba(251, 73, 52, 0.2);
+      color: var(--red);
+    }
+
+    .variables-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.25rem 0.5rem;
+      background: var(--bg);
+      font-size: 0.7rem;
+      color: var(--fg4);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .variables-header:hover {
+      background: var(--bg1);
+    }
+
+    .variables-content {
+      padding: 0.25rem;
+    }
+
+    .variable-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.2rem 0.4rem;
+      margin: 0.1rem;
+      border-radius: 3px;
+      background: var(--bg);
+      font-size: 0.75rem;
+    }
+
+    .variable-item.changed {
+      animation: highlight-change 1s ease-out;
+    }
+
+    @keyframes highlight-change {
+      0% { background: var(--yellow-dim); }
+      100% { background: var(--bg); }
+    }
+
+    .variable-name {
+      color: var(--blue);
+      font-weight: 500;
+    }
+
+    .variable-value {
+      color: var(--fg);
+    }
+
+    .variable-type {
+      color: var(--fg4);
+      font-size: 0.65rem;
+    }
+
+    .variables-empty {
+      color: var(--fg4);
+      font-size: 0.75rem;
+      font-style: italic;
+      padding: 0.5rem;
+    }
+
+    /* Debug line highlight in editor */
+    .debug-line-highlight {
+      background: rgba(250, 189, 47, 0.15) !important;
+      border-left: 3px solid var(--yellow) !important;
+    }
+
+    .debug-line-glyph {
+      background: var(--yellow);
+      border-radius: 50%;
+      margin-left: 4px;
+    }
+
   </style>
 </head>
 <body>
@@ -526,7 +701,24 @@
         <button id="btn-stop" class="btn btn-stop" title="Stop" style="display: none;">
           <svg class="icon icon-lg" viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6" y="6" width="12" height="12" rx="1"></rect></svg>
         </button>
-        <span id="debug-indicator" class="debug-indicator" style="display: none;">Debug mode</span>
+        <span id="debug-indicator" class="debug-indicator" style="display: none;">Debug</span>
+        <div id="debug-toolbar-controls" class="debug-toolbar-controls">
+          <button id="debug-step-into" class="debug-btn step-into" title="Step (F11)">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 5v14M5 12l7 7 7-7"></path>
+            </svg>
+          </button>
+          <button id="debug-continue" class="debug-btn debug-continue" title="Continue (F5)">
+            <svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+              <path d="M8 5v14l11-7z"></path>
+            </svg>
+          </button>
+          <button id="debug-stop" class="debug-btn debug-stop" title="Stop (Shift+F5)">
+            <svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+              <rect x="6" y="6" width="12" height="12" rx="1"></rect>
+            </svg>
+          </button>
+        </div>
         <a href="docs.html" target="_blank" class="btn btn-icon" title="Documentație">
           <svg class="icon icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
         </a>
@@ -569,18 +761,38 @@
         <div class="console-output" id="console-output">
           <div class="console-placeholder">$ ready</div>
         </div>
+        <div class="variables-panel" id="variables-panel">
+          <div class="condition-display" id="condition-display"></div>
+          <div class="variables-header" id="variables-header">
+            <span>Variables</span>
+            <span id="variables-step">Step 0</span>
+          </div>
+          <div class="variables-content" id="variables-content">
+            <span class="variables-empty">No variables</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <script>
-    // Mock version.js for demo
-    const VERSION = 'v1.0.0';
-  </script>
+  <script src="version.js"></script>
+  <script src="pseudo.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
   <script>
     // Set version from version.js
     document.getElementById('version-label').textContent = VERSION;
+
+    // Initialize WASM module
+    let Module = null;
+    let wasmReady = false;
+
+    PseudoModule().then(mod => {
+      Module = mod;
+      wasmReady = true;
+      console.log('WASM module loaded');
+    }).catch(err => {
+      console.error('Failed to load WASM module:', err);
+    });
 
     // State
     let editor = null;
@@ -661,6 +873,20 @@
     const tabsScrollLeft = document.getElementById('tabs-scroll-left');
     const tabsScrollRight = document.getElementById('tabs-scroll-right');
     const btnBacMode = document.getElementById('btn-bac-mode');
+
+    // Debug UI elements
+    const debugToolbarControls = document.getElementById('debug-toolbar-controls');
+    const debugStepInto = document.getElementById('debug-step-into');
+    const debugContinue = document.getElementById('debug-continue');
+    const debugStop = document.getElementById('debug-stop');
+    const variablesPanel = document.getElementById('variables-panel');
+    const variablesStep = document.getElementById('variables-step');
+    const variablesContent = document.getElementById('variables-content');
+    const conditionDisplay = document.getElementById('condition-display');
+
+    // Debugger state
+    let debugger_ = null;
+    let debugLineDecorations = [];
 
     // Default code (Romanian pseudocode syntax) - demo with nested blocks
     const defaultCode = `# Exemplu de pseudocod cu blocuri imbricate
@@ -1238,9 +1464,359 @@ scrie n + 1`;
       if (input) input.focus();
     });
 
-    // Simple demo run function
+    // PseudoDebugger class for step-through debugging
+    class PseudoDebugger {
+      constructor(wasm) {
+        this.wasm = wasm;
+        this.stateHistory = [];      // Array of {snapshotId, line, variables}
+        this.currentHistoryIndex = -1;
+        this.maxHistory = 100;
+        this.previousVariables = {};
+        this.isAtEnd = false;
+        this.isProgramDone = false;
+      }
+
+      reset() {
+        this.stateHistory = [];
+        this.currentHistoryIndex = -1;
+        this.previousVariables = {};
+        this.isAtEnd = false;
+        this.isProgramDone = false;
+        if (this.wasm) {
+          this.wasm._pseudo_clear_snapshots();
+        }
+      }
+
+      getVariables() {
+        if (!this.wasm) return [];
+        const ptr = this.wasm._pseudo_get_variables_json();
+        if (!ptr) return [];
+        const json = this.wasm.UTF8ToString(ptr);
+        this.wasm._pseudo_free_output(ptr);
+        try {
+          return JSON.parse(json);
+        } catch (e) {
+          console.error('Failed to parse variables JSON:', e);
+          return [];
+        }
+      }
+
+      getNextLine() {
+        if (!this.wasm) return 0;
+        return this.wasm._pseudo_get_next_line();
+      }
+
+      getConditionInfo() {
+        if (!this.wasm) return { valid: false };
+        const ptr = this.wasm._pseudo_get_condition_info();
+        if (!ptr) return { valid: false };
+        const json = this.wasm.UTF8ToString(ptr);
+        this.wasm._pseudo_free_output(ptr);
+        try {
+          return JSON.parse(json);
+        } catch (e) {
+          return { valid: false };
+        }
+      }
+
+      setDebugMode(enabled) {
+        if (this.wasm) {
+          this.wasm._pseudo_set_debug_mode(enabled ? 1 : 0);
+        }
+      }
+
+      createSnapshot() {
+        if (!this.wasm) return -1;
+        return this.wasm._pseudo_create_snapshot();
+      }
+
+      restoreSnapshot(id) {
+        if (!this.wasm) return false;
+        return this.wasm._pseudo_restore_snapshot(id) === 1;
+      }
+
+      // Execute one statement and save state
+      stepInto() {
+        if (!this.wasm || this.isProgramDone) return { done: true };
+
+        // If we stepped back and are now stepping forward through history
+        if (this.currentHistoryIndex < this.stateHistory.length - 1) {
+          this.currentHistoryIndex++;
+          const state = this.stateHistory[this.currentHistoryIndex];
+          this.restoreSnapshot(state.snapshotId);
+          return {
+            done: false,
+            line: state.line,
+            variables: state.variables,
+            changedVars: this.getChangedVars(state.variables)
+          };
+        }
+
+        // Create snapshot before executing
+        const snapshotId = this.createSnapshot();
+        const line = this.getNextLine();
+
+        // Execute one step
+        const result = this.wasm._pseudo_step();
+
+        // Get state after execution
+        const variables = this.getVariables();
+        const changedVars = this.getChangedVars(variables);
+        const conditionInfo = this.getConditionInfo();
+
+        // Save to history
+        const stateEntry = { snapshotId, line, variables, conditionInfo };
+
+        if (this.stateHistory.length >= this.maxHistory) {
+          this.stateHistory.shift();
+        }
+        this.stateHistory.push(stateEntry);
+        this.currentHistoryIndex = this.stateHistory.length - 1;
+
+        // Update previous variables for change detection
+        this.previousVariables = {};
+        for (const v of variables) {
+          this.previousVariables[v.name] = v.value;
+        }
+
+        // Check execution state
+        // 0 = EXEC_CONTINUE, 1 = EXEC_DONE, 2 = EXEC_NEEDS_INPUT, 3 = EXEC_ERROR
+        const isDone = result === 1;
+        const needsInput = result === 2;
+        const hasError = result === 3;
+
+        if (isDone) {
+          this.isProgramDone = true;
+        }
+
+        return {
+          done: isDone,
+          needsInput,
+          hasError,
+          line: this.getNextLine(),
+          variables,
+          changedVars,
+          conditionInfo
+        };
+      }
+
+      // Execute and step over control structures
+      stepOver() {
+        if (!this.wasm || this.isProgramDone) return { done: true };
+
+        // If we stepped back and are now stepping forward through history
+        if (this.currentHistoryIndex < this.stateHistory.length - 1) {
+          return this.stepInto(); // Just use normal step through history
+        }
+
+        // Create snapshot before executing
+        const snapshotId = this.createSnapshot();
+        const line = this.getNextLine();
+
+        // Execute step over (runs until same or lower depth)
+        const result = this.wasm._pseudo_step_over();
+
+        // Get state after execution
+        const variables = this.getVariables();
+        const changedVars = this.getChangedVars(variables);
+        const conditionInfo = this.getConditionInfo();
+
+        // Save to history
+        const stateEntry = { snapshotId, line, variables, conditionInfo };
+
+        if (this.stateHistory.length >= this.maxHistory) {
+          this.stateHistory.shift();
+        }
+        this.stateHistory.push(stateEntry);
+        this.currentHistoryIndex = this.stateHistory.length - 1;
+
+        // Update previous variables for change detection
+        this.previousVariables = {};
+        for (const v of variables) {
+          this.previousVariables[v.name] = v.value;
+        }
+
+        // Check execution state
+        const isDone = result === 1;
+        const needsInput = result === 2;
+        const hasError = result === 3;
+
+        if (isDone) {
+          this.isProgramDone = true;
+        }
+
+        return {
+          done: isDone,
+          needsInput,
+          hasError,
+          line: this.getNextLine(),
+          variables,
+          changedVars,
+          conditionInfo
+        };
+      }
+
+      // Go back one step
+      stepBack() {
+        if (this.currentHistoryIndex <= 0) return null;
+
+        this.currentHistoryIndex--;
+        const state = this.stateHistory[this.currentHistoryIndex];
+        this.restoreSnapshot(state.snapshotId);
+
+        // Reset program done flag since we went back
+        this.isProgramDone = false;
+
+        return {
+          line: state.line,
+          variables: state.variables,
+          changedVars: [],
+          conditionInfo: state.conditionInfo || { valid: false }
+        };
+      }
+
+      // Go forward one step (if we have history)
+      stepForward() {
+        if (this.currentHistoryIndex >= this.stateHistory.length - 1) {
+          // No more history, execute new step
+          return this.stepInto();
+        }
+
+        this.currentHistoryIndex++;
+        const state = this.stateHistory[this.currentHistoryIndex];
+        this.restoreSnapshot(state.snapshotId);
+
+        return {
+          done: false,
+          line: state.line,
+          variables: state.variables,
+          changedVars: []
+        };
+      }
+
+      // Jump to specific point in history
+      jumpToStep(index) {
+        if (index < 0 || index >= this.stateHistory.length) return null;
+
+        this.currentHistoryIndex = index;
+        const state = this.stateHistory[index];
+        this.restoreSnapshot(state.snapshotId);
+
+        // Reset program done flag if we jumped back
+        if (index < this.stateHistory.length - 1) {
+          this.isProgramDone = false;
+        }
+
+        return {
+          line: state.line,
+          variables: state.variables,
+          changedVars: []
+        };
+      }
+
+      getChangedVars(currentVars) {
+        const changed = [];
+        for (const v of currentVars) {
+          if (this.previousVariables[v.name] !== v.value) {
+            changed.push(v.name);
+          }
+        }
+        return changed;
+      }
+
+      canStepBack() {
+        return this.currentHistoryIndex > 0;
+      }
+
+      canStepForward() {
+        return !this.isProgramDone || this.currentHistoryIndex < this.stateHistory.length - 1;
+      }
+
+      getCurrentStep() {
+        return this.currentHistoryIndex + 1;
+      }
+
+      getTotalSteps() {
+        return this.stateHistory.length;
+      }
+    }
+
+    // Update debug UI
+    function updateDebugUI(variables, changedVars = [], conditionInfo = null) {
+      // Update condition display
+      if (conditionInfo && conditionInfo.valid) {
+        conditionDisplay.classList.add('visible');
+        conditionDisplay.innerHTML = `
+          <span class="condition-label">Condition:</span>
+          <span class="condition-text">${escapeHtml(conditionInfo.text)}</span>
+          <span class="condition-result ${conditionInfo.result ? 'true' : 'false'}">${conditionInfo.result ? 'TRUE' : 'FALSE'}</span>
+        `;
+      } else {
+        conditionDisplay.classList.remove('visible');
+        conditionDisplay.innerHTML = '';
+      }
+
+      // Update variables list
+      if (variables.length === 0) {
+        variablesContent.innerHTML = '<span class="variables-empty">No variables</span>';
+      } else {
+        variablesContent.innerHTML = variables.map(v => {
+          const isChanged = changedVars.includes(v.name);
+          return `<span class="variable-item ${isChanged ? 'changed' : ''}">
+            <span class="variable-name">${escapeHtml(v.name)}</span>=<span class="variable-value">${escapeHtml(v.value)}</span>
+            <span class="variable-type">${v.type}</span>
+          </span>`;
+        }).join('');
+      }
+
+      // Update step counter and button states
+      if (debugger_) {
+        const current = debugger_.getCurrentStep();
+        variablesStep.textContent = `Step ${current}`;
+        debugStepInto.disabled = debugger_.isProgramDone;
+        debugContinue.disabled = debugger_.isProgramDone;
+      }
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    // Highlight current line in editor
+    function highlightDebugLine(line) {
+      if (!editor) return;
+
+      debugLineDecorations = editor.deltaDecorations(debugLineDecorations, [{
+        range: new monaco.Range(line + 1, 1, line + 1, 1),
+        options: {
+          isWholeLine: true,
+          className: 'debug-line-highlight',
+          glyphMarginClassName: 'debug-line-glyph'
+        }
+      }]);
+
+      // Scroll to line
+      editor.revealLineInCenter(line + 1);
+    }
+
+    function clearDebugHighlight() {
+      if (editor) {
+        debugLineDecorations = editor.deltaDecorations(debugLineDecorations, []);
+      }
+    }
+
+    // Run or debug code
     async function runCode(debug = false) {
       if (isRunning) return;
+
+      // Check if WASM is loaded
+      if (!wasmReady || !Module || !Module._pseudo_init) {
+        clearConsole();
+        appendToConsole('WASM interpreter not loaded yet. Please wait...', 'error');
+        return;
+      }
 
       isRunning = true;
       isDebugging = debug;
@@ -1248,41 +1824,255 @@ scrie n + 1`;
 
       btnRun.style.display = 'none';
       btnDebug.style.display = 'none';
-      btnStop.style.display = 'flex';
+      btnStop.style.display = debug ? 'none' : 'flex';
       debugIndicator.style.display = debug ? 'inline' : 'none';
       runStatus.textContent = debug ? 'Debugging...' : 'Running...';
 
-      clearConsole();
-      appendToConsole('Program started.', 'system');
-      appendToConsole('(Demo mode - WASM interpreter not loaded)', 'system');
+      // Show/hide debug controls and variables panel
+      debugToolbarControls.classList.toggle('visible', debug);
+      variablesPanel.classList.toggle('visible', debug);
+      if (editor) {
+        editor.updateOptions({ glyphMargin: debug });
+      }
 
-      setTimeout(() => {
-        appendToConsole('Program finished.', 'system');
-        isRunning = false;
-        btnRun.style.display = 'flex';
-        btnDebug.style.display = 'flex';
-        btnStop.style.display = 'none';
-        debugIndicator.style.display = 'none';
-        runStatus.textContent = '';
-      }, 500);
+      clearConsole();
+      clearDebugHighlight();
+      appendToConsole('Program started.', 'system');
+
+      // Initialize runtime
+      if (!Module._pseudo_init()) {
+        const error = Module._pseudo_get_init_error();
+        appendToConsole('Failed to initialize: ' + (error ? Module.UTF8ToString(error) : 'unknown error'), 'error');
+        stopCode(true);
+        return;
+      }
+
+      // Load source code
+      const source = editor.getValue();
+      const sourcePtr = Module.allocateUTF8(source);
+      const loadResult = Module._pseudo_load(sourcePtr);
+      Module._free(sourcePtr);
+
+      if (!loadResult) {
+        const error = Module._pseudo_get_error();
+        appendToConsole('Parse error: ' + (error ? Module.UTF8ToString(error) : 'unknown error'), 'error');
+        stopCode(true);
+        return;
+      }
+
+      if (debug) {
+        // Initialize debugger and enable debug mode (step-by-step visible actions)
+        debugger_ = new PseudoDebugger(Module);
+        debugger_.setDebugMode(true);
+        debugger_.reset();
+        updateDebugUI([], [], null);
+
+        // Highlight first line
+        const firstLine = debugger_.getNextLine();
+        highlightDebugLine(firstLine);
+
+        // Enable controls
+        debugStepInto.disabled = false;
+        debugContinue.disabled = false;
+
+        appendToConsole('Debug mode: Press Step (F11) or Continue (F5).', 'debug');
+      } else {
+        // Run mode - disable debug mode for fast execution
+        if (Module._pseudo_set_debug_mode) {
+          Module._pseudo_set_debug_mode(0);
+        }
+        await executeRunMode();
+      }
     }
 
-    function stopCode() {
+    async function executeRunMode() {
+      const processOutput = () => {
+        while (Module._pseudo_has_output()) {
+          const ptr = Module._pseudo_pop_output();
+          if (ptr) {
+            const output = Module.UTF8ToString(ptr);
+            Module._pseudo_free_output(ptr);
+            appendToConsole(output, 'output');
+          }
+        }
+      };
+
+      const runUntilBlocked = () => {
+        if (stopRequested) {
+          processOutput();
+          return;
+        }
+
+        // Use fast run that executes until done/input/error in one call
+        const result = Module._pseudo_run();
+        processOutput();
+
+        // 0 = EXEC_CONTINUE, 1 = EXEC_DONE, 2 = EXEC_NEEDS_INPUT, 3 = EXEC_ERROR
+        if (result === 2) {
+          // Needs input
+          isWaitingForInput = true;
+          showInputPrompt();
+          inputCallback = (value) => {
+            const inputPtr = Module.allocateUTF8(value);
+            Module._pseudo_push_input(inputPtr);
+            Module._free(inputPtr);
+            runUntilBlocked();
+          };
+        } else if (result === 1) {
+          // Done
+          appendToConsole('Program finished.', 'system');
+          stopCode(true);
+        } else if (result === 3) {
+          // Error
+          const error = Module._pseudo_get_error();
+          appendToConsole('Runtime error: ' + (error ? Module.UTF8ToString(error) : 'unknown error'), 'error');
+          stopCode(true);
+        }
+      };
+
+      runUntilBlocked();
+    }
+
+    // Debug step handlers
+    async function debugStepIntoHandler() {
+      if (!debugger_ || !isDebugging) return;
+
+      const processOutput = () => {
+        while (Module._pseudo_has_output()) {
+          const ptr = Module._pseudo_pop_output();
+          if (ptr) {
+            const output = Module.UTF8ToString(ptr);
+            Module._pseudo_free_output(ptr);
+            appendToConsole(output, 'output');
+          }
+        }
+      };
+
+      const result = debugger_.stepInto();
+      processOutput();
+
+      if (result.needsInput) {
+        isWaitingForInput = true;
+        debugStepInto.disabled = true;
+        showInputPrompt();
+        inputCallback = (value) => {
+          const inputPtr = Module.allocateUTF8(value);
+          Module._pseudo_push_input(inputPtr);
+          Module._free(inputPtr);
+          debugStepInto.disabled = false;
+          debugStepIntoHandler(); // Re-execute the step after input
+        };
+        return;
+      }
+
+      if (result.hasError) {
+        const error = Module._pseudo_get_error();
+        appendToConsole('Runtime error: ' + (error ? Module.UTF8ToString(error) : 'unknown error'), 'error');
+      }
+
+      updateDebugUI(result.variables || [], result.changedVars || [], result.conditionInfo);
+      highlightDebugLine(result.line);
+
+      if (result.done) {
+        appendToConsole('Program finished.', 'system');
+        debugStepInto.disabled = true;
+      }
+    }
+
+    async function debugContinueHandler() {
+      if (!debugger_ || !isDebugging || isWaitingForInput) return;
+
+      // Disable buttons during continue
+      debugStepInto.disabled = true;
+      debugContinue.disabled = true;
+
+      const processOutput = () => {
+        while (Module._pseudo_has_output()) {
+          const ptr = Module._pseudo_pop_output();
+          if (ptr) {
+            const output = Module.UTF8ToString(ptr);
+            Module._pseudo_free_output(ptr);
+            appendToConsole(output, 'output');
+          }
+        }
+      };
+
+      // Run until done/error/input using the fast run function
+      const result = Module._pseudo_run();
+      processOutput();
+
+      // Get final state
+      const variables = debugger_.getVariables();
+      updateDebugUI(variables, [], null);
+      clearDebugHighlight();
+
+      // 0 = EXEC_CONTINUE, 1 = EXEC_DONE, 2 = EXEC_NEEDS_INPUT, 3 = EXEC_ERROR
+      if (result === 2) {
+        // Needs input
+        isWaitingForInput = true;
+        showInputPrompt();
+        const line = Module._pseudo_get_line();
+        highlightDebugLine(line);
+        debugStepInto.disabled = false;
+        debugContinue.disabled = false;
+        inputCallback = (value) => {
+          const inputPtr = Module.allocateUTF8(value);
+          Module._pseudo_push_input(inputPtr);
+          Module._free(inputPtr);
+          debugContinueHandler();
+        };
+        return;
+      }
+
+      if (result === 1) {
+        // Done
+        appendToConsole('Program finished.', 'system');
+        stopCode(true);
+      } else if (result === 3) {
+        // Error
+        const error = Module._pseudo_get_error();
+        appendToConsole('Runtime error: ' + (error ? Module.UTF8ToString(error) : 'unknown error'), 'error');
+        stopCode(true);
+      }
+    }
+
+    function stopCode(silent = false) {
+      if (isDebugging && debugger_) {
+        debugger_.reset();
+        debugger_ = null;
+      }
+
       stopRequested = true;
       isRunning = false;
+      isDebugging = false;
       isWaitingForInput = false;
       inputCallback = null;
 
       const inputLine = consoleOutput.querySelector('.input-line');
       if (inputLine) inputLine.remove();
 
-      appendToConsole('Program stopped.', 'system');
+      if (Module && Module._pseudo_request_stop) {
+        Module._pseudo_request_stop();
+      }
+
+      if (!silent) {
+        appendToConsole('Program stopped.', 'system');
+      }
 
       btnRun.style.display = 'flex';
       btnDebug.style.display = 'flex';
       btnStop.style.display = 'none';
       debugIndicator.style.display = 'none';
+      debugToolbarControls.classList.remove('visible');
+      variablesPanel.classList.remove('visible');
       runStatus.textContent = '';
+
+      // Disable glyph margin when not debugging
+      if (editor) {
+        editor.updateOptions({ glyphMargin: false });
+      }
+
+      clearDebugHighlight();
     }
 
     // Event listeners
@@ -1290,6 +2080,30 @@ scrie n + 1`;
     btnDebug.addEventListener('click', () => runCode(true));
     btnStop.addEventListener('click', stopCode);
     btnClear.addEventListener('click', clearConsole);
+
+    // Debug control event listeners
+    debugStepInto.addEventListener('click', debugStepIntoHandler);
+    debugContinue.addEventListener('click', debugContinueHandler);
+    debugStop.addEventListener('click', stopCode);
+
+    // Keyboard shortcuts for debugging
+    document.addEventListener('keydown', (e) => {
+      if (!isDebugging) return;
+
+      if (e.key === 'F11') {
+        e.preventDefault();
+        debugStepIntoHandler();
+      } else if (e.key === 'F5' && !e.shiftKey) {
+        e.preventDefault();
+        debugContinueHandler();
+      } else if (e.key === 'F5' && e.shiftKey) {
+        e.preventDefault();
+        stopCode();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        stopCode();
+      }
+    });
   </script>
 </body>
 </html>

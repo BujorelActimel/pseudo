@@ -137,7 +137,7 @@ grammar-test:
 # Emscripten / WASM configuration
 EMCC = emcc
 WASM_FLAGS = -O2 -s WASM=1 -s MODULARIZE=1 -s EXPORT_NAME="PseudoModule"
-WASM_FLAGS += -s EXPORTED_RUNTIME_METHODS='["ccall","cwrap","UTF8ToString","stringToUTF8","lengthBytesUTF8"]'
+WASM_FLAGS += -s EXPORTED_RUNTIME_METHODS='["ccall","cwrap","UTF8ToString","stringToUTF8","lengthBytesUTF8","allocateUTF8"]'
 WASM_FLAGS += -s EXPORTED_FUNCTIONS='["_malloc","_free"]'
 WASM_FLAGS += -s ALLOW_MEMORY_GROWTH=1 -s NO_EXIT_RUNTIME=1 --no-entry
 

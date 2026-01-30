@@ -52,6 +52,7 @@ jobs:
 
           NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
           echo "$NEW_VERSION" > VERSION
+          echo "const VERSION = '$NEW_VERSION';" > web/version.js
 
           echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
           echo "tag=v$NEW_VERSION" >> $GITHUB_OUTPUT
@@ -61,7 +62,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add VERSION
+          git add VERSION web/version.js
           git commit -m "chore: bump version to ${{ steps.bump.outputs.version }}"
           git tag ${{ steps.bump.outputs.tag }}
           git push

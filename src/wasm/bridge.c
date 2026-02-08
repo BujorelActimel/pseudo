@@ -1,5 +1,6 @@
 #include "pseudo/runtime.h"
 #include "pseudo/debugger.h"
+#include "pseudo/linter.h"
 #include "pseudo/string.h"
 #include "pseudo/io.h"
 #include <emscripten.h>
@@ -221,5 +222,30 @@ char* pseudo_get_condition_info(void) {
         info.condition_text ? info.condition_text : "",
         info.result ? "true" : "false");
 
+    return result;
+}
+
+// === Linter export ===
+
+EMSCRIPTEN_KEEPALIVE
+char* pseudo_lint(const char* source) {
+    if (!source) return NULL;
+
+    string_t* src = string_create_from(source);
+    if (!src) return NULL;
+
+    string_t* linted = lint(src);
+    string_destroy(src);
+
+    if (!linted) return NULL;
+
+    // Copy to malloc'd buffer for JS to free
+    const char* str = string_cstr(linted);
+    size_t len = string_length(linted);
+    char* result = malloc(len + 1);
+    if (result) {
+        memcpy(result, str, len + 1);
+    }
+    string_destroy(linted);
     return result;
 }

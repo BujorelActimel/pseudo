@@ -148,6 +148,42 @@
       color: var(--fg);
     }
 
+    #editor-container {
+      position: relative;
+    }
+
+    .btn-lint-float {
+      position: absolute;
+      top: 8px;
+      right: 20px;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      background: var(--bg1);
+      border: 1px solid var(--bg3);
+      border-radius: 4px;
+      color: var(--fg4);
+      cursor: pointer;
+      transition: all 0.15s;
+      opacity: 0.7;
+    }
+
+    .btn-lint-float:hover {
+      background: var(--bg2);
+      border-color: var(--yellow);
+      color: var(--yellow);
+      opacity: 1;
+    }
+
+    .btn-lint-float .icon {
+      width: 16px;
+      height: 16px;
+    }
+
     .debug-indicator {
       margin-left: 0.5rem;
       font-size: 0.75rem;
@@ -746,7 +782,14 @@
           </button>
           <span id="run-status" class="panel-header-status"></span>
         </div>
-        <div id="editor-container"></div>
+        <div id="editor-container">
+          <button id="btn-lint" class="btn-lint-float" title="Lint: normalizează caracterele speciale (smart quotes, diacritice, etc.)">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 7h16M4 12h10M4 17h6"></path>
+              <path d="M18 13l3 3-3 3"></path>
+            </svg>
+          </button>
+        </div>
       </div>
 
       <div class="resize-handle" id="resize-handle"></div>
@@ -873,6 +916,7 @@
     const tabsScrollLeft = document.getElementById('tabs-scroll-left');
     const tabsScrollRight = document.getElementById('tabs-scroll-right');
     const btnBacMode = document.getElementById('btn-bac-mode');
+    const btnLint = document.getElementById('btn-lint');
 
     // Debug UI elements
     const debugToolbarControls = document.getElementById('debug-toolbar-controls');
@@ -1344,6 +1388,46 @@ scrie n + 1`;
 
     btnBacMode.addEventListener('click', toggleBacMode);
 
+    // Lint function
+    function lintCode() {
+      const activeFile = files.find(f => f.id === activeFileId);
+      if (!activeFile) return;
+
+      const source = editor.getValue();
+      const sourcePtr = Module.allocateUTF8(source);
+      const resultPtr = Module._pseudo_lint(sourcePtr);
+      Module._free(sourcePtr);
+
+      if (resultPtr) {
+        const linted = Module.UTF8ToString(resultPtr);
+        Module._pseudo_free_output(resultPtr);
+
+        if (linted !== source) {
+          // Save cursor position
+          const position = editor.getPosition();
+
+          // Update editor content
+          editor.setValue(linted);
+
+          // Restore cursor position
+          if (position) {
+            editor.setPosition(position);
+            editor.revealPositionInCenter(position);
+          }
+
+          // Update file content
+          activeFile.content = linted;
+          saveState();
+
+          appendToConsole('Lint: cod normalizat.', 'system');
+        } else {
+          appendToConsole('Lint: nicio modificare necesară.', 'system');
+        }
+      }
+    }
+
+    btnLint.addEventListener('click', lintCode);
+
     // Resize functionality
     let isDragging = false;
 
@@ -1450,8 +1534,9 @@ scrie n + 1`;
           appendToConsole(value, 'input');
           isWaitingForInput = false;
           if (inputCallback) {
-            inputCallback(value);
+            const cb = inputCallback;
             inputCallback = null;
+            cb(value);
           }
         }
       });

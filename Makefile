@@ -98,7 +98,7 @@ $(TS_LIB_OBJ): $(TS_LIB_SRC) | $(OBJ_DIR)
 	$(CC) -std=c11 -O2 -Itree-sitter-0.25.3/lib/src -Itree-sitter-0.25.3/lib/include -c $< -o $@
 
 # Build test binaries (exclude cli/main.o to avoid multiple main definitions)
-$(BIN_DIR)/%: $(TEST_DIR)/%.c $(filter-out $(OBJ_DIR)/src/cli/%,$(SRC_OBJ)) | $(BIN_DIR)
+$(BIN_DIR)/%: $(TEST_DIR)/%.c $(filter-out $(OBJ_DIR)/src/cli/%,$(SRC_OBJ)) $(GRAMMAR_OBJ) $(EXTRA_OBJ) | $(BIN_DIR)
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 	@echo "Built test: $@"
 

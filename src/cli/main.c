@@ -1,6 +1,7 @@
 #include "pseudo/linter.h"
 #include "pseudo/parser.h"
 #include "pseudo/runtime.h"
+#include "pseudo/transpiler.h"
 #include "pseudo/io.h"
 #include "pseudo/string.h"
 #include <tree_sitter/api.h>
@@ -11,15 +12,18 @@
 static void print_usage(const char* prog_name) {
     printf("Usage: %s <command> [options]\n\n", prog_name);
     printf("Commands:\n");
-    printf("  run <file>     Execute pseudocode file\n");
-    printf("  lint <file>    Lint pseudocode file\n");
-    printf("  parse <file>   Parse and show syntax tree\n");
-    printf("  debug <file>   Debug tree (shows all nodes + ERROR/MISSING)\n");
-    printf("  help           Show this help message\n");
+    printf("  run <file>              Execute pseudocode file\n");
+    printf("  lint <file>             Lint pseudocode file\n");
+    printf("  parse <file>            Parse and show syntax tree\n");
+    printf("  debug <file>            Debug tree (shows all nodes + ERROR/MISSING)\n");
+    printf("  transpile <target> <file>  Transpile to C, C++ or Pascal\n");
+    printf("                          target: c | cpp | pascal\n");
+    printf("  help                    Show this help message\n");
     printf("\nExample:\n");
     printf("  %s run program.pseudo\n", prog_name);
-    printf("  %s lint input.txt\n", prog_name);
-    printf("  %s parse input.txt\n", prog_name);
+    printf("  %s transpile c program.pseudo\n", prog_name);
+    printf("  %s transpile cpp program.pseudo\n", prog_name);
+    printf("  %s transpile pascal program.pseudo\n", prog_name);
 }
 
 static string_t* read_file(const char* filename) {
@@ -151,6 +155,40 @@ static int cmd_debug(int argc, char** argv) {
     return 0;
 }
 
+static int cmd_transpile(int argc, char** argv) {
+    if (argc < 4) {
+        fprintf(stderr, "Eroare: comanda transpile necesita un target si un fisier\n\n");
+        print_usage(argv[0]);
+        return 1;
+    }
+
+    const char* target   = argv[2];
+    const char* filename = argv[3];
+
+    int lang = transpile_lang_from_str(target);
+    if (lang < 0) {
+        fprintf(stderr, "Eroare: target necunoscut '%s' (acceptat: c, cpp, pascal)\n", target);
+        return 1;
+    }
+
+    string_t* input = read_file(filename);
+    if (!input) return 1;
+
+    char* error  = NULL;
+    char* result = transpile_source(string_cstr(input), (transpile_lang_t)lang, &error);
+    string_destroy(input);
+
+    if (!result) {
+        fprintf(stderr, "Eroare de transpilare: %s\n", error ? error : "eroare necunoscuta");
+        free(error);
+        return 1;
+    }
+
+    printf("%s", result);
+    free(result);
+    return 0;
+}
+
 static int cmd_run(int argc, char** argv) {
     if (argc < 3) {
         fprintf(stderr, "Eroare: comanda run necesita un fisier\n\n");
@@ -221,6 +259,8 @@ int main(int argc, char** argv) {
         return cmd_parse(argc, argv);
     } else if (strcmp(command, "debug") == 0) {
         return cmd_debug(argc, argv);
+    } else if (strcmp(command, "transpile") == 0) {
+        return cmd_transpile(argc, argv);
     } else if (strcmp(command, "help") == 0 || strcmp(command, "--help") == 0 || strcmp(command, "-h") == 0) {
         print_usage(argv[0]);
         return 0;

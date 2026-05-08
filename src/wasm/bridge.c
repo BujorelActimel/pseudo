@@ -1,6 +1,7 @@
 #include "pseudo/runtime.h"
 #include "pseudo/debugger.h"
 #include "pseudo/linter.h"
+#include "pseudo/transpiler.h"
 #include "pseudo/string.h"
 #include "pseudo/io.h"
 #include <emscripten.h>
@@ -222,6 +223,26 @@ char* pseudo_get_condition_info(void) {
         info.condition_text ? info.condition_text : "",
         info.result ? "true" : "false");
 
+    return result;
+}
+
+// === Transpiler export ===
+
+EMSCRIPTEN_KEEPALIVE
+char* pseudo_transpile(const char* source, const char* language) {
+    if (!source || !language) return NULL;
+
+    int lang = transpile_lang_from_str(language);
+    if (lang < 0) return NULL;
+
+    char* error  = NULL;
+    char* result = transpile_source(source, (transpile_lang_t)lang, &error);
+
+    if (!result) {
+        // Return the error message so JS can display it; caller frees with pseudo_free_output
+        return error;
+    }
+    free(error);
     return result;
 }
 

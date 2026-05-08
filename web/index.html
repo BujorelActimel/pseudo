@@ -137,6 +137,62 @@
       color: var(--red);
     }
 
+    /* Transpile split-button */
+    .btn-group-transpile {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .btn-transpile-main {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: transparent;
+      color: var(--aqua);
+      padding: 0.4rem 0.55rem;
+      border-radius: 6px 0 0 6px;
+    }
+    .btn-transpile-main:hover { background: var(--bg1); }
+    .btn-transpile-caret {
+      background: transparent;
+      color: var(--aqua);
+      border-radius: 0 6px 6px 0;
+      border-left: 1px solid rgba(255,255,255,0.10);
+      padding: 0.4rem 0.35rem;
+      min-width: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-transpile-caret:hover { background: var(--bg1); }
+    .lang-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 4px);
+      right: 0;
+      background: var(--bg2);
+      border: 1px solid var(--bg3);
+      border-radius: 6px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.45);
+      z-index: 200;
+      min-width: 90px;
+      overflow: hidden;
+    }
+    .lang-dropdown.open { display: block; }
+    .lang-option {
+      display: block;
+      width: 100%;
+      padding: 7px 14px;
+      text-align: left;
+      background: none;
+      border: none;
+      color: var(--fg1);
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .lang-option:hover { background: var(--bg3); }
+    .lang-option.active { color: var(--yellow); }
+
     .btn-icon {
       padding: 0.5rem;
       background: transparent;
@@ -163,10 +219,6 @@
       transition: opacity 0.12s ease;
       z-index: 9999;
       box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-    }
-
-    #editor-container {
-      position: relative;
     }
 
     .btn-lint-float {
@@ -220,6 +272,66 @@
       flex-direction: column;
       min-width: 200px;
       background: var(--bg-hard);
+    }
+
+    .editor-body {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+    }
+
+    #editor-container {
+      flex: 1;
+      min-width: 0;
+      position: relative;
+    }
+
+    /* Transpile split view */
+    .transpile-divider {
+      width: 1px;
+      background: var(--bg3);
+      flex-shrink: 0;
+    }
+    .transpile-pane {
+      display: flex;
+      flex-direction: column;
+      flex: 0 0 50%;
+      min-width: 0;
+      background: var(--bg-hard);
+    }
+    .transpile-pane-header {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 0 8px;
+      height: 36px;
+      border-bottom: 1px solid var(--bg1);
+      background: var(--bg);
+      flex-shrink: 0;
+    }
+    .transpile-pane-title {
+      flex: 1;
+      font-size: 12px;
+      color: var(--fg4);
+      font-family: 'JetBrains Mono', monospace;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .btn-icon-small {
+      background: none;
+      border: none;
+      color: var(--fg4);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+    }
+    .btn-icon-small:hover { color: var(--fg); background: var(--bg1); }
+    #transpile-editor-container {
+      flex: 1;
+      min-height: 0;
     }
 
     .panel-header {
@@ -349,11 +461,6 @@
     .add-file-btn:hover {
       background: var(--bg-soft);
       color: var(--fg);
-    }
-
-    #editor-container {
-      flex: 1;
-      min-height: 0;
     }
 
     /* Resize handle */
@@ -799,6 +906,20 @@
             </svg>
           </button>
         </div>
+        <div class="btn-group-transpile">
+          <button id="btn-transpile" class="btn btn-transpile-main" data-tooltip="Transpilează">
+            <svg class="icon icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16V4m0 0L3 8m4-4 4 4"/><path d="M17 8v12m0 0 4-4m-4 4-4-4"/></svg>
+            <span id="transpile-lang-label">C</span>
+          </button>
+          <button id="btn-transpile-lang" class="btn btn-transpile-caret" data-tooltip="Alege limbaj">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="lang-dropdown" id="lang-dropdown">
+            <button class="lang-option" data-lang="c">C</button>
+            <button class="lang-option" data-lang="cpp">C++</button>
+            <button class="lang-option" data-lang="pascal">Pascal</button>
+          </div>
+        </div>
         <a href="docs.html" target="_blank" class="btn btn-icon" data-tooltip="Documentație">
           <svg class="icon icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
         </a>
@@ -825,13 +946,28 @@
             <span class="toggle-label">Vizual</span>
           </button>
         </div>
-        <div id="editor-container">
-          <button id="btn-lint" class="btn-lint-float" data-tooltip="Normalizează caracterele speciale">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M4 7h16M4 12h10M4 17h6"></path>
-              <path d="M18 13l3 3-3 3"></path>
-            </svg>
-          </button>
+        <div id="editor-body" class="editor-body">
+          <div id="editor-container">
+            <button id="btn-lint" class="btn-lint-float" data-tooltip="Normalizează caracterele speciale">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 7h16M4 12h10M4 17h6"></path>
+                <path d="M18 13l3 3-3 3"></path>
+              </svg>
+            </button>
+          </div>
+          <div class="transpile-divider" id="transpile-divider" style="display:none"></div>
+          <div class="transpile-pane" id="transpile-pane" style="display:none">
+            <div class="transpile-pane-header">
+              <span class="transpile-pane-title" id="transpile-pane-title">output.c</span>
+              <button class="btn-icon-small" id="btn-transpile-copy" data-tooltip="Copiază codul">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              </button>
+              <button class="btn-icon-small" id="btn-transpile-close" data-tooltip="Închide">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <div id="transpile-editor-container"></div>
+          </div>
         </div>
       </div>
 
@@ -877,6 +1013,7 @@
       const target = e.target.closest('[data-tooltip]');
       if (!target) return;
       tooltipEl.textContent = target.getAttribute('data-tooltip');
+      tooltipEl.style.color  = '';
       tooltipEl.style.opacity = '1';
       const r = target.getBoundingClientRect();
       const tr = tooltipEl.getBoundingClientRect();
@@ -2254,6 +2391,168 @@ scrie n + 1`;
     debugStepInto.addEventListener('click', debugStepIntoHandler);
     debugContinue.addEventListener('click', debugContinueHandler);
     debugStop.addEventListener('click', stopCode);
+
+    // ── Transpile split-view ───────────────────────────────────────────────
+
+    const langExtMap    = { c: '.c', cpp: '.cpp', pascal: '.pas' };
+    const monacoLangMap = { c: 'c', cpp: 'cpp', pascal: 'pascal' };
+    const langLabels    = { c: 'C', cpp: 'C++', pascal: 'Pascal' };
+
+    let currentTranspileLang = 'c';
+    let transpileEditor      = null;
+    let transpileVisible     = false;
+
+    function getActiveFilename() {
+      const f = files.find(f => f.id === activeFileId);
+      return f ? f.name : 'output';
+    }
+
+    // ── Split-button: language picker ──────────────────────────────────────
+    const btnTranspile      = document.getElementById('btn-transpile');
+    const btnTranspileLang  = document.getElementById('btn-transpile-lang');
+    const langDropdown      = document.getElementById('lang-dropdown');
+    const transpileLangLabel = document.getElementById('transpile-lang-label');
+
+    function updateLangDropdown() {
+      document.querySelectorAll('.lang-option').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lang === currentTranspileLang);
+      });
+      transpileLangLabel.textContent = langLabels[currentTranspileLang];
+    }
+
+    btnTranspileLang.addEventListener('click', (e) => {
+      e.stopPropagation();
+      langDropdown.classList.toggle('open');
+    });
+
+    document.querySelectorAll('.lang-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentTranspileLang = btn.dataset.lang;
+        updateLangDropdown();
+        langDropdown.classList.remove('open');
+      });
+    });
+
+    document.addEventListener('click', () => langDropdown.classList.remove('open'));
+
+    updateLangDropdown();
+
+    // ── Second Monaco instance (created on first transpile) ─────────────────
+    function getOrCreateTranspileEditor() {
+      if (transpileEditor) return transpileEditor;
+      transpileEditor = monaco.editor.create(
+        document.getElementById('transpile-editor-container'), {
+          value: '',
+          language: 'c',
+          theme: 'gruvbox-dark',
+          readOnly: true,
+          fontFamily: "'JetBrains Mono', monospace",
+          fontSize: 14,
+          lineHeight: 1.6,
+          padding: { top: 16 },
+          minimap: { enabled: false },
+          scrollBeyondLastLine: false,
+          renderLineHighlight: 'line',
+          wordWrap: 'on',
+          automaticLayout: true,
+          lineNumbers: 'on',
+          glyphMargin: false,
+          folding: false,
+          lineDecorationsWidth: 8,
+          lineNumbersMinChars: 3,
+          overviewRulerBorder: false,
+          hideCursorInOverviewRuler: true,
+          overviewRulerLanes: 0,
+          scrollbar: { vertical: 'auto', horizontal: 'auto', verticalScrollbarSize: 10 },
+        }
+      );
+      return transpileEditor;
+    }
+
+    // ── Show / hide pane ───────────────────────────────────────────────────
+    function showTranspilePane() {
+      if (transpileVisible) return;
+      transpileVisible = true;
+      document.getElementById('transpile-pane').style.display = 'flex';
+      document.getElementById('transpile-divider').style.display = 'block';
+      // Hide console while split-view is open — too cramped otherwise
+      consolePanel.style.display = 'none';
+      resizeHandle.style.display = 'none';
+      editorPanel.style.width = '100%';
+      editor.layout();
+    }
+
+    function hideTranspilePane() {
+      if (!transpileVisible) return;
+      transpileVisible = false;
+      document.getElementById('transpile-pane').style.display = 'none';
+      document.getElementById('transpile-divider').style.display = 'none';
+      // Restore console
+      consolePanel.style.display = '';
+      resizeHandle.style.display = '';
+      updatePanelWidths();
+      editor.layout();
+    }
+
+    // ── Main transpile action ──────────────────────────────────────────────
+    function transpileCode() {
+      if (!wasmReady || !Module || !Module._pseudo_transpile) {
+        appendToConsole('Modulul nu este încărcat. Așteptați...', 'error');
+        return;
+      }
+      const source  = editor.getValue();
+      const lang    = currentTranspileLang;
+      const srcPtr  = Module.allocateUTF8(source);
+      const langPtr = Module.allocateUTF8(lang);
+      const resPtr  = Module._pseudo_transpile(srcPtr, langPtr);
+      Module._free(srcPtr);
+      Module._free(langPtr);
+
+      if (!resPtr) {
+        appendToConsole('Transpilare eșuată.', 'error');
+        return;
+      }
+      const result = Module.UTF8ToString(resPtr);
+      Module._pseudo_free_output(resPtr);
+
+      const te = getOrCreateTranspileEditor();
+      monaco.editor.setModelLanguage(te.getModel(), monacoLangMap[lang]);
+      te.setValue(result);
+
+      const baseName = getActiveFilename().replace(/\.pseudo$/, '');
+      document.getElementById('transpile-pane-title').textContent = baseName + langExtMap[lang];
+
+      showTranspilePane();
+    }
+
+    btnTranspile.addEventListener('click', transpileCode);
+
+    document.getElementById('btn-transpile-close').addEventListener('click', hideTranspilePane);
+
+    document.getElementById('btn-transpile-copy').addEventListener('click', () => {
+      if (!transpileEditor) return;
+      const btn = document.getElementById('btn-transpile-copy');
+      navigator.clipboard.writeText(transpileEditor.getValue())
+        .then(() => {
+          const r = btn.getBoundingClientRect();
+          tooltipEl.textContent   = 'Copiat!';
+          tooltipEl.style.color   = 'var(--green)';
+          tooltipEl.style.opacity = '1';
+          requestAnimationFrame(() => {
+            const tr = tooltipEl.getBoundingClientRect();
+            let left = r.left + r.width / 2 - tr.width / 2;
+            if (left < 4) left = 4;
+            if (left + tr.width > window.innerWidth - 4) left = window.innerWidth - tr.width - 4;
+            tooltipEl.style.top  = (r.bottom + 7) + 'px';
+            tooltipEl.style.left = left + 'px';
+          });
+          setTimeout(() => {
+            tooltipEl.style.opacity = '0';
+            tooltipEl.style.color   = '';
+          }, 800);
+        })
+        .catch(() => appendToConsole('Copierea a eșuat.', 'error'));
+    });
 
     // Keyboard shortcuts for debugging
     document.addEventListener('keydown', (e) => {

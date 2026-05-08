@@ -2193,51 +2193,67 @@ scrie n + 1`;
     }
 
     async function executeRunMode() {
+      const MAX_OUTPUT_LINES = 1000;
+      const STEPS_PER_FRAME = 2000;
+      let stepCount = 0;
+
       const processOutput = () => {
         while (Module._pseudo_has_output()) {
           const ptr = Module._pseudo_pop_output();
-          if (ptr) {
-            const output = Module.UTF8ToString(ptr);
-            Module._pseudo_free_output(ptr);
-            appendToConsole(output, 'output');
-          }
+          if (!ptr) continue;
+          const output = Module.UTF8ToString(ptr);
+          Module._pseudo_free_output(ptr);
+          appendToConsole(output, 'output');
         }
       };
 
-      const runUntilBlocked = () => {
-        if (stopRequested) {
-          processOutput();
-          return;
-        }
+      // Remove oldest output lines so at most MAX_OUTPUT_LINES remain.
+      // Called after the rAF yield so flushOutputBuffer has already run.
+      const trimConsole = () => {
+        const lines = consoleOutput.querySelectorAll('.console-line.output');
+        if (lines.length <= MAX_OUTPUT_LINES) return;
+        const excess = lines.length - MAX_OUTPUT_LINES;
+        for (let i = 0; i < excess; i++) lines[i].remove();
+      };
 
-        // Use fast run that executes until done/input/error in one call
-        const result = Module._pseudo_run();
+      // 0 = EXEC_CONTINUE, 1 = EXEC_DONE, 2 = EXEC_NEEDS_INPUT, 3 = EXEC_ERROR
+      while (!stopRequested) {
+        const result = Module._pseudo_step();
         processOutput();
 
-        // 0 = EXEC_CONTINUE, 1 = EXEC_DONE, 2 = EXEC_NEEDS_INPUT, 3 = EXEC_ERROR
-        if (result === 2) {
-          // Needs input
-          isWaitingForInput = true;
-          showInputPrompt();
-          inputCallback = (value) => {
-            const inputPtr = Module.allocateUTF8(value);
-            Module._pseudo_push_input(inputPtr);
-            Module._free(inputPtr);
-            runUntilBlocked();
-          };
-        } else if (result === 1) {
-          // Done
+        if (result === 1) {
           appendToConsole('Program terminat.', 'system');
           stopCode(true);
+          return;
+        } else if (result === 2) {
+          isWaitingForInput = true;
+          showInputPrompt();
+          await new Promise(resolve => {
+            inputCallback = (value) => {
+              const inputPtr = Module.allocateUTF8(value);
+              Module._pseudo_push_input(inputPtr);
+              Module._free(inputPtr);
+              resolve();
+            };
+          });
+          if (stopRequested) return;
         } else if (result === 3) {
-          // Error
           const error = Module._pseudo_get_error();
           appendToConsole('Eroare de execuție: ' + (error ? Module.UTF8ToString(error) : 'eroare necunoscută'), 'error');
           stopCode(true);
+          return;
         }
-      };
 
-      runUntilBlocked();
+        stepCount++;
+        if (stepCount % STEPS_PER_FRAME === 0) {
+          // flushOutputBuffer's rAF was registered before this one, so it
+          // fires first — DOM is up-to-date by the time trimConsole runs.
+          await new Promise(resolve => requestAnimationFrame(resolve));
+          trimConsole();
+        }
+      }
+
+      processOutput();
     }
 
     // Debug step handlers

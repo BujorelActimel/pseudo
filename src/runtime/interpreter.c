@@ -513,7 +513,413 @@ static void clear_condition_info(runtime_t* rt) {
     rt->has_condition_info = false;
 }
 
-// === Stack-based step execution ===
+// === Dispatch table for frame step functions ===
+
+// Dispatch one statement (actual is already unwrapped from NODE_STMT).
+// Returns true if a visible action occurred, false if invisible (frame pushed).
+// The frame's child_idx has already been incremented before this call.
+static bool dispatch_stmt(runtime_t* rt, exec_frame_t* frame, TSNode actual) {
+    const char* type = ts_node_type(actual);
+
+    if (strcmp(type, NODE_ASSIGN) == 0 || strcmp(type, NODE_SWAP) == 0 ||
+        strcmp(type, NODE_READ) == 0   || strcmp(type, NODE_WRITE) == 0) {
+        if (!exec_simple_stmt(rt, actual))
+            frame->child_idx--;  // retry: input not yet available
+        return true;
+    }
+    if (strcmp(type, NODE_MULTI_STMT) == 0) { stack_push(rt, FRAME_BLOCK,    actual); return false; }
+    if (strcmp(type, NODE_IF)         == 0) { stack_push(rt, FRAME_IF,       actual); return false; }
+    if (strcmp(type, NODE_FOR)        == 0) { stack_push(rt, FRAME_FOR,      actual); return false; }
+    if (strcmp(type, NODE_WHILE)      == 0) { stack_push(rt, FRAME_WHILE,    actual); return false; }
+    if (strcmp(type, NODE_DO_WHILE)   == 0) { stack_push(rt, FRAME_DO_WHILE, actual); return false; }
+    if (strcmp(type, NODE_REPEAT)     == 0) { stack_push(rt, FRAME_REPEAT,   actual); return false; }
+    return false;
+}
+
+static bool step_program(runtime_t* rt, exec_frame_t* frame) {
+    // Find next statement in program
+    uint32_t count = ts_node_child_count(frame->node);
+    while (frame->child_idx < count) {
+        TSNode child = ts_node_child(frame->node, frame->child_idx);
+        frame->child_idx++;
+
+        if (!parser_node_is_type(child, NODE_STMT)) continue;
+
+        TSNode actual = ts_node_child(child, 0);
+
+        rt->current_line = ts_node_start_point(actual).row;
+        clear_condition_info(rt);
+
+        return dispatch_stmt(rt, frame, actual);
+    }
+    // No more statements - NOT visible, just cleanup
+    stack_pop(rt);
+    if (rt->stack_top < 0) {
+        rt->state = EXEC_DONE;
+        return true;  // Visible: program ended
+    }
+    return false;  // Not visible: popped empty frame
+}
+
+static bool step_block(runtime_t* rt, exec_frame_t* frame) {
+    // Iterate through statements in a block (multi_stmt or loop body)
+    uint32_t count = ts_node_child_count(frame->node);
+    while (frame->child_idx < count) {
+        TSNode child = ts_node_child(frame->node, frame->child_idx);
+        const char* ctype = ts_node_type(child);
+        frame->child_idx++;
+
+        if (strcmp(ctype, ";") == 0) continue;
+
+        rt->current_line = ts_node_start_point(child).row;
+        clear_condition_info(rt);
+
+        // In multi_stmt, children are direct statements (VISIBLE)
+        if (strcmp(ctype, NODE_ASSIGN) == 0 ||
+            strcmp(ctype, NODE_SWAP) == 0 ||
+            strcmp(ctype, NODE_READ) == 0 ||
+            strcmp(ctype, NODE_WRITE) == 0) {
+            if (!exec_simple_stmt(rt, child)) {
+                frame->child_idx--;
+            }
+            return true;  // Visible: statement executed
+        }
+    }
+    stack_pop(rt);
+    return false;  // Not visible: just popped block
+}
+
+static bool step_if(runtime_t* rt, exec_frame_t* frame) {
+    if (frame->phase == 0) {
+        // Evaluate condition (VISIBLE)
+        TSNode cond = parser_child_by_field(frame->node, "condition");
+        rt->current_line = ts_node_start_point(frame->node).row;
+
+        value_t* cond_val = eval_expr(rt, cond);
+        if (!cond_val || rt->state == EXEC_ERROR) {
+            stack_pop(rt);
+            return true;  // Visible: error occurred
+        }
+        frame->condition_result = value_to_bool(cond_val);
+        value_destroy(cond_val);
+
+        // Save condition info for visualization
+        save_condition_info(rt, cond, frame->condition_result);
+
+        frame->phase = 1;
+        frame->child_idx = 0;
+        return true;  // Visible: condition evaluated
+    }
+
+    // Find and execute statements in appropriate branch
+    uint32_t count = ts_node_child_count(frame->node);
+
+    while (frame->child_idx < count) {
+        TSNode child = ts_node_child(frame->node, frame->child_idx);
+        const char* ctype = ts_node_type(child);
+        frame->child_idx++;
+
+        if (strcmp(ctype, "altfel") == 0) {
+            frame->in_else = true;
+            continue;
+        }
+        if (strcmp(ctype, "sf") == 0) break;
+
+        if (parser_node_is_type(child, NODE_STMT)) {
+            bool should_exec = (!frame->in_else && frame->condition_result) ||
+                               (frame->in_else && !frame->condition_result);
+            if (should_exec) {
+                TSNode actual = ts_node_child(child, 0);
+
+                rt->current_line = ts_node_start_point(actual).row;
+                clear_condition_info(rt);
+
+                return dispatch_stmt(rt, frame, actual);
+            }
+        }
+    }
+    stack_pop(rt);
+    return false;  // Not visible: just popped if frame
+}
+
+static bool step_for(runtime_t* rt, exec_frame_t* frame) {
+    if (frame->phase == 0) {
+        // Initialize loop (VISIBLE - shows loop start with i=start)
+        TSNode var_node = parser_child_by_field(frame->node, "var");
+        TSNode start_node = parser_child_by_field(frame->node, "start");
+        TSNode end_node = parser_child_by_field(frame->node, "end");
+        TSNode step_node = parser_child_by_field(frame->node, "step");
+
+        rt->current_line = ts_node_start_point(frame->node).row;
+
+        frame->loop_var = parser_get_identifier(rt->parser, var_node);
+
+        value_t* start_val = eval_expr(rt, start_node);
+        value_t* end_val = eval_expr(rt, end_node);
+
+        frame->loop_current = value_to_int(start_val);
+        frame->loop_end = value_to_int(end_val);
+        frame->loop_step = 1;
+
+        if (!ts_node_is_null(step_node)) {
+            value_t* step_val = eval_expr(rt, step_node);
+            frame->loop_step = value_to_int(step_val);
+            value_destroy(step_val);
+        }
+
+        value_destroy(start_val);
+        value_destroy(end_val);
+
+        // Set initial loop variable
+        env_set(rt->env, frame->loop_var, value_create_int(frame->loop_current));
+
+        // Show condition in visualization
+        if (rt->last_condition_text) string_destroy(rt->last_condition_text);
+        char buf[128];
+        bool will_continue = (frame->loop_step > 0 && frame->loop_current <= frame->loop_end) ||
+                             (frame->loop_step < 0 && frame->loop_current >= frame->loop_end);
+        snprintf(buf, sizeof(buf), "%s = %lld, %s %s %lld",
+            string_cstr(frame->loop_var), (long long)frame->loop_current,
+            string_cstr(frame->loop_var),
+            frame->loop_step > 0 ? "<=" : ">=",
+            (long long)frame->loop_end);
+        rt->last_condition_text = string_create_from(buf);
+        rt->last_condition_result = will_continue;
+        rt->has_condition_info = true;
+
+        if (!will_continue) {
+            stack_pop(rt);
+            return true;  // Visible: loop condition false from start
+        }
+
+        frame->phase = 2;
+        frame->child_idx = 0;
+        return true;  // Visible: loop initialized
+    }
+
+    if (frame->phase == 1) {
+        // Check loop condition (VISIBLE - shows condition check)
+        bool continue_loop = (frame->loop_step > 0 && frame->loop_current <= frame->loop_end) ||
+                             (frame->loop_step < 0 && frame->loop_current >= frame->loop_end);
+
+        rt->current_line = ts_node_start_point(frame->node).row;
+
+        // Show condition in visualization
+        if (rt->last_condition_text) string_destroy(rt->last_condition_text);
+        char buf[128];
+        snprintf(buf, sizeof(buf), "%s = %lld, %s %s %lld",
+            string_cstr(frame->loop_var), (long long)frame->loop_current,
+            string_cstr(frame->loop_var),
+            frame->loop_step > 0 ? "<=" : ">=",
+            (long long)frame->loop_end);
+        rt->last_condition_text = string_create_from(buf);
+        rt->last_condition_result = continue_loop;
+        rt->has_condition_info = true;
+
+        if (!continue_loop) {
+            stack_pop(rt);
+            return true;  // Visible: loop ended
+        }
+
+        // Set loop variable for this iteration
+        env_set(rt->env, frame->loop_var, value_create_int(frame->loop_current));
+        frame->phase = 2;
+        frame->child_idx = 0;
+        return true;  // Visible: starting new iteration
+    }
+
+    if (frame->phase == 2) {
+        // Execute body statements
+        uint32_t count = ts_node_child_count(frame->node);
+        while (frame->child_idx < count) {
+            TSNode child = ts_node_child(frame->node, frame->child_idx);
+            frame->child_idx++;
+
+            if (!parser_node_is_type(child, NODE_STMT)) continue;
+
+            TSNode actual = ts_node_child(child, 0);
+            rt->current_line = ts_node_start_point(actual).row;
+            clear_condition_info(rt);
+
+            bool vis = dispatch_stmt(rt, frame, actual);
+            return vis;
+        }
+
+        // Body done, increment and loop back
+        frame->loop_current += frame->loop_step;
+        frame->phase = 1;
+        frame->child_idx = 0;
+        return false;  // Not visible: just incrementing counter
+    }
+    return false;
+}
+
+static bool step_while(runtime_t* rt, exec_frame_t* frame) {
+    if (frame->phase == 0) {
+        // Check condition (VISIBLE)
+        TSNode cond = parser_child_by_field(frame->node, "condition");
+        rt->current_line = ts_node_start_point(frame->node).row;
+
+        value_t* cond_val = eval_expr(rt, cond);
+        if (!cond_val || rt->state == EXEC_ERROR) {
+            stack_pop(rt);
+            return true;  // Visible: error
+        }
+        bool is_true = value_to_bool(cond_val);
+        value_destroy(cond_val);
+
+        // Save condition info for visualization
+        save_condition_info(rt, cond, is_true);
+
+        if (!is_true) {
+            stack_pop(rt);
+            return true;  // Visible: loop condition false
+        }
+
+        frame->phase = 1;
+        frame->child_idx = 0;
+        return true;  // Visible: condition evaluated
+    }
+
+    if (frame->phase == 1) {
+        // Execute body
+        uint32_t count = ts_node_child_count(frame->node);
+        while (frame->child_idx < count) {
+            TSNode child = ts_node_child(frame->node, frame->child_idx);
+            frame->child_idx++;
+
+            if (!parser_node_is_type(child, NODE_STMT)) continue;
+
+            TSNode actual = ts_node_child(child, 0);
+            rt->current_line = ts_node_start_point(actual).row;
+            clear_condition_info(rt);
+
+            bool vis = dispatch_stmt(rt, frame, actual);
+            return vis;
+        }
+
+        // Body done, check condition again
+        frame->phase = 0;
+        frame->child_idx = 0;
+        return false;  // Not visible: looping back to condition check
+    }
+    return false;
+}
+
+static bool step_do_while(runtime_t* rt, exec_frame_t* frame) {
+    if (frame->phase == 0) {
+        // Execute body first
+        uint32_t count = ts_node_child_count(frame->node);
+        while (frame->child_idx < count) {
+            TSNode child = ts_node_child(frame->node, frame->child_idx);
+            frame->child_idx++;
+
+            if (!parser_node_is_type(child, NODE_STMT)) continue;
+
+            TSNode actual = ts_node_child(child, 0);
+            rt->current_line = ts_node_start_point(actual).row;
+            clear_condition_info(rt);
+
+            bool vis = dispatch_stmt(rt, frame, actual);
+            return vis;
+        }
+
+        frame->phase = 1;
+        return false;  // Not visible: transitioning to condition check
+    }
+
+    if (frame->phase == 1) {
+        // Check condition (VISIBLE)
+        TSNode cond = parser_child_by_field(frame->node, "condition");
+        rt->current_line = ts_node_start_point(cond).row;
+
+        value_t* cond_val = eval_expr(rt, cond);
+        if (!cond_val || rt->state == EXEC_ERROR) {
+            stack_pop(rt);
+            return true;  // Visible: error
+        }
+        bool is_true = value_to_bool(cond_val);
+        value_destroy(cond_val);
+
+        // Save condition info for visualization
+        save_condition_info(rt, cond, is_true);
+
+        if (!is_true) {
+            stack_pop(rt);
+            return true;  // Visible: loop ended
+        }
+
+        // Continue loop
+        frame->phase = 0;
+        frame->child_idx = 0;
+        return true;  // Visible: condition evaluated, continuing
+    }
+    return false;
+}
+
+static bool step_repeat(runtime_t* rt, exec_frame_t* frame) {
+    if (frame->phase == 0) {
+        // Execute body first
+        uint32_t count = ts_node_child_count(frame->node);
+        while (frame->child_idx < count) {
+            TSNode child = ts_node_child(frame->node, frame->child_idx);
+            frame->child_idx++;
+
+            if (!parser_node_is_type(child, NODE_STMT)) continue;
+
+            TSNode actual = ts_node_child(child, 0);
+            rt->current_line = ts_node_start_point(actual).row;
+            clear_condition_info(rt);
+
+            bool vis = dispatch_stmt(rt, frame, actual);
+            return vis;
+        }
+
+        frame->phase = 1;
+        return false;  // Not visible: transitioning to condition check
+    }
+
+    if (frame->phase == 1) {
+        // Check condition (repeat UNTIL condition is true) (VISIBLE)
+        TSNode cond = parser_child_by_field(frame->node, "condition");
+        rt->current_line = ts_node_start_point(cond).row;
+
+        value_t* cond_val = eval_expr(rt, cond);
+        if (!cond_val || rt->state == EXEC_ERROR) {
+            stack_pop(rt);
+            return true;  // Visible: error
+        }
+        bool is_true = value_to_bool(cond_val);
+        value_destroy(cond_val);
+
+        // Save condition info for visualization
+        save_condition_info(rt, cond, is_true);
+
+        if (is_true) {
+            // Condition true = stop loop
+            stack_pop(rt);
+            return true;  // Visible: loop ended
+        }
+
+        // Continue loop
+        frame->phase = 0;
+        frame->child_idx = 0;
+        return true;  // Visible: condition evaluated, continuing
+    }
+    return false;
+}
+
+typedef bool (*frame_step_fn)(runtime_t*, exec_frame_t*);
+
+static const frame_step_fn k_step_fns[] = {
+    [FRAME_PROGRAM]  = step_program,
+    [FRAME_IF]       = step_if,
+    [FRAME_FOR]      = step_for,
+    [FRAME_WHILE]    = step_while,
+    [FRAME_DO_WHILE] = step_do_while,
+    [FRAME_REPEAT]   = step_repeat,
+    [FRAME_BLOCK]    = step_block,
+};
 
 // Internal step that processes one phase. Returns true if a visible action occurred.
 static bool runtime_step_internal(runtime_t* rt) {
@@ -547,586 +953,7 @@ static bool runtime_step_internal(runtime_t* rt) {
         rt->state = EXEC_DONE;
         return true;
     }
-
-    switch (frame->type) {
-        case FRAME_PROGRAM: {
-            // Find next statement in program
-            uint32_t count = ts_node_child_count(frame->node);
-            while (frame->child_idx < count) {
-                TSNode child = ts_node_child(frame->node, frame->child_idx);
-                frame->child_idx++;
-
-                if (!parser_node_is_type(child, NODE_STMT)) continue;
-
-                TSNode actual = ts_node_child(child, 0);
-                const char* type = ts_node_type(actual);
-
-                rt->current_line = ts_node_start_point(actual).row;
-                clear_condition_info(rt);
-
-                // Simple statements - execute directly (VISIBLE)
-                if (strcmp(type, NODE_ASSIGN) == 0 ||
-                    strcmp(type, NODE_SWAP) == 0 ||
-                    strcmp(type, NODE_READ) == 0 ||
-                    strcmp(type, NODE_WRITE) == 0) {
-                    if (!exec_simple_stmt(rt, actual)) {
-                        frame->child_idx--; // Retry this statement
-                    }
-                    return true;  // Visible: statement executed
-                }
-
-                // Multi-statement - NOT visible, just setup
-                if (strcmp(type, NODE_MULTI_STMT) == 0) {
-                    stack_push(rt, FRAME_BLOCK, actual);
-                    return false;  // Not visible: just pushed frame
-                }
-
-                // Control structures - push frame (NOT visible yet)
-                if (strcmp(type, NODE_IF) == 0) {
-                    stack_push(rt, FRAME_IF, actual);
-                    return false;  // Not visible: will evaluate condition next
-                }
-                if (strcmp(type, NODE_FOR) == 0) {
-                    stack_push(rt, FRAME_FOR, actual);
-                    return false;  // Not visible: will init loop next
-                }
-                if (strcmp(type, NODE_WHILE) == 0) {
-                    stack_push(rt, FRAME_WHILE, actual);
-                    return false;  // Not visible: will check condition next
-                }
-                if (strcmp(type, NODE_DO_WHILE) == 0) {
-                    stack_push(rt, FRAME_DO_WHILE, actual);
-                    return false;  // Not visible: will execute body next
-                }
-                if (strcmp(type, NODE_REPEAT) == 0) {
-                    stack_push(rt, FRAME_REPEAT, actual);
-                    return false;  // Not visible: will execute body next
-                }
-            }
-            // No more statements - NOT visible, just cleanup
-            stack_pop(rt);
-            if (rt->stack_top < 0) {
-                rt->state = EXEC_DONE;
-                return true;  // Visible: program ended
-            }
-            return false;  // Not visible: popped empty frame
-        }
-
-        case FRAME_BLOCK: {
-            // Iterate through statements in a block (multi_stmt or loop body)
-            uint32_t count = ts_node_child_count(frame->node);
-            while (frame->child_idx < count) {
-                TSNode child = ts_node_child(frame->node, frame->child_idx);
-                const char* ctype = ts_node_type(child);
-                frame->child_idx++;
-
-                if (strcmp(ctype, ";") == 0) continue;
-
-                rt->current_line = ts_node_start_point(child).row;
-                clear_condition_info(rt);
-
-                // In multi_stmt, children are direct statements (VISIBLE)
-                if (strcmp(ctype, NODE_ASSIGN) == 0 ||
-                    strcmp(ctype, NODE_SWAP) == 0 ||
-                    strcmp(ctype, NODE_READ) == 0 ||
-                    strcmp(ctype, NODE_WRITE) == 0) {
-                    if (!exec_simple_stmt(rt, child)) {
-                        frame->child_idx--;
-                    }
-                    return true;  // Visible: statement executed
-                }
-            }
-            stack_pop(rt);
-            return false;  // Not visible: just popped block
-        }
-
-        case FRAME_IF: {
-            if (frame->phase == 0) {
-                // Evaluate condition (VISIBLE)
-                TSNode cond = parser_child_by_field(frame->node, "condition");
-                rt->current_line = ts_node_start_point(frame->node).row;
-
-                value_t* cond_val = eval_expr(rt, cond);
-                if (!cond_val || rt->state == EXEC_ERROR) {
-                    stack_pop(rt);
-                    return true;  // Visible: error occurred
-                }
-                frame->condition_result = value_to_bool(cond_val);
-                value_destroy(cond_val);
-
-                // Save condition info for visualization
-                save_condition_info(rt, cond, frame->condition_result);
-
-                frame->phase = 1;
-                frame->child_idx = 0;
-                return true;  // Visible: condition evaluated
-            }
-
-            // Find and execute statements in appropriate branch
-            uint32_t count = ts_node_child_count(frame->node);
-
-            while (frame->child_idx < count) {
-                TSNode child = ts_node_child(frame->node, frame->child_idx);
-                const char* ctype = ts_node_type(child);
-                frame->child_idx++;
-
-                if (strcmp(ctype, "altfel") == 0) {
-                    frame->in_else = true;
-                    continue;
-                }
-                if (strcmp(ctype, "sf") == 0) break;
-
-                if (parser_node_is_type(child, NODE_STMT)) {
-                    bool should_exec = (!frame->in_else && frame->condition_result) ||
-                                       (frame->in_else && !frame->condition_result);
-                    if (should_exec) {
-                        TSNode actual = ts_node_child(child, 0);
-                        const char* type = ts_node_type(actual);
-
-                        rt->current_line = ts_node_start_point(actual).row;
-                        clear_condition_info(rt);
-
-                        if (strcmp(type, NODE_ASSIGN) == 0 ||
-                            strcmp(type, NODE_SWAP) == 0 ||
-                            strcmp(type, NODE_READ) == 0 ||
-                            strcmp(type, NODE_WRITE) == 0) {
-                            if (!exec_simple_stmt(rt, actual)) {
-                                frame->child_idx--;
-                            }
-                            return true;  // Visible: statement executed
-                        }
-                        if (strcmp(type, NODE_MULTI_STMT) == 0) {
-                            stack_push(rt, FRAME_BLOCK, actual);
-                            return false;  // Not visible: just pushed frame
-                        }
-                        if (strcmp(type, NODE_IF) == 0) {
-                            stack_push(rt, FRAME_IF, actual);
-                            return false;
-                        }
-                        if (strcmp(type, NODE_FOR) == 0) {
-                            stack_push(rt, FRAME_FOR, actual);
-                            return false;
-                        }
-                        if (strcmp(type, NODE_WHILE) == 0) {
-                            stack_push(rt, FRAME_WHILE, actual);
-                            return false;
-                        }
-                        if (strcmp(type, NODE_DO_WHILE) == 0) {
-                            stack_push(rt, FRAME_DO_WHILE, actual);
-                            return false;
-                        }
-                        if (strcmp(type, NODE_REPEAT) == 0) {
-                            stack_push(rt, FRAME_REPEAT, actual);
-                            return false;
-                        }
-                    }
-                }
-            }
-            stack_pop(rt);
-            return false;  // Not visible: just popped if frame
-        }
-
-        case FRAME_FOR: {
-            if (frame->phase == 0) {
-                // Initialize loop (VISIBLE - shows loop start with i=start)
-                TSNode var_node = parser_child_by_field(frame->node, "var");
-                TSNode start_node = parser_child_by_field(frame->node, "start");
-                TSNode end_node = parser_child_by_field(frame->node, "end");
-                TSNode step_node = parser_child_by_field(frame->node, "step");
-
-                rt->current_line = ts_node_start_point(frame->node).row;
-
-                frame->loop_var = parser_get_identifier(rt->parser, var_node);
-
-                value_t* start_val = eval_expr(rt, start_node);
-                value_t* end_val = eval_expr(rt, end_node);
-
-                frame->loop_current = value_to_int(start_val);
-                frame->loop_end = value_to_int(end_val);
-                frame->loop_step = 1;
-
-                if (!ts_node_is_null(step_node)) {
-                    value_t* step_val = eval_expr(rt, step_node);
-                    frame->loop_step = value_to_int(step_val);
-                    value_destroy(step_val);
-                }
-
-                value_destroy(start_val);
-                value_destroy(end_val);
-
-                // Set initial loop variable
-                env_set(rt->env, frame->loop_var, value_create_int(frame->loop_current));
-
-                // Show condition in visualization
-                if (rt->last_condition_text) string_destroy(rt->last_condition_text);
-                char buf[128];
-                bool will_continue = (frame->loop_step > 0 && frame->loop_current <= frame->loop_end) ||
-                                     (frame->loop_step < 0 && frame->loop_current >= frame->loop_end);
-                snprintf(buf, sizeof(buf), "%s = %lld, %s %s %lld",
-                    string_cstr(frame->loop_var), (long long)frame->loop_current,
-                    string_cstr(frame->loop_var),
-                    frame->loop_step > 0 ? "<=" : ">=",
-                    (long long)frame->loop_end);
-                rt->last_condition_text = string_create_from(buf);
-                rt->last_condition_result = will_continue;
-                rt->has_condition_info = true;
-
-                if (!will_continue) {
-                    stack_pop(rt);
-                    return true;  // Visible: loop condition false from start
-                }
-
-                frame->phase = 2;
-                frame->child_idx = 0;
-                return true;  // Visible: loop initialized
-            }
-
-            if (frame->phase == 1) {
-                // Check loop condition (VISIBLE - shows condition check)
-                bool continue_loop = (frame->loop_step > 0 && frame->loop_current <= frame->loop_end) ||
-                                     (frame->loop_step < 0 && frame->loop_current >= frame->loop_end);
-
-                rt->current_line = ts_node_start_point(frame->node).row;
-
-                // Show condition in visualization
-                if (rt->last_condition_text) string_destroy(rt->last_condition_text);
-                char buf[128];
-                snprintf(buf, sizeof(buf), "%s = %lld, %s %s %lld",
-                    string_cstr(frame->loop_var), (long long)frame->loop_current,
-                    string_cstr(frame->loop_var),
-                    frame->loop_step > 0 ? "<=" : ">=",
-                    (long long)frame->loop_end);
-                rt->last_condition_text = string_create_from(buf);
-                rt->last_condition_result = continue_loop;
-                rt->has_condition_info = true;
-
-                if (!continue_loop) {
-                    stack_pop(rt);
-                    return true;  // Visible: loop ended
-                }
-
-                // Set loop variable for this iteration
-                env_set(rt->env, frame->loop_var, value_create_int(frame->loop_current));
-                frame->phase = 2;
-                frame->child_idx = 0;
-                return true;  // Visible: starting new iteration
-            }
-
-            if (frame->phase == 2) {
-                // Execute body statements
-                uint32_t count = ts_node_child_count(frame->node);
-                while (frame->child_idx < count) {
-                    TSNode child = ts_node_child(frame->node, frame->child_idx);
-                    frame->child_idx++;
-
-                    if (!parser_node_is_type(child, NODE_STMT)) continue;
-
-                    TSNode actual = ts_node_child(child, 0);
-                    const char* type = ts_node_type(actual);
-
-                    rt->current_line = ts_node_start_point(actual).row;
-                    clear_condition_info(rt);
-
-                    if (strcmp(type, NODE_ASSIGN) == 0 ||
-                        strcmp(type, NODE_SWAP) == 0 ||
-                        strcmp(type, NODE_READ) == 0 ||
-                        strcmp(type, NODE_WRITE) == 0) {
-                        if (!exec_simple_stmt(rt, actual)) {
-                            frame->child_idx--;
-                        }
-                        return true;  // Visible: statement executed
-                    }
-                    if (strcmp(type, NODE_MULTI_STMT) == 0) {
-                        stack_push(rt, FRAME_BLOCK, actual);
-                        return false;
-                    }
-                    if (strcmp(type, NODE_IF) == 0) {
-                        stack_push(rt, FRAME_IF, actual);
-                        return false;
-                    }
-                    if (strcmp(type, NODE_FOR) == 0) {
-                        stack_push(rt, FRAME_FOR, actual);
-                        return false;
-                    }
-                    if (strcmp(type, NODE_WHILE) == 0) {
-                        stack_push(rt, FRAME_WHILE, actual);
-                        return false;
-                    }
-                    if (strcmp(type, NODE_DO_WHILE) == 0) {
-                        stack_push(rt, FRAME_DO_WHILE, actual);
-                        return false;
-                    }
-                    if (strcmp(type, NODE_REPEAT) == 0) {
-                        stack_push(rt, FRAME_REPEAT, actual);
-                        return false;
-                    }
-                }
-
-                // Body done, increment and loop back
-                frame->loop_current += frame->loop_step;
-                frame->phase = 1;
-                frame->child_idx = 0;
-                return false;  // Not visible: just incrementing counter
-            }
-            break;
-        }
-
-        case FRAME_WHILE: {
-            if (frame->phase == 0) {
-                // Check condition (VISIBLE)
-                TSNode cond = parser_child_by_field(frame->node, "condition");
-                rt->current_line = ts_node_start_point(frame->node).row;
-
-                value_t* cond_val = eval_expr(rt, cond);
-                if (!cond_val || rt->state == EXEC_ERROR) {
-                    stack_pop(rt);
-                    return true;  // Visible: error
-                }
-                bool is_true = value_to_bool(cond_val);
-                value_destroy(cond_val);
-
-                // Save condition info for visualization
-                save_condition_info(rt, cond, is_true);
-
-                if (!is_true) {
-                    stack_pop(rt);
-                    return true;  // Visible: loop condition false
-                }
-
-                frame->phase = 1;
-                frame->child_idx = 0;
-                return true;  // Visible: condition evaluated
-            }
-
-            if (frame->phase == 1) {
-                // Execute body
-                uint32_t count = ts_node_child_count(frame->node);
-                while (frame->child_idx < count) {
-                    TSNode child = ts_node_child(frame->node, frame->child_idx);
-                    frame->child_idx++;
-
-                    if (!parser_node_is_type(child, NODE_STMT)) continue;
-
-                    TSNode actual = ts_node_child(child, 0);
-                    const char* type = ts_node_type(actual);
-
-                    rt->current_line = ts_node_start_point(actual).row;
-                    clear_condition_info(rt);
-
-                    if (strcmp(type, NODE_ASSIGN) == 0 ||
-                        strcmp(type, NODE_SWAP) == 0 ||
-                        strcmp(type, NODE_READ) == 0 ||
-                        strcmp(type, NODE_WRITE) == 0) {
-                        if (!exec_simple_stmt(rt, actual)) {
-                            frame->child_idx--;
-                        }
-                        return true;  // Visible: statement executed
-                    }
-                    if (strcmp(type, NODE_MULTI_STMT) == 0) {
-                        stack_push(rt, FRAME_BLOCK, actual);
-                        return false;
-                    }
-                    if (strcmp(type, NODE_IF) == 0) {
-                        stack_push(rt, FRAME_IF, actual);
-                        return false;
-                    }
-                    if (strcmp(type, NODE_FOR) == 0) {
-                        stack_push(rt, FRAME_FOR, actual);
-                        return false;
-                    }
-                    if (strcmp(type, NODE_WHILE) == 0) {
-                        stack_push(rt, FRAME_WHILE, actual);
-                        return false;
-                    }
-                    if (strcmp(type, NODE_DO_WHILE) == 0) {
-                        stack_push(rt, FRAME_DO_WHILE, actual);
-                        return false;
-                    }
-                    if (strcmp(type, NODE_REPEAT) == 0) {
-                        stack_push(rt, FRAME_REPEAT, actual);
-                        return false;
-                    }
-                }
-
-                // Body done, check condition again
-                frame->phase = 0;
-                frame->child_idx = 0;
-                return false;  // Not visible: looping back to condition check
-            }
-            break;
-        }
-
-        case FRAME_DO_WHILE: {
-            if (frame->phase == 0) {
-                // Execute body first
-                uint32_t count = ts_node_child_count(frame->node);
-                while (frame->child_idx < count) {
-                    TSNode child = ts_node_child(frame->node, frame->child_idx);
-                    frame->child_idx++;
-
-                    if (!parser_node_is_type(child, NODE_STMT)) continue;
-
-                    TSNode actual = ts_node_child(child, 0);
-                    const char* type = ts_node_type(actual);
-
-                    rt->current_line = ts_node_start_point(actual).row;
-                    clear_condition_info(rt);
-
-                    if (strcmp(type, NODE_ASSIGN) == 0 ||
-                        strcmp(type, NODE_SWAP) == 0 ||
-                        strcmp(type, NODE_READ) == 0 ||
-                        strcmp(type, NODE_WRITE) == 0) {
-                        if (!exec_simple_stmt(rt, actual)) {
-                            frame->child_idx--;
-                        }
-                        return true;  // Visible: statement executed
-                    }
-                    if (strcmp(type, NODE_MULTI_STMT) == 0) {
-                        stack_push(rt, FRAME_BLOCK, actual);
-                        return false;
-                    }
-                    if (strcmp(type, NODE_IF) == 0) {
-                        stack_push(rt, FRAME_IF, actual);
-                        return false;
-                    }
-                    if (strcmp(type, NODE_FOR) == 0) {
-                        stack_push(rt, FRAME_FOR, actual);
-                        return false;
-                    }
-                    if (strcmp(type, NODE_WHILE) == 0) {
-                        stack_push(rt, FRAME_WHILE, actual);
-                        return false;
-                    }
-                    if (strcmp(type, NODE_DO_WHILE) == 0) {
-                        stack_push(rt, FRAME_DO_WHILE, actual);
-                        return false;
-                    }
-                    if (strcmp(type, NODE_REPEAT) == 0) {
-                        stack_push(rt, FRAME_REPEAT, actual);
-                        return false;
-                    }
-                }
-
-                frame->phase = 1;
-                return false;  // Not visible: transitioning to condition check
-            }
-
-            if (frame->phase == 1) {
-                // Check condition (VISIBLE)
-                TSNode cond = parser_child_by_field(frame->node, "condition");
-                rt->current_line = ts_node_start_point(cond).row;
-
-                value_t* cond_val = eval_expr(rt, cond);
-                if (!cond_val || rt->state == EXEC_ERROR) {
-                    stack_pop(rt);
-                    return true;  // Visible: error
-                }
-                bool is_true = value_to_bool(cond_val);
-                value_destroy(cond_val);
-
-                // Save condition info for visualization
-                save_condition_info(rt, cond, is_true);
-
-                if (!is_true) {
-                    stack_pop(rt);
-                    return true;  // Visible: loop ended
-                }
-
-                // Continue loop
-                frame->phase = 0;
-                frame->child_idx = 0;
-                return true;  // Visible: condition evaluated, continuing
-            }
-            break;
-        }
-
-        case FRAME_REPEAT: {
-            if (frame->phase == 0) {
-                // Execute body first
-                uint32_t count = ts_node_child_count(frame->node);
-                while (frame->child_idx < count) {
-                    TSNode child = ts_node_child(frame->node, frame->child_idx);
-                    frame->child_idx++;
-
-                    if (!parser_node_is_type(child, NODE_STMT)) continue;
-
-                    TSNode actual = ts_node_child(child, 0);
-                    const char* type = ts_node_type(actual);
-
-                    rt->current_line = ts_node_start_point(actual).row;
-                    clear_condition_info(rt);
-
-                    if (strcmp(type, NODE_ASSIGN) == 0 ||
-                        strcmp(type, NODE_SWAP) == 0 ||
-                        strcmp(type, NODE_READ) == 0 ||
-                        strcmp(type, NODE_WRITE) == 0) {
-                        if (!exec_simple_stmt(rt, actual)) {
-                            frame->child_idx--;
-                        }
-                        return true;  // Visible: statement executed
-                    }
-                    if (strcmp(type, NODE_MULTI_STMT) == 0) {
-                        stack_push(rt, FRAME_BLOCK, actual);
-                        return false;
-                    }
-                    if (strcmp(type, NODE_IF) == 0) {
-                        stack_push(rt, FRAME_IF, actual);
-                        return false;
-                    }
-                    if (strcmp(type, NODE_FOR) == 0) {
-                        stack_push(rt, FRAME_FOR, actual);
-                        return false;
-                    }
-                    if (strcmp(type, NODE_WHILE) == 0) {
-                        stack_push(rt, FRAME_WHILE, actual);
-                        return false;
-                    }
-                    if (strcmp(type, NODE_DO_WHILE) == 0) {
-                        stack_push(rt, FRAME_DO_WHILE, actual);
-                        return false;
-                    }
-                    if (strcmp(type, NODE_REPEAT) == 0) {
-                        stack_push(rt, FRAME_REPEAT, actual);
-                        return false;
-                    }
-                }
-
-                frame->phase = 1;
-                return false;  // Not visible: transitioning to condition check
-            }
-
-            if (frame->phase == 1) {
-                // Check condition (repeat UNTIL condition is true) (VISIBLE)
-                TSNode cond = parser_child_by_field(frame->node, "condition");
-                rt->current_line = ts_node_start_point(cond).row;
-
-                value_t* cond_val = eval_expr(rt, cond);
-                if (!cond_val || rt->state == EXEC_ERROR) {
-                    stack_pop(rt);
-                    return true;  // Visible: error
-                }
-                bool is_true = value_to_bool(cond_val);
-                value_destroy(cond_val);
-
-                // Save condition info for visualization
-                save_condition_info(rt, cond, is_true);
-
-                if (is_true) {
-                    // Condition true = stop loop
-                    stack_pop(rt);
-                    return true;  // Visible: loop ended
-                }
-
-                // Continue loop
-                frame->phase = 0;
-                frame->child_idx = 0;
-                return true;  // Visible: condition evaluated, continuing
-            }
-            break;
-        }
-    }
-
-    return false;  // Fallthrough - should not reach here
+    return k_step_fns[frame->type](rt, frame);
 }
 
 // Public step function - loops until a visible action occurs

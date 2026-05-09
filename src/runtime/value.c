@@ -191,6 +191,14 @@ bool value_to_bool(const value_t* val) {
 #define SET_OK(err) do { if (err) *err = VALUE_OK; } while(0)
 #define SET_ERR(err, code) do { if (err) *err = code; } while(0)
 
+#define REQUIRE_NUMERIC(a, b, err) \
+    do { if (!(a) || !(b) || !value_is_numeric(a) || !value_is_numeric(b)) { \
+        SET_ERR((err), VALUE_ERR_TYPE); return NULL; } } while(0)
+
+#define REQUIRE_COMPARABLE(a, b, err) \
+    do { if (!(a) || !(b) || !types_comparable((a), (b))) { \
+        SET_ERR((err), VALUE_ERR_TYPE); return NULL; } } while(0)
+
 static bool needs_float_math(const value_t* a, const value_t* b) {
     return a->type == VALUE_FLOAT || b->type == VALUE_FLOAT;
 }
@@ -227,10 +235,7 @@ value_t* value_add(const value_t* a, const value_t* b, value_error_t* err) {
 }
 
 value_t* value_sub(const value_t* a, const value_t* b, value_error_t* err) {
-    if (!a || !b || !value_is_numeric(a) || !value_is_numeric(b)) {
-        SET_ERR(err, VALUE_ERR_TYPE);
-        return NULL;
-    }
+    REQUIRE_NUMERIC(a, b, err);
     SET_OK(err);
     if (needs_float_math(a, b)) {
         return value_create_float(value_to_float(a) - value_to_float(b));
@@ -239,10 +244,7 @@ value_t* value_sub(const value_t* a, const value_t* b, value_error_t* err) {
 }
 
 value_t* value_mul(const value_t* a, const value_t* b, value_error_t* err) {
-    if (!a || !b || !value_is_numeric(a) || !value_is_numeric(b)) {
-        SET_ERR(err, VALUE_ERR_TYPE);
-        return NULL;
-    }
+    REQUIRE_NUMERIC(a, b, err);
     SET_OK(err);
     if (needs_float_math(a, b)) {
         return value_create_float(value_to_float(a) * value_to_float(b));
@@ -251,10 +253,7 @@ value_t* value_mul(const value_t* a, const value_t* b, value_error_t* err) {
 }
 
 value_t* value_div(const value_t* a, const value_t* b, value_error_t* err) {
-    if (!a || !b || !value_is_numeric(a) || !value_is_numeric(b)) {
-        SET_ERR(err, VALUE_ERR_TYPE);
-        return NULL;
-    }
+    REQUIRE_NUMERIC(a, b, err);
     double divisor = value_to_float(b);
     if (divisor == 0.0) {
         SET_ERR(err, VALUE_ERR_DIV_ZERO);
@@ -266,10 +265,7 @@ value_t* value_div(const value_t* a, const value_t* b, value_error_t* err) {
 }
 
 value_t* value_mod(const value_t* a, const value_t* b, value_error_t* err) {
-    if (!a || !b || !value_is_numeric(a) || !value_is_numeric(b)) {
-        SET_ERR(err, VALUE_ERR_TYPE);
-        return NULL;
-    }
+    REQUIRE_NUMERIC(a, b, err);
     int64_t divisor = value_to_int(b);
     if (divisor == 0) {
         SET_ERR(err, VALUE_ERR_DIV_ZERO);
@@ -338,55 +334,37 @@ static int compare_values(const value_t* a, const value_t* b) {
 }
 
 value_t* value_eq(const value_t* a, const value_t* b, value_error_t* err) {
-    if (!a || !b || !types_comparable(a, b)) {
-        SET_ERR(err, VALUE_ERR_TYPE);
-        return NULL;
-    }
+    REQUIRE_COMPARABLE(a, b, err);
     SET_OK(err);
     return value_create_int(compare_values(a, b) == 0 ? 1 : 0);
 }
 
 value_t* value_ne(const value_t* a, const value_t* b, value_error_t* err) {
-    if (!a || !b || !types_comparable(a, b)) {
-        SET_ERR(err, VALUE_ERR_TYPE);
-        return NULL;
-    }
+    REQUIRE_COMPARABLE(a, b, err);
     SET_OK(err);
     return value_create_int(compare_values(a, b) != 0 ? 1 : 0);
 }
 
 value_t* value_lt(const value_t* a, const value_t* b, value_error_t* err) {
-    if (!a || !b || !types_comparable(a, b)) {
-        SET_ERR(err, VALUE_ERR_TYPE);
-        return NULL;
-    }
+    REQUIRE_COMPARABLE(a, b, err);
     SET_OK(err);
     return value_create_int(compare_values(a, b) < 0 ? 1 : 0);
 }
 
 value_t* value_le(const value_t* a, const value_t* b, value_error_t* err) {
-    if (!a || !b || !types_comparable(a, b)) {
-        SET_ERR(err, VALUE_ERR_TYPE);
-        return NULL;
-    }
+    REQUIRE_COMPARABLE(a, b, err);
     SET_OK(err);
     return value_create_int(compare_values(a, b) <= 0 ? 1 : 0);
 }
 
 value_t* value_gt(const value_t* a, const value_t* b, value_error_t* err) {
-    if (!a || !b || !types_comparable(a, b)) {
-        SET_ERR(err, VALUE_ERR_TYPE);
-        return NULL;
-    }
+    REQUIRE_COMPARABLE(a, b, err);
     SET_OK(err);
     return value_create_int(compare_values(a, b) > 0 ? 1 : 0);
 }
 
 value_t* value_ge(const value_t* a, const value_t* b, value_error_t* err) {
-    if (!a || !b || !types_comparable(a, b)) {
-        SET_ERR(err, VALUE_ERR_TYPE);
-        return NULL;
-    }
+    REQUIRE_COMPARABLE(a, b, err);
     SET_OK(err);
     return value_create_int(compare_values(a, b) >= 0 ? 1 : 0);
 }

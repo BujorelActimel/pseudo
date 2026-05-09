@@ -1,0 +1,7 @@
+CompileFlags:
+  Add:
+    - -Iinclude
+    - -Itree-sitter-pseudo/bindings/c
+    - -Itree-sitter-pseudo/src
+    - -Itree-sitter-0.25.3/lib/include
+    - -std=c2x

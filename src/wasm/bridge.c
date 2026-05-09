@@ -2,6 +2,7 @@
 #include "pseudo/debugger.h"
 #include "pseudo/linter.h"
 #include "pseudo/transpiler.h"
+#include "pseudo/equivalence.h"
 #include "pseudo/string.h"
 #include "pseudo/io.h"
 #include <emscripten.h>
@@ -244,6 +245,21 @@ char* pseudo_transpile(const char* source, const char* language) {
     }
     free(error);
     return result;
+}
+
+// === Equivalence exports ===
+
+EMSCRIPTEN_KEEPALIVE
+char* pseudo_get_all_loops(const char* source) {
+    if (!source) return NULL;
+    return equiv_get_all_loops(source);
+}
+
+EMSCRIPTEN_KEEPALIVE
+char* pseudo_convert_loop(const char* source, int line, int col,
+                          const char* target_type) {
+    if (!source || !target_type) return NULL;
+    return equiv_convert_loop(source, (uint32_t)line, (uint32_t)col, target_type);
 }
 
 // === Linter export ===

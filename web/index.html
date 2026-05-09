@@ -333,6 +333,22 @@
       flex: 1;
       min-height: 0;
     }
+    #diff-editors-wrapper {
+      flex: 1;
+      display: flex;
+      min-height: 0;
+    }
+    #diff-orig-container, #diff-mod-container {
+      flex: 1;
+      min-width: 0;
+    }
+    .diff-inner-divider {
+      width: 1px;
+      background: var(--bg3);
+      flex-shrink: 0;
+    }
+    .diff-removed-line { background: rgba(204, 36, 29, 0.22) !important; }
+    .diff-added-line   { background: rgba(152, 151, 26, 0.22) !important; }
 
     .panel-header {
       display: flex;
@@ -869,9 +885,80 @@
       margin: 5px 0 0 6px;
     }
 
+    .loop-glyph {
+      cursor: pointer;
+      width: 16px !important;
+      height: 16px !important;
+      margin: 1px 0 0 1px;
+      opacity: 0.4;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238ec07c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m2 9 3-3 3 3'/%3E%3Cpath d='M13 18H7a2 2 0 0 1-2-2V6'/%3E%3Cpath d='m22 15-3 3-3-3'/%3E%3Cpath d='M11 6h6a2 2 0 0 1 2 2v7'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 13px 13px;
+      transition: opacity 0.12s;
+    }
+    .loop-glyph:hover { opacity: 1; }
+
+    #loop-convert-popup {
+      position: fixed;
+      background: var(--bg1);
+      border: 1px solid var(--bg3);
+      border-radius: 6px;
+      padding: 6px 4px;
+      z-index: 9999;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      display: none;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 210px;
+    }
+    #loop-convert-popup.visible { display: flex; }
+    #loop-convert-popup .popup-title {
+      font-size: 11px;
+      color: var(--fg4);
+      padding: 2px 8px 4px;
+      border-bottom: 1px solid var(--bg2);
+      margin-bottom: 2px;
+    }
+    #loop-convert-popup button {
+      text-align: left;
+      background: transparent;
+      color: var(--fg2);
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      font-family: inherit;
+    }
+    #loop-convert-popup button:hover:not(:disabled) { background: var(--bg2); color: var(--fg); }
+    #loop-convert-popup button:disabled { color: var(--bg3); cursor: default; }
+
+    #loop-tooltip {
+      position: fixed;
+      background: var(--bg2);
+      color: var(--fg);
+      border: 1px solid var(--bg3);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      pointer-events: none;
+      z-index: 9998;
+      display: none;
+      white-space: nowrap;
+    }
+
   </style>
 </head>
 <body>
+  <div id="loop-tooltip">Convertește bucla</div>
+  <div id="loop-convert-popup">
+    <div class="popup-title">Convertește bucla în:</div>
+    <button data-target="for">pentru (for)</button>
+    <button data-target="while">cât timp (while)</button>
+    <button data-target="do_while">execută...cât timp</button>
+    <button data-target="repeat">repetă...până când</button>
+  </div>
   <div class="app">
     <div class="toolbar">
       <div class="toolbar-title">
@@ -967,6 +1054,26 @@
               </button>
             </div>
             <div id="transpile-editor-container"></div>
+          </div>
+          <div class="transpile-divider" id="diff-divider" style="display:none"></div>
+          <div class="transpile-pane" id="diff-pane" style="display:none">
+            <div class="transpile-pane-header">
+              <span class="transpile-pane-title" id="diff-pane-title">Echivalență</span>
+              <button class="btn-icon-small" id="btn-diff-apply" data-tooltip="Aplică modificările în fișierul curent">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </button>
+              <button class="btn-icon-small" id="btn-diff-newtab" data-tooltip="Deschide în tab nou">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              </button>
+              <button class="btn-icon-small" id="btn-diff-close" data-tooltip="Închide">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <div id="diff-editors-wrapper">
+              <div id="diff-orig-container"></div>
+              <div class="diff-inner-divider"></div>
+              <div id="diff-mod-container"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -1199,6 +1306,13 @@ scrie n + 1`;
         'scrollbarSlider.background': '#50494580',
         'scrollbarSlider.hoverBackground': '#665c5480',
         'scrollbarSlider.activeBackground': '#7c6f6480',
+        'diffEditor.insertedTextBackground': '#98971a30',
+        'diffEditor.removedTextBackground': '#cc241d30',
+        'diffEditor.insertedLineBackground': '#98971a18',
+        'diffEditor.removedLineBackground': '#cc241d18',
+        'diffEditor.diagonalFill': '#3c383640',
+        'diffEditorGutter.insertedLineBackground': '#98971a40',
+        'diffEditorGutter.removedLineBackground': '#cc241d40',
       }
     };
 
@@ -1285,7 +1399,7 @@ scrie n + 1`;
         wordWrap: 'on',
         automaticLayout: true,
         lineNumbers: 'on',
-        glyphMargin: false,
+        glyphMargin: true,
         folding: false,
         lineDecorationsWidth: 8,
         lineNumbersMinChars: 3,
@@ -1335,7 +1449,7 @@ scrie n + 1`;
 
       // Apply BAC mode UI state
       updateBacModeUI();
-      setTimeout(() => updateAllDecorations(), 100);
+      setTimeout(() => { updateAllDecorations(); updateLoopGlyphs(); }, 100);
 
       // Listen for content changes to auto-save and update decorations
       editor.onDidChangeModelContent(() => {
@@ -1344,6 +1458,8 @@ scrie n + 1`;
           clearTimeout(editor._decorationUpdateTimeout);
           editor._decorationUpdateTimeout = setTimeout(updateAllDecorations, 150);
         }
+        clearTimeout(editor._loopGlyphTimeout);
+        editor._loopGlyphTimeout = setTimeout(updateLoopGlyphs, 300);
       });
 
       // Save state before page unload
@@ -2138,9 +2254,6 @@ scrie n + 1`;
       // Show/hide debug controls and variables panel
       debugToolbarControls.classList.toggle('visible', debug);
       variablesPanel.classList.toggle('visible', debug);
-      if (editor) {
-        editor.updateOptions({ glyphMargin: debug });
-      }
 
       clearConsole();
       clearDebugHighlight();
@@ -2389,11 +2502,6 @@ scrie n + 1`;
       debugToolbarControls.classList.remove('visible');
       variablesPanel.classList.remove('visible');
 
-      // Disable glyph margin when not debugging
-      if (editor) {
-        editor.updateOptions({ glyphMargin: false });
-      }
-
       clearDebugHighlight();
     }
 
@@ -2569,6 +2677,294 @@ scrie n + 1`;
         })
         .catch(() => appendToConsole('Copierea a eșuat.', 'error'));
     });
+
+    // ── Loop equivalence ───────────────────────────────────────────────────
+
+    let loopDecorations = [];
+    let loopMetaMap = {};   // monacoLine (1-indexed) → {type, start_line, end_line}
+    const loopPopup = document.getElementById('loop-convert-popup');
+    let popupSourceLine = -1;  // 0-indexed line of the active popup's loop
+
+    function updateLoopGlyphs() {
+      if (!wasmReady || !Module || !Module._pseudo_get_all_loops || !editor) return;
+      const src = editor.getValue();
+      const ptr = Module.allocateUTF8(src);
+      const resPtr = Module._pseudo_get_all_loops(ptr);
+      Module._free(ptr);
+      if (!resPtr) { loopDecorations = editor.deltaDecorations(loopDecorations, []); return; }
+      const json = Module.UTF8ToString(resPtr);
+      Module._pseudo_free_output(resPtr);
+
+      let loops;
+      try { loops = JSON.parse(json); } catch (_) { return; }
+
+      loopMetaMap = {};
+      loopDecorations = editor.deltaDecorations(loopDecorations,
+        loops.map(l => {
+          const monacoLine = l.start_line + 1;
+          loopMetaMap[monacoLine] = l;
+          return {
+            range: new monaco.Range(monacoLine, 1, monacoLine, 1),
+            options: { glyphMarginClassName: 'loop-glyph' }
+          };
+        })
+      );
+    }
+
+    function hideLoopPopup() {
+      loopPopup.classList.remove('visible');
+      popupSourceLine = -1;
+    }
+
+    function showLoopPopup(monacoLine, x, y) {
+      const meta = loopMetaMap[monacoLine];
+      if (!meta) return;
+      popupSourceLine = meta.start_line;  // 0-indexed
+
+      loopPopup.querySelectorAll('button[data-target]').forEach(btn => {
+        const isCurrentType = btn.dataset.target === meta.type;
+        const isForBtn = btn.dataset.target === 'for';
+        btn.disabled = isCurrentType || (isForBtn && meta.type !== 'for');
+      });
+
+      // Position popup before showing so offsetWidth is accurate
+      loopPopup.style.visibility = 'hidden';
+      loopPopup.classList.add('visible');
+      const pw = loopPopup.offsetWidth || 215;
+      const ph = loopPopup.offsetHeight || 170;
+      let left = x + 8;
+      let top  = y;
+      if (left + pw > window.innerWidth - 8) left = x - pw - 8;
+      if (top + ph > window.innerHeight - 8) top = window.innerHeight - ph - 8;
+      loopPopup.style.left = left + 'px';
+      loopPopup.style.top  = top + 'px';
+      loopPopup.style.visibility = '';
+    }
+
+    // Glyph tooltip
+    const loopTooltip = document.getElementById('loop-tooltip');
+    document.getElementById('editor-container').addEventListener('mousemove', e => {
+      if (e.target.classList.contains('loop-glyph')) {
+        loopTooltip.style.left = (e.clientX + 14) + 'px';
+        loopTooltip.style.top  = (e.clientY - 6) + 'px';
+        loopTooltip.style.display = 'block';
+      } else {
+        loopTooltip.style.display = 'none';
+      }
+    });
+
+    // Detect glyph clicks via DOM class — avoids depending on monaco.editor.MouseTargetType
+    document.getElementById('editor-container').addEventListener('mousedown', e => {
+      if (!e.target.classList.contains('loop-glyph')) return;
+      e.stopPropagation();
+      loopTooltip.style.display = 'none';
+
+      // Get line number: try Monaco API, fall back to Y-position math
+      const monacoTarget = editor.getTargetAtClientPoint(e.clientX, e.clientY);
+      let monacoLine = monacoTarget?.position?.lineNumber;
+      if (!monacoLine) {
+        const rect = editor.getContainerDomNode().getBoundingClientRect();
+        const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
+        monacoLine = Math.floor((e.clientY - rect.top + editor.getScrollTop()) / lineHeight) + 1;
+      }
+
+      if (!monacoLine || !loopMetaMap[monacoLine]) return;
+      showLoopPopup(monacoLine, e.clientX, e.clientY);
+    });
+
+    // Close popup on mousedown outside it (fires before editor changes focus)
+    document.addEventListener('mousedown', e => {
+      if (e.target.classList.contains('loop-glyph')) return;
+      if (!loopPopup.contains(e.target)) hideLoopPopup();
+    });
+
+    loopPopup.querySelectorAll('button[data-target]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.target;
+        applyLoopConversion(popupSourceLine, target);
+        hideLoopPopup();
+      });
+    });
+
+    // ── Diff pane (two synchronized editors) ──────────────────────────────
+
+    let diffOrigEditor   = null;
+    let diffModEditor    = null;
+    let diffOrigDecIds   = [];
+    let diffModDecIds    = [];
+    let diffVisible      = false;
+    let diffModified     = null;
+    let diffScrollSync   = false;
+
+    const loopTypeLabels = {
+      for:      'pentru (for)',
+      while:    'cât timp (while)',
+      do_while: 'execută...cât timp',
+      repeat:   'repetă...până când',
+    };
+
+    function initDiffEditors() {
+      if (diffOrigEditor) return;
+      const sharedOpts = {
+        theme: 'gruvbox-dark',
+        readOnly: true,
+        language: 'pseudocode',
+        fontFamily: "'JetBrains Mono', monospace",
+        fontSize: 14,
+        lineHeight: 1.6,
+        padding: { top: 16 },
+        minimap: { enabled: false },
+        scrollBeyondLastLine: false,
+        wordWrap: 'off',
+        automaticLayout: true,
+        glyphMargin: false,
+        folding: false,
+        lineNumbers: 'on',
+        lineNumbersMinChars: 3,
+        overviewRulerBorder: false,
+        hideCursorInOverviewRuler: true,
+        overviewRulerLanes: 0,
+        scrollbar: { vertical: 'auto', horizontal: 'hidden', verticalScrollbarSize: 10 },
+      };
+      diffOrigEditor = monaco.editor.create(document.getElementById('diff-orig-container'), sharedOpts);
+      diffModEditor  = monaco.editor.create(document.getElementById('diff-mod-container'),  sharedOpts);
+
+      diffOrigEditor.onDidScrollChange(e => {
+        if (diffScrollSync) return;
+        diffScrollSync = true;
+        diffModEditor.setScrollTop(e.scrollTop);
+        diffScrollSync = false;
+      });
+      diffModEditor.onDidScrollChange(e => {
+        if (diffScrollSync) return;
+        diffScrollSync = true;
+        diffOrigEditor.setScrollTop(e.scrollTop);
+        diffScrollSync = false;
+      });
+    }
+
+    function computeLineDiff(origLines, modLines) {
+      const m = origLines.length, n = modLines.length;
+      // LCS table (bottom-up)
+      const dp = Array.from({length: m + 1}, () => new Int32Array(n + 1));
+      for (let i = m - 1; i >= 0; i--)
+        for (let j = n - 1; j >= 0; j--)
+          dp[i][j] = origLines[i] === modLines[j]
+            ? dp[i+1][j+1] + 1
+            : Math.max(dp[i+1][j], dp[i][j+1]);
+
+      // Traceback — collect 0-indexed line indices that have no LCS match
+      const removed = [], added = [];
+      let i = 0, j = 0;
+      while (i < m && j < n) {
+        if (origLines[i] === modLines[j])   { i++; j++; }
+        else if (dp[i+1][j] >= dp[i][j+1]) { removed.push(i++); }
+        else                                { added.push(j++);   }
+      }
+      while (i < m) removed.push(i++);
+      while (j < n) added.push(j++);
+      return { removed, added };
+    }
+
+    function toDecorations(indices, className) {
+      // Merge consecutive indices into range decorations
+      if (!indices.length) return [];
+      const decs = [];
+      let s = indices[0], e = indices[0];
+      for (let k = 1; k < indices.length; k++) {
+        if (indices[k] === e + 1) { e = indices[k]; }
+        else {
+          decs.push({ range: new monaco.Range(s+1, 1, e+1, 1), options: { isWholeLine: true, className } });
+          s = e = indices[k];
+        }
+      }
+      decs.push({ range: new monaco.Range(s+1, 1, e+1, 1), options: { isWholeLine: true, className } });
+      return decs;
+    }
+
+    function showDiffPane(originalCode, modifiedCode, title) {
+      diffModified = modifiedCode;
+      if (transpileVisible) hideTranspilePane();
+
+      initDiffEditors();
+
+      diffOrigEditor.setValue(originalCode);
+      diffModEditor.setValue(modifiedCode);
+
+      // LCS-based line diff
+      const { removed, added } = computeLineDiff(
+        originalCode.split('\n'), modifiedCode.split('\n')
+      );
+      diffOrigDecIds = diffOrigEditor.deltaDecorations(diffOrigDecIds, toDecorations(removed, 'diff-removed-line'));
+      diffModDecIds  = diffModEditor.deltaDecorations(diffModDecIds,   toDecorations(added,   'diff-added-line'));
+
+      // Scroll to first changed line
+      const revealLine = (removed[0] ?? added[0] ?? 0) + 1;
+      diffOrigEditor.revealLineInCenter(revealLine);
+      diffModEditor.revealLineInCenter(revealLine);
+
+      document.getElementById('diff-pane-title').textContent = title;
+
+      if (!diffVisible) {
+        diffVisible = true;
+        document.getElementById('editor-container').style.display = 'none';
+        document.getElementById('diff-divider').style.display = 'none';
+        document.getElementById('diff-pane').style.display = 'flex';
+        document.getElementById('diff-pane').style.flex = '1';
+        consolePanel.style.display = 'none';
+        resizeHandle.style.display = 'none';
+        editorPanel.style.width = '100%';
+      }
+    }
+
+    function hideDiffPane() {
+      if (!diffVisible) return;
+      diffVisible = false;
+      document.getElementById('editor-container').style.display = '';
+      document.getElementById('diff-pane').style.display = 'none';
+      document.getElementById('diff-pane').style.flex = '';
+      consolePanel.style.display = '';
+      resizeHandle.style.display = '';
+      updatePanelWidths();
+      editor.layout();
+    }
+
+    document.getElementById('btn-diff-close').addEventListener('click', hideDiffPane);
+
+    document.getElementById('btn-diff-apply').addEventListener('click', () => {
+      if (diffModified !== null) editor.setValue(diffModified);
+      hideDiffPane();
+    });
+
+    document.getElementById('btn-diff-newtab').addEventListener('click', () => {
+      if (diffModified !== null) {
+        const baseName = getActiveFilename().replace(/\.pseudo$/, '');
+        const suffix = document.getElementById('diff-pane-title').textContent.match(/\((\w+)\)/)?.[1] || 'equiv';
+        createFile(baseName + '_' + suffix + '.pseudo', diffModified);
+      }
+      hideDiffPane();
+    });
+
+    function applyLoopConversion(sourceLine0, targetType) {
+      if (!wasmReady || !Module || !Module._pseudo_convert_loop) return;
+      const src = editor.getValue();
+      const srcPtr = Module.allocateUTF8(src);
+      const tPtr   = Module.allocateUTF8(targetType);
+      const resPtr = Module._pseudo_convert_loop(srcPtr, sourceLine0, 0, tPtr);
+      Module._free(srcPtr);
+      Module._free(tPtr);
+      if (!resPtr) { appendToConsole('Conversie eșuată.', 'error'); return; }
+      const result = Module.UTF8ToString(resPtr);
+      Module._pseudo_free_output(resPtr);
+
+      try {
+        const err = JSON.parse(result);
+        if (err.error) { appendToConsole('Eroare: ' + err.error, 'error'); return; }
+      } catch (_) {}
+
+      const label = loopTypeLabels[targetType] || targetType;
+      showDiffPane(src, result, 'Echivalență → ' + label);
+    }
 
     // Keyboard shortcuts for debugging
     document.addEventListener('keydown', (e) => {

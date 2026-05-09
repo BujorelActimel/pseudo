@@ -1,0 +1,6 @@
+citeste n
+p <- 1
+pentru i <- 1, n executa
+    p <- p * i
+sf
+scrie p

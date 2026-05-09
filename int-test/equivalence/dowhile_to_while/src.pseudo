@@ -1,0 +1,5 @@
+citeste n
+executa
+    n <- n - 1
+cat timp n > 0
+scrie n

@@ -1,0 +1,6 @@
+citeste n
+i <- 1
+executa
+    i <- i + 1
+cat timp i <= n
+scrie i

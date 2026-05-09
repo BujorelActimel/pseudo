@@ -1,0 +1,7 @@
+citeste a, b
+cat timp b != 0 executa
+    r <- a % b
+    a <- b
+    b <- r
+sf
+scrie a

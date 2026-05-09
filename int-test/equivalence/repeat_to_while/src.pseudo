@@ -1,0 +1,5 @@
+citeste n
+repeta
+    n <- n - 1
+pana cand n = 0
+scrie n

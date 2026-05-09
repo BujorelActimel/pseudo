@@ -2,6 +2,7 @@
 #include "pseudo/parser.h"
 #include "pseudo/runtime.h"
 #include "pseudo/transpiler.h"
+#include "pseudo/equivalence.h"
 #include "pseudo/io.h"
 #include "pseudo/string.h"
 #include <tree_sitter/api.h>
@@ -12,18 +13,20 @@
 static void print_usage(const char* prog_name) {
     printf("Usage: %s <command> [options]\n\n", prog_name);
     printf("Commands:\n");
-    printf("  run <file>              Execute pseudocode file\n");
-    printf("  lint <file>             Lint pseudocode file\n");
-    printf("  parse <file>            Parse and show syntax tree\n");
-    printf("  debug <file>            Debug tree (shows all nodes + ERROR/MISSING)\n");
-    printf("  transpile <target> <file>  Transpile to C, C++ or Pascal\n");
-    printf("                          target: c | cpp | pascal\n");
-    printf("  help                    Show this help message\n");
+    printf("  run <file>                    Execute pseudocode file\n");
+    printf("  lint <file>                   Lint pseudocode file\n");
+    printf("  parse <file>                  Parse and show syntax tree\n");
+    printf("  debug <file>                  Debug tree (shows all nodes + ERROR/MISSING)\n");
+    printf("  transpile <target> <file>     Transpile to C, C++ or Pascal\n");
+    printf("                                target: c | cpp | pascal\n");
+    printf("  equivalence <file> <line> <target>  Convert loop to equivalent\n");
+    printf("                                line: 0-indexed line of loop keyword\n");
+    printf("                                target: for | while | do_while | repeat\n");
+    printf("  help                          Show this help message\n");
     printf("\nExample:\n");
     printf("  %s run program.pseudo\n", prog_name);
     printf("  %s transpile c program.pseudo\n", prog_name);
-    printf("  %s transpile cpp program.pseudo\n", prog_name);
-    printf("  %s transpile pascal program.pseudo\n", prog_name);
+    printf("  %s equivalence program.pseudo 3 while\n", prog_name);
 }
 
 static string_t* read_file(const char* filename) {
@@ -189,6 +192,40 @@ static int cmd_transpile(int argc, char** argv) {
     return 0;
 }
 
+static int cmd_equivalence(int argc, char** argv) {
+    if (argc < 5) {
+        fprintf(stderr, "Eroare: comanda equivalence necesita <file> <line> <target>\n\n");
+        print_usage(argv[0]);
+        return 1;
+    }
+
+    const char* filename = argv[2];
+    int line = atoi(argv[3]);
+    const char* target = argv[4];
+
+    string_t* input = read_file(filename);
+    if (!input) return 1;
+
+    char* result = equiv_convert_loop(string_cstr(input), (uint32_t)line, 0, target);
+    string_destroy(input);
+
+    if (!result) {
+        fprintf(stderr, "Eroare: conversie esuata\n");
+        return 1;
+    }
+
+    // Check for error JSON
+    if (result[0] == '{') {
+        fprintf(stderr, "Eroare: %s\n", result);
+        free(result);
+        return 1;
+    }
+
+    printf("%s", result);
+    free(result);
+    return 0;
+}
+
 static int cmd_run(int argc, char** argv) {
     if (argc < 3) {
         fprintf(stderr, "Eroare: comanda run necesita un fisier\n\n");
@@ -261,6 +298,8 @@ int main(int argc, char** argv) {
         return cmd_debug(argc, argv);
     } else if (strcmp(command, "transpile") == 0) {
         return cmd_transpile(argc, argv);
+    } else if (strcmp(command, "equivalence") == 0) {
+        return cmd_equivalence(argc, argv);
     } else if (strcmp(command, "help") == 0 || strcmp(command, "--help") == 0 || strcmp(command, "-h") == 0) {
         print_usage(argv[0]);
         return 0;

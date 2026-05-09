@@ -1,0 +1,7 @@
+citeste n
+r <- 0
+repeta
+    r <- r * 10 + n % 10
+    n <- [n / 10]
+pana cand n = 0
+scrie r
